@@ -1,0 +1,45 @@
+<!--{% load widget_tweaks %}-->
+<!--{% load socialaccount %}-->
+
+<!--<form method="post" action="{% url 'account_login' %}" class="mt-4 text-start">-->
+<!--  {% csrf_token %}-->
+<!--  {% if form.errors %}-->
+<!--  <div class="alert alert-danger">-->
+<!--    {% for field in form %}-->
+<!--    {% for error in field.errors %}-->
+<!--    <div>{{ error|escape }}</div>-->
+<!--    {% endfor %}-->
+<!--    {% endfor %}-->
+<!--    {% for error in form.non_field_errors %}-->
+<!--    <div>{{ error|escape }}</div>-->
+<!--    {% endfor %}-->
+<!--  </div>-->
+<!--  {% endif %}-->
+<!--  <div class="mb-3">-->
+<!--    <label class="form-label" for="{{ form.login.id_for_label }}">Adresse e-mail</label>-->
+<!--    {{ form.login|add_class:'form-control' }}-->
+<!--  </div>-->
+<!--  <div class="mb-3 position-relative">-->
+<!--    <label class="form-label" for="{{ form.password.id_for_label }}">Mot de passe</label>-->
+<!--    {{ form.password|add_class:'form-control' }}-->
+<!--  </div>-->
+<!--  <div class="mb-3 d-sm-flex justify-content-between">-->
+<!--    <div>-->
+<!--      <input type="checkbox" class="form-check-input" id="remember" name="remember" {% if request.POST.remember %}checked{% endif %}>-->
+<!--      <label class="form-check-label" for="remember">Se souvenir de moi</label>-->
+<!--    </div>-->
+<!--    <a href="{% url 'account_reset_password' %}">Mot de passe oublié ?</a>-->
+<!--  </div>-->
+<!--  <div>-->
+<!--    <button type="submit" class="btn btn-primary w-100 mb-0">Connexion</button>-->
+<!--  </div>-->
+<!--  <div class="position-relative my-4">-->
+<!--    <hr>-->
+<!--    <p class="small bg-mode position-absolute top-50 start-50 translate-middle px-2">Ou se connecter avec</p>-->
+<!--  </div>-->
+<!--  <div class="vstack gap-3">-->
+<!--    <a href="{% provider_login_url 'google' %}" class="btn btn-light mb-0">-->
+<!--      <i class="fab fa-fw fa-google text-google-icon me-2"></i>Google-->
+<!--    </a>-->
+<!--  </div>-->
+<!--</form>-->

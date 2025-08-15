@@ -48,8 +48,14 @@
 
   {% block extra_javascript %}{% endblock extra_javascript %}
 
-  {% endblock javascript %}  
-
+  {% endblock javascript %}
+  <script>
+    if (typeof bootstrap === 'undefined') {
+      console.log('Bootstrap n\'est pas chargé !');
+    } else {
+      console.log('Bootstrap est chargé correctement.');
+    }
+  </script>
 </body>
 
 </html>

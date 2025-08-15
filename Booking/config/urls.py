@@ -6,8 +6,11 @@ from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 
+from allauth.account.views import LoginView
+from booking.pages.views import ModalLoginView
+
 urlpatterns = [
-    
+
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
@@ -15,9 +18,12 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
     path("", include("booking.pages.urls", namespace="pages")),
+    path('accounts/login/', ModalLoginView.as_view(), name='account_login'),
+
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
+
 ]
 
 

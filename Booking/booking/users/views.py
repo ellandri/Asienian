@@ -2,12 +2,20 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
 from django.urls import reverse
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 from django.views.generic import UpdateView
+from django.views.generic.edit import FormView
+from django.contrib import messages
 
+from booking.users.forms import UserSignupForm
 from booking.users.models import User
+
+
+
+
 
 
 class UserDetailView(LoginRequiredMixin, DetailView):
@@ -44,3 +52,25 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+
+class UserSignupView(FormView):
+    template_name = "pages/sign-up.html"
+    form_class = UserSignupForm
+    success_url = reverse_lazy("account_login")  # Redirige vers la page de connexion de django-allauth
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = self.get_form()  # Assure que form est toujours dans le contexte
+        return context
+
+    def form_valid(self, form):
+        try:
+            user = form.save(self.request)
+            messages.success(self.request, _("Votre compte a été créé avec succès. Connectez-vous."))
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, _("Une erreur s'est produite : %s") % str(e))
+            return self.form_invalid(form)
+
+user_signup_view = UserSignupView.as_view()
