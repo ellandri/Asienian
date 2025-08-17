@@ -5,9 +5,9 @@ from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-
 from allauth.account.views import LoginView
 from booking.pages.views import ModalLoginView
+from backoffice.views import BackofficeView
 
 urlpatterns = [
 
@@ -17,8 +17,10 @@ urlpatterns = [
     path("users/", include("booking.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
-    path("", include("booking.pages.urls", namespace="pages")),
     path('accounts/login/', ModalLoginView.as_view(), name='account_login'),
+    path('backoffice/', include('backoffice.urls')),
+    path("", include("booking.pages.urls", namespace="pages")),
+
 
     # ...
     # Media files

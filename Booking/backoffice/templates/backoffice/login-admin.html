@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realnest - Connexion Admin</title>
+  {% load static crispy_forms_tags %}
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'fontawesomefree/css/all.min.css' %}" rel="stylesheet">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; overflow: hidden;">
+
+<!-- Container principal -->
+<div style="display: flex; height: 100vh; flex-direction: row;">
+
+  <!-- Section gauche avec image -->
+  <div id="left-section" style="flex: 1; position: relative; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); overflow: hidden;">
+    <!-- Image de fond -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('{% static 'images/background.jpeg' %}'); background-size: cover; background-position: center; opacity: 0.9;"></div>
+
+    <!-- Overlay gradient -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(45deg, rgba(30, 58, 138, 0.7) 0%, rgba(59, 130, 246, 0.3) 100%);"></div>
+
+    <!-- Header avec logo -->
+    <div style="position: relative; z-index: 2; padding: 20px 30px;">
+      <div style="display: flex; align-items: center; color: white;">
+        <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+          <i class="fas fa-home" style="color: #1e3a8a; font-size: 18px;"></i>
+        </div>
+        <span style="font-size: 24px; font-weight: 600;">Realnest</span>
+      </div>
+    </div>
+
+    <!-- Contenu principal gauche -->
+    <div id="left-content" style="position: absolute; bottom: 80px; left: 40px; color: white; z-index: 2;">
+      <h1 id="main-title" style="font-size: 48px; font-weight: 300; margin: 0 0 20px 0; line-height: 1.1;">Administration Realnest</h1>
+      <p id="main-subtitle" style="font-size: 18px; margin: 0 0 30px 0; opacity: 0.9; max-width: 400px;">Connectez-vous pour gérer votre plateforme.</p>
+
+      <!-- Indicateurs de pagination -->
+      <div style="display: flex; gap: 8px;">
+        <div style="width: 40px; height: 4px; background: white; border-radius: 2px;"></div>
+        <div style="width: 8px; height: 4px; background: rgba(255, 255, 255, 0.4); border-radius: 2px;"></div>
+        <div style="width: 8px; height: 4px; background: rgba(255, 255, 255, 0.4); border-radius: 2px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section droite avec formulaire -->
+  <div id="right-section" style="flex: 1; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 40px; position: relative; min-height: 100vh;">
+    <!-- Formulaire -->
+    <div id="form-container" style="width: 100%; max-width: 400px;">
+      <h2 id="welcome-title" style="font-size: 32px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0;">Connexion Admin</h2>
+      <p style="color: #6b7280; margin: 0 0 40px 0; font-size: 16px;">Entrez vos identifiants pour accéder au backoffice.</p>
+
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+        {{ error }}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" style="width: 100%;">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" style="width: 100%; background: #000; color: white; border: none; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">
+          Se connecter
+        </button>
+      </form>
+
+      <!-- Lien de déconnexion -->
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="{% url 'account_logout' %}" style="color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 14px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+          Se déconnecter
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script>
+  function togglePassword(icon) {
+    const input = icon.parentElement.querySelector('input');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fas fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'fas fa-eye';
+    }
+  }
+
+  // Gestion responsive
+  function handleResize() {
+    const container = document.querySelector('div[style*="display: flex; height: 100vh"]');
+    const leftSection = document.getElementById('left-section');
+    const rightSection = document.getElementById('right-section');
+    const leftContent = document.getElementById('left-content');
+    const mainTitle = document.getElementById('main-title');
+    const mainSubtitle = document.getElementById('main-subtitle');
+    const welcomeTitle = document.getElementById('welcome-title');
+    const formContainer = document.getElementById('form-container');
+
+    if (window.innerWidth <= 768) {
+      container.style.flexDirection = 'column';
+      leftSection.style.flex = '0 0 40vh';
+      rightSection.style.flex = '1';
+      rightSection.style.padding = '30px 20px';
+      leftContent.style.bottom = '30px';
+      leftContent.style.left = '20px';
+      leftContent.style.right = '20px';
+      mainTitle.style.fontSize = '28px';
+      mainSubtitle.style.fontSize = '16px';
+      welcomeTitle.style.fontSize = '24px';
+      formContainer.style.maxWidth = '100%';
+    } else if (window.innerWidth <= 1024) {
+      container.style.flexDirection = 'row';
+      leftSection.style.flex = '1';
+      rightSection.style.flex = '1';
+      rightSection.style.padding = '40px 30px';
+      leftContent.style.bottom = '60px';
+      leftContent.style.left = '30px';
+      mainTitle.style.fontSize = '36px';
+      mainSubtitle.style.fontSize = '16px';
+      welcomeTitle.style.fontSize = '28px';
+      formContainer.style.maxWidth = '380px';
+    } else {
+      container.style.flexDirection = 'row';
+      leftSection.style.flex = '1';
+      rightSection.style.flex = '1';
+      rightSection.style.padding = '60px 40px';
+      leftContent.style.bottom = '80px';
+      leftContent.style.left = '40px';
+      mainTitle.style.fontSize = '48px';
+      mainSubtitle.style.fontSize = '18px';
+      welcomeTitle.style.fontSize = '32px';
+      formContainer.style.maxWidth = '400px';
+    }
+  }
+
+  window.addEventListener('load', function() {
+    const rightSection = document.getElementById('right-section');
+    rightSection.style.opacity = '0';
+    rightSection.style.transform = 'translateX(50px)';
+    rightSection.style.transition = 'all 0.8s ease';
+    setTimeout(() => {
+      rightSection.style.opacity = '1';
+      rightSection.style.transform = 'translateX(0)';
+    }, 200);
+    handleResize();
+  });
+
+  window.addEventListener('resize', handleResize);
+</script>
+</body>
+</html>

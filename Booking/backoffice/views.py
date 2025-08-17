@@ -1,0 +1,45 @@
+from django.shortcuts import render, redirect
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from booking.users.models import User
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.views import LoginView
+from django.contrib.auth import login
+from django.contrib.auth import logout
+
+
+
+class LoginAdminView( LoginView):
+    template_name = "backoffice/login-admin.html"
+    redirect_authenticated_user = False
+
+    def form_valid(self, form):
+        user = form.get_user()
+        if user.is_superuser:
+            login(self.request, user)
+            return redirect('backoffice_dashboard')
+        else:
+            form.add_error(None, "Vous devez être un superutilisateur pour accéder au backoffice.")
+            return self.form_invalid(form)
+
+class BackofficeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "backoffice/admin-dashboard.html"
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['users'] = User.objects.all()
+        context['message'] = _("Bienvenue dans le backoffice personnalisé !")
+        return context
+
+
+class LogoutView(LoginRequiredMixin, TemplateView):
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return redirect('backoffice_login')  # Redirige vers /backoffice/ (login-admin.html)
+
+login_admin_view = LoginAdminView.as_view()
+backoffice_view = BackofficeView.as_view()
+logout_view = LogoutView.as_view()

@@ -1,6 +1,6 @@
 # ruff: noqa: ERA001, E501
 """Base settings to build other settings files upon."""
-
+import os
 from pathlib import Path
 import environ
 
@@ -65,6 +65,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "booking.users",
+    'backoffice',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -115,9 +116,9 @@ MIDDLEWARE = [
 
 # STATIC
 # ------------------------------------------------------------------------------
-STATIC_ROOT = str(BASE_DIR / "staticfiles")
-STATIC_URL = "/static/"
+STATIC_URL = "static/"
 STATICFILES_DIRS = [str(APPS_DIR / "static")]
+STATIC_ROOT = str(BASE_DIR / "staticfiles")
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -221,3 +222,8 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"auth_type": "reauthenticate"},
     }
 }
+AUTH_USER_MODEL = 'users.User'
+AUTHENTICATION_BACKENDS = [
+'django.contrib.auth.backends.ModelBackend',
+'allauth.account.auth_backends.AuthenticationBackend',
+]
