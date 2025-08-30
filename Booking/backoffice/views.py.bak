@@ -5,10 +5,23 @@ from booking.users.models import User
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import login
+from django.contrib.auth import logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import get_user_model
+from django.http import Http404
+from django.template.loader import get_template
+from django.template import TemplateDoesNotExist
+from django.http import HttpResponse
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAdminUser
+from .serializers import VoyageSerializer
+from .models import Voyage
+from django.contrib.auth import get_user_model
 
 
+User = get_user_model()
 
-class LoginAdminView(LoginRequiredMixin, LoginView):
+class LoginAdminView( LoginView):
     template_name = "backoffice/login-admin.html"
     redirect_authenticated_user = False
 
@@ -33,5 +46,61 @@ class BackofficeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['message'] = _("Bienvenue dans le backoffice personnalisé !")
         return context
 
+def dynamic_pages_view(request, template_name):
+    # Liste des templates valides pour éviter favicon.ico et autres requêtes non désirées
+    valid_templates = ['login-admin', 'admin-booking-list']
+    if template_name not in valid_templates:
+        raise Http404('Page non trouvée')
+
+    # Vérifier si l'utilisateur est authentifié et superutilisateur
+    if request.user.is_authenticated and request.user.is_superuser and template_name != 'login-admin':
+        return redirect('backoffice_dashboard')
+
+    # Utiliser AuthenticationForm pour la page de connexion
+    form = None
+    error_message = None
+    if template_name == 'login-admin':
+        form = AuthenticationForm(request, data=request.POST or None)
+        if request.method == 'POST':
+            if form.is_valid():
+                user = form.get_user()
+                if user.is_superuser:
+                    login(request, user)
+                    return redirect('backoffice_dashboard')
+                else:
+                    error_message = 'Vous devez être un superutilisateur pour accéder au backoffice.'
+                    form.add_error(None, error_message)
+            else:
+                error_message = 'Nom d''utilisateur ou mot de passe incorrect.'
+
+    # Déterminer le chemin du template
+    try:
+        template_path = f'backoffice/{template_name}.html' if template_name == 'login-admin' else f'pages/{template_name}.html'
+        get_template(template_path)  # Vérifier si le template existe
+    except TemplateDoesNotExist:
+        raise Http404('Template non trouvé')
+
+    return render(request, template_path, {
+        'user_authenticated': request.user.is_authenticated,
+        'form': form,
+        'error_message': error_message
+    })
+
+
+class VoyageViewSet(UserPassesTestMixin, ModelViewSet):
+    queryset = Voyage.objects.all()
+    serializer_class = VoyageSerializer
+def test_func(self):
+    return self.request.user.is_superuser
+    voyage_view_set = VoyageViewSet.as_view({'get': 'list', 'post': 'create', 'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'})
+
+class LogoutView(LoginRequiredMixin, TemplateView):
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return redirect('backoffice_login')  # Redirige vers /backoffice/ (login-admin.html)
+
 login_admin_view = LoginAdminView.as_view()
 backoffice_view = BackofficeView.as_view()
+logout_view = LogoutView.as_view()
+dynamic_pages_view = dynamic_pages_view
+

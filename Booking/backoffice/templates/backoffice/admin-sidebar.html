@@ -17,7 +17,7 @@
             <!-- Sidebar menu START -->
             <ul class="navbar-nav flex-column" id="sidebar-account">
                 <!-- Menu item -->
-                <li class="nav-item"><a href="{% url 'pages:dynamic_pages' template_name='admin-dashboard' %}" class="nav-link">Dashboard</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Dashboard</a></li>
 
                 <!-- Title -->
                 <li class="nav-item ms-2 my-2">Pages</li>
@@ -26,12 +26,12 @@
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#collapsebooking" role="button"
                         aria-expanded="false" aria-controls="collapsebooking">
-                        Bookings
+                      Voyages
                     </a>
                     <!-- Submenu -->
                     <ul class="nav collapse flex-column" id="collapsebooking" data-bs-parent="#sidebarAccount">
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-booking-list' %}">Booking List</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-booking-detail' %}">Booking Detail</a>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-booking-list' %}">Liste des voyages</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-booking-detail' %}">Détail d’un voyage</a>
                         </li>
                     </ul>
                 </li>
@@ -40,12 +40,12 @@
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#collapseguest" role="button"
                         aria-expanded="false" aria-controls="collapseguest">
-                        Guests
+                      Clients
                     </a>
                     <!-- Submenu -->
                     <ul class="nav collapse flex-column" id="collapseguest" data-bs-parent="#navbar-sidebar">
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-guest-list' %}">Guest List</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-guest-detail' %}">Guest Detail</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-guest-list' %}">Liste des clients</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-guest-detail' %}">Profil client</a></li>
                     </ul>
                 </li>
 
@@ -53,23 +53,23 @@
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#collapseagent" role="button"
                         aria-expanded="false" aria-controls="collapseagent">
-                        Agents
+                      Réservations
                     </a>
                     <!-- Submenu -->
                     <ul class="nav collapse flex-column" id="collapseagent" data-bs-parent="#navbar-sidebar">
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-agent-list' %}">Agent List</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-agent-detail' %}">Agent Detail</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-agent-list' %}">Liste des réservations</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-agent-detail' %}">Détail réservation</a></li>
                     </ul>
                 </li>
 
                 <!-- Menu item -->
-                <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-reviews' %}">Reviews</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-reviews' %}">Avis & retours</a></li>
 
                 <!-- Menu item -->
-                <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-earnings' %}">Earnings</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-earnings' %}">Finances</a></li>
 
                 <!-- Menu item -->
-                <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-settings' %}">Admin Settings</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-settings' %}">Paramètres</a></li>
 
                 <!-- Menu item -->
                 <li class="nav-item">
@@ -92,10 +92,9 @@
 
             <!-- Sidebar footer START -->
             <div class="d-flex align-items-center justify-content-between text-primary-hover mt-auto p-3">
-                <a class="h6 fw-light mb-0 text-body" href="{% url 'backoffice_logout' %}" data-bs-toggle="tooltip"
-                    data-bs-placement="top" aria-label="Sign out">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Log out
-                </a>
+              <a class="h6 fw-light mb-0 text-body" href="{% url 'backoffice:backoffice_logout' %}" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Sign out">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+              </a>
                 <a class="h6 mb-0 text-body" href="{% url 'pages:dynamic_pages' template_name='admin-settings' %}" data-bs-toggle="tooltip" data-bs-placement="top"
                     aria-label="Settings">
                     <i class="bi bi-gear-fill"></i>

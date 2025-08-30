@@ -1,0 +1,181 @@
+{% extends 'admin.html' %}
+{% load static i18n %}
+
+{% block page_content %}
+<div class="page-content-wrapper p-xxl-4">
+  <div class="row">
+    <div class="col-12 mb-5">
+      <div class="d-sm-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-2 mb-sm-0">Voyages</h1>
+        <div class="d-grid d-flex gap-3">
+          <a href="{% url 'backoffice:admin-add-trip-form' %}" class="btn btn-primary mb-0"><i class="bi bi-plus-lg fa-fw"></i>Formulaire d'Ajout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content mt-5" id="myTabContent">
+    <!-- Grid View -->
+    <div class="tab-pane fade show active" id="grid-tab-pane">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xxl-5 g-4">
+        {% for trip in trips %}
+        <div class="col">
+          <div class="card shadow h-100">
+            <div class="position-relative">
+              <img src="{{ trip.image|default:'https://via.placeholder.com/400x300' }}" class="card-img-top" alt="{{ trip.departure_city }} à {{ trip.arrival_city }}">
+              <div class="card-img-overlay d-flex flex-column p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="badge text-bg-dark"><i class="bi fa-fw bi-star-fill me-2 text-warning"></i>{{ trip.rating|floatformat:1 }}</div>
+                  <div class="list-inline-item dropdown">
+                    <a href="#" class="btn btn-sm btn-round btn-light" role="button" id="dropdownAction{{ trip.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow rounded small" aria-labelledby="dropdownAction{{ trip.id }}">
+                      <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>Rapport</a></li>
+                      <li><a class="dropdown-item" href="#"><i class="bi bi-slash-circle me-2"></i>Désactiver</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body px-3">
+              <h5 class="card-title mb-1"><a href="{% url 'backoffice:admin-trip-detail' trip.id %}">{{ trip.departure_city }} à {{ trip.arrival_city }}</a></h5>
+              <ul class="list-group list-group-borderless small mt-2 mb-0">
+                <li class="list-group-item pb-0">
+                  <i class="fa-solid fa-bus fa-fw me-2"></i>{{ trip.vehicle_type }}
+                </li>
+                <li class="list-group-item pb-0">
+                  <i class="fa-solid fa-clock fa-fw me-2"></i>Durée: {{ trip.duration }}
+                </li>
+              </ul>
+            </div>
+            <div class="card-footer pt-0">
+              <div class="hstack gap-2 mb-2">
+                <h6 class="fw-normal mb-0">{{ trip.price }} FCFA</h6>
+                <small>/par personne</small>
+              </div>
+              <a href="{% url 'backoffice:admin-trip-detail' trip.id %}" class="btn btn-sm btn-primary-soft mb-0 w-100">Voir détails</a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col">
+          <p>Aucun voyage disponible.</p>
+        </div>
+        {% endfor %}
+      </div>
+      <!-- Pagination -->
+      {% if trips %}
+      <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4">
+        <p class="mb-sm-0 text-center text-sm-start">Affichage de {{ trips.start_index }} à {{ trips.end_index }} sur {{ trips.paginator.count }} entrées</p>
+        <nav class="mb-sm-0 d-flex justify-content-center" aria-label="navigation">
+          <ul class="pagination pagination-sm pagination-primary-soft mb-0">
+            {% if trips.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ trips.previous_page_number }}">Préc</a></li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Préc</a></li>
+            {% endif %}
+            {% for num in trips.paginator.page_range %}
+            <li class="page-item {% if trips.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endfor %}
+            {% if trips.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ trips.next_page_number }}">Suiv</a></li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link" href="#">Suiv</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- List View -->
+    <div class="tab-pane fade" id="list-tab-pane">
+      <div class="card shadow">
+        <div class="card-body">
+          <div class="bg-light rounded p-3 d-none d-xxl-block">
+            <div class="row row-cols-6 g-4">
+              <div class="col"><h6 class="mb-0">Itinéraire du Voyage</h6></div>
+              <div class="col"><h6 class="mb-0">Type de Véhicule</h6></div>
+              <div class="col"><h6 class="mb-0">Heure de Départ</h6></div>
+              <div class="col"><h6 class="mb-0">Montant</h6></div>
+              <div class="col"><h6 class="mb-0">Note</h6></div>
+              <div class="col"><h6 class="mb-0">Action</h6></div>
+            </div>
+          </div>
+
+          {% for trip in trips %}
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-6 g-2 g-sm-4 align-items-md-center border-bottom px-2 py-4">
+            <div class="col">
+              <small class="d-block d-xxl-none">Itinéraire du Voyage:</small>
+              <div class="d-flex align-items-center">
+                <div class="w-80px flex-shrink-0">
+                  <img src="{{ trip.image|default:'https://via.placeholder.com/400x300' }}" class="rounded" alt="{{ trip.departure_city }} à {{ trip.arrival_city }}">
+                </div>
+                <h6 class="mb-0 ms-2">{{ trip.departure_city }} à {{ trip.arrival_city }}</h6>
+              </div>
+            </div>
+            <div class="col">
+              <small class="d-block d-xxl-none">Type de Véhicule:</small>
+              <h6 class="mb-0 fw-normal">{{ trip.vehicle_type }}</h6>
+            </div>
+            <div class="col">
+              <small class="d-block d-xxl-none">Heure de Départ:</small>
+              <h6 class="mb-0 fw-normal">{{ trip.departure_time }}</h6>
+            </div>
+            <div class="col">
+              <small class="d-block d-xxl-none">Montant:</small>
+              <h6 class="text-success mb-0">{{ trip.price }} FCFA</h6>
+            </div>
+            <div class="col">
+              <small class="d-block d-xxl-none">Note:</small>
+              <ul class="list-inline mb-0">
+                {% for i in "12345" %}
+                <li class="list-inline-item me-0 small">
+                  <i class="fas fa-star {% if forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="col">
+              <a href="{% url 'backoffice:admin-trip-detail' trip.id %}" class="btn btn-sm btn-light mb-0">Voir</a>
+            </div>
+          </div>
+          {% empty %}
+          <div class="row">
+            <div class="col">
+              <p>Aucun voyage disponible.</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- Card footer -->
+        {% if trips %}
+        <div class="card-footer pt-0">
+          <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
+            <p class="mb-sm-0 text-center text-sm-start">Affichage de {{ trips.start_index }} à {{ trips.end_index }} sur {{ trips.paginator.count }} entrées</p>
+            <nav class="mb-sm-0 d-flex justify-content-center" aria-label="navigation">
+              <ul class="pagination pagination-sm pagination-primary-soft mb-0">
+                {% if trips.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ trips.previous_page_number }}">Préc</a></li>
+                {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Préc</a></li>
+                {% endif %}
+                {% for num in trips.paginator.page_range %}
+                <li class="page-item {% if trips.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endfor %}
+                {% if trips.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ trips.next_page_number }}">Suiv</a></li>
+                {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#">Suiv</a></li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock page_content %}

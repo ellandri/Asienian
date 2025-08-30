@@ -26,8 +26,12 @@ SITE_ID = 1  # Correct, mais assurez-vous que la table django_site a une entrée
 # ------------------------------------------------------------------------------
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'assienian_db',
+        'USER': 'postgres',
+        'PASSWORD': 'ella',  # Remplacez par le mot de passe de l'utilisateur postgres
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
@@ -64,6 +68,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    'rest_framework',
     "booking.users",
     'backoffice',
 ]
@@ -206,7 +211,9 @@ ACCOUNT_LOGIN_METHODS = {'username', 'email'}  # Remplace ACCOUNT_AUTHENTICATION
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']  # Remplace ACCOUNT_EMAIL_REQUIRED
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_ADAPTER = "booking.users.adapters.AccountAdapter"
-ACCOUNT_FORMS = {"signup": "booking.users.forms.UserSignupForm"}
+ACCOUNT_FORMS = {
+    "signup": "booking.users.forms.CustomSignupForm",
+}
 SOCIALACCOUNT_ADAPTER = "booking.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_FORMS = {"signup": "booking.users.forms.UserSocialSignupForm"}
 

@@ -9,6 +9,8 @@ from allauth.account.views import LoginView
 from booking.pages.views import ModalLoginView
 from backoffice.views import BackofficeView
 
+
+
 urlpatterns = [
 
     # Django Admin, use {% url 'admin:index' %}
@@ -18,7 +20,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
     path('accounts/login/', ModalLoginView.as_view(), name='account_login'),
-    path('backoffice/', include('backoffice.urls')),
+    path('backoffice/', include('backoffice.urls', namespace='backoffice')),
     path("", include("booking.pages.urls", namespace="pages")),
 
 

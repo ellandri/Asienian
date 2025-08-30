@@ -1,0 +1,144 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends 'admin.html' %}
+
+{% load static i18n %}
+
+{% block page_content %}
+
+<!-- Page main content START -->
+<div class="page-content-wrapper p-xxl-4">
+
+    <!-- Title -->
+    <div class="row">
+        <div class="col-12 mb-4 mb-sm-5">
+            <h1 class="h3 mb-0">Ajouter un Nouveau Voyage</h1>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Trip form -->
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header border-bottom">
+                    <h5 class="card-header-title">Détails du Voyage</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <!-- Departure city -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.departure_city.id_for_label }}">Ville de départ</label>
+                            {{ form.departure_city }}
+                            {% if form.departure_city.errors %}
+                                <div class="text-danger small">{{ form.departure_city.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Arrival city -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.arrival_city.id_for_label }}">Ville d'arrivée</label>
+                            {{ form.arrival_city }}
+                            {% if form.arrival_city.errors %}
+                                <div class="text-danger small">{{ form.arrival_city.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Vehicle type -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.vehicle_type.id_for_label }}">Type de véhicule</label>
+                            {{ form.vehicle_type }}
+                            {% if form.vehicle_type.errors %}
+                                <div class="text-danger small">{{ form.vehicle_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Duration -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.duration.id_for_label }}">Durée</label>
+                            {{ form.duration }}
+                            {% if form.duration.errors %}
+                                <div class="text-danger small">{{ form.duration.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.price.id_for_label }}">Prix (FCFA)</label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                                <div class="text-danger small">{{ form.price.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Rating -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.rating.id_for_label }}">Note</label>
+                            {{ form.rating }}
+                            {% if form.rating.errors %}
+                                <div class="text-danger small">{{ form.rating.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Image URL -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.image.id_for_label }}">URL de l'image</label>
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="text-danger small">{{ form.image.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Entrez une URL pointant vers une image (par exemple, https://via.placeholder.com/400x300).</div>
+                        </div>
+                        <!-- Departure time -->
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.departure_time.id_for_label }}">Heure de départ</label>
+                            {{ form.departure_time }}
+                            {% if form.departure_time.errors %}
+                                <div class="text-danger small">{{ form.departure_time.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Format attendu : HH:MM AM/PM (par exemple, 07:00 AM).</div>
+                        </div>
+                        <!-- Save button -->
+                        <div class="d-flex justify-content-end mt-4">
+                            <a href="{% url 'backoffice:admin_booking_list' %}" class="btn text-secondary border-0 me-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> <!-- Row END -->
+</div>
+
+{% endblock page_content %}

@@ -2,8 +2,8 @@ from allauth.account.forms import SignupForm
 from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from django.contrib.auth import forms as admin_forms
 from django.utils.translation import gettext_lazy as _
-
 from .models import User
+
 
 
 class UserAdminChangeForm(admin_forms.UserChangeForm):
@@ -22,8 +22,12 @@ class UserAdminCreationForm(admin_forms.BaseUserCreationForm):  # type: ignore[n
         error_messages = {
             "username": {"unique": _("This username has already been taken.")},
         }
-
-
+class CustomSignupForm(SignupForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].label = "Adresse e-mail"  # Traduction en français
+        self.fields['email'].required = True
+        
 class UserSignupForm(SignupForm):
     """
     Form that will be rendered on a user sign up section/screen.

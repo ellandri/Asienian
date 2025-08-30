@@ -1,0 +1,21 @@
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class Voyage(models.Model):
+    destination = models.CharField(max_length=200, verbose_name=('Destination'))
+    date_depart = models.DateField(verbose_name=('Date de d�part'))
+    date_fin = models.DateField(verbose_name=('Date de fin'))
+    type_voyage = models.CharField(max_length=100, verbose_name=('Type de voyage'), choices=[('vacances', 'Vacances'), ('affaires', 'Affaires'), ('aventure', 'Aventure')])
+    description_complete = models.TextField(verbose_name=('Description compl�te'))
+    itineraire = models.TextField(verbose_name=('Itin�raire'))
+    inclusions_exclusions = models.TextField(verbose_name=('Inclusions et exclusions'))
+    politique_visite = models.TextField(verbose_name=('Politique de visite'))
+    possibilite_paiement = models.BooleanField(default=True, verbose_name=('Possibilit� de paiement'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=('Cr�� le'))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_('Mis � jour le'))
+class Meta:
+    verbose_name = _('Voyage')
+    verbose_name_plural = _('Voyages')
+def str(self):
+    return f'{self.destination} ({self.date_depart} - {self.date_fin})'
