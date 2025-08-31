@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.contrib.auth import login as auth_login
 from allauth.account import app_settings as allauth_settings
 from allauth.account.utils import complete_signup
@@ -17,6 +17,7 @@ from allauth.account.views import LoginView
 
 from allauth.account.forms import SignupForm, LoginForm
 from django.urls import reverse
+from backoffice.models import Trip
 
 
 
@@ -33,14 +34,19 @@ class CustomLoginView(LoginView):
 
 def root_page_view(request):
     form = LoginForm(request.POST or None)
+    best_trips = Trip.objects.filter(is_best_trip=True)
     return render(request, 'pages/index-tour.html', {
         'user_authenticated': request.user.is_authenticated,
-        'form': form
+        'form': form,
+        'best_trips': best_trips,
     })
 
 
 
 def dynamic_pages_view(request, template_name):
+    if template_name == 'search_trip':
+        # Empêche le rendu du template inexistant
+        raise Http404("Cette page n'existe pas.")
     if template_name == 'sign-up':
         # Utiliser SignupForm pour la page d'inscription
         if request.method == 'POST':
@@ -63,10 +69,14 @@ def dynamic_pages_view(request, template_name):
         # Pour d'autres pages dynamiques, pas de formulaire
         form = None
 
-    return render(request, f'pages/{template_name}.html', {
+    context = {
         'user_authenticated': request.user.is_authenticated,
         'form': form
-    })
+    }
+    if template_name == 'index-tour':
+        best_trips = Trip.objects.filter(is_best_trip=True).order_by('-rating')
+        context['best_trips'] = best_trips
+    return render(request, f'pages/{template_name}.html', context)
 class ModalLoginView(View):
     def post(self, request, *args, **kwargs):
         if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -85,3 +95,20 @@ class ModalLoginView(View):
 
     def get(self, request, *args, **kwargs):
         return JsonResponse({'success': False, 'errors': ['Méthode non autorisée.']}, status=405)
+
+def search_trip_view(request):
+    all_trips = Trip.objects.all()
+    location = request.GET.get('location', '')
+
+    # Filtrage partiel et insensible à la casse sur la ville d'arrivée
+    trips = all_trips
+    if location:
+        trips = trips.filter(arrival_city__icontains=location)
+
+    # Passage au template
+    return render(request, 'pages/index-tour.html', {
+        'selected_location': location,
+        'trips': trips,
+        'user_authenticated': request.user.is_authenticated,
+        'form': LoginForm(),
+    })

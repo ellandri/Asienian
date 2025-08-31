@@ -22,6 +22,9 @@ from rest_framework import viewsets
 from django.urls import reverse  # Ajoutez cet import
 from .forms import TripForm
 from django.core.paginator import Paginator
+from .models import Guest
+
+
 
 
 
@@ -54,18 +57,24 @@ class BackofficeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['message'] = _("Bienvenue dans le backoffice personnalisé !")
         return context
 
+
 def dynamic_pages_view(request, template_name):
-    valid_templates = ['login-admin', 'admin-booking-list', 'dashboard', 'admin-booking-detail']
+    valid_templates = ['login-admin', 'dashboard', 'admin-booking-detail', 'admin-trip-list']  # 'admin-booking-list' retiré
+
     if template_name not in valid_templates:
         raise Http404('Page non trouvée')
 
-    # Redirection seulement pour la page de login
+    # Redirection pour la page de login si l'utilisateur est authentifié
     if (request.user.is_authenticated and request.user.is_superuser and
         template_name == 'login-admin'):
-        return redirect('backoffice:backoffice_dashboard')  # ← Ajoutez le namespace
+        return redirect('backoffice:backoffice_dashboard')
 
-    form = None
-    error_message = None
+    # Initialisation du contexte
+    context = {
+        'user_authenticated': request.user.is_authenticated,
+    }
+
+    # Gestion du formulaire de login
     if template_name == 'login-admin':
         form = AuthenticationForm(request, data=request.POST or None)
         if request.method == 'POST':
@@ -73,12 +82,22 @@ def dynamic_pages_view(request, template_name):
                 user = form.get_user()
                 if user.is_superuser:
                     login(request, user)
-                    return redirect('backoffice:backoffice_dashboard')  # ← Ajoutez le namespace
+                    return redirect('backoffice:backoffice_dashboard')
                 else:
                     error_message = 'Vous devez être un superutilisateur pour accéder au backoffice.'
                     form.add_error(None, error_message)
             else:
                 error_message = 'Nom d\'utilisateur ou mot de passe incorrect.'
+        context['form'] = form
+        context['error_message'] = error_message if 'error_message' in locals() else None
+
+    # Gestion de la liste des voyages
+    elif template_name == 'admin-trip-list':
+        trips = Trip.objects.all()  # Récupérer tous les voyages
+        paginator = Paginator(trips, 10)  # 10 voyages par page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['trips'] = page_obj  # Ajouter les voyages paginés au contexte
 
     # Déterminer le chemin du template
     try:
@@ -92,40 +111,36 @@ def dynamic_pages_view(request, template_name):
     except TemplateDoesNotExist:
         raise Http404('Template non trouvé')
 
-    return render(request, template_path, {
-        'user_authenticated': request.user.is_authenticated,
-        'form': form,
-        'error_message': error_message
-    })
-# class VoyageViewSet(UserPassesTestMixin, ModelViewSet):
-#     queryset = Voyage.objects.all()
-#     serializer_class = VoyageSerializer
-#     permission_classes = [IsAdminUser]
-#
-#     def test_func(self):
-#         return self.request.user.is_superuser
+    return render(request, template_path, context)
 
 def admin_booking_list_view(request):
-    # Cette logique crée une boucle infinie !
-    # Si l'utilisateur est authentifié, on le redirige vers le dashboard,
-    # mais cette vue EST le dashboard pour les réservations
-    if not request.user.is_authenticated or not request.user.is_superuser:
-        return redirect('backoffice:backoffice_login')  # Redirigez vers le login si non authentifié
-
+    trips = Trip.objects.all().order_by('-id')
+    best_trips = Trip.objects.filter(is_best_trip=True).order_by('-rating')
+    from django.core.paginator import Paginator
+    paginator = Paginator(trips, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'user_authenticated': request.user.is_authenticated,
-        'form': None,
-        'error_message': None,
-        'voyages': Trip.objects.all()
+        'trips': page_obj,
+        'best_trips': best_trips,
     }
     return render(request, 'pages/admin-booking-list.html', context)
 
-
-# class BackofficeView(APIView):
-#     def get(self, request):
-#         trips = Trip.objects.all()
-#         serializer = TripSerializer(trips, many=True)
-#         return Response(serializer.data)
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
+def toggle_best_trip(request, trip_id):
+    if request.method == 'POST':
+        try:
+            trip = Trip.objects.get(id=trip_id)
+            trip.is_best_trip = not trip.is_best_trip
+            trip.save()
+            return JsonResponse({'success': True, 'is_best_trip': trip.is_best_trip})
+        except Trip.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Voyage introuvable'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'})
 
 class TripViewSet(viewsets.ModelViewSet):
     queryset = Trip.objects.all()
@@ -159,15 +174,36 @@ def admin_trips_view(request):
     return render(request, 'pages/admin-booking-list.html', {'trips': trips})
 
 
-def admin_booking_list(request):
-    return render(request, 'pages/admin-booking-list.html')  # Ajustez selon votre structure
-
-
-
 # Vue pour les détails d'un voyage
-def trip_detail_view(request, pk):
-    trip = get_object_or_404(Trip, pk=pk)  # Remplacez Trip par Voyage si nécessaire
-    return render(request, 'pages/admin-booking-detail.html', {'trip': trip})
+def trip_detail_view(request, trip_id):
+    trip = get_object_or_404(Trip, pk=trip_id)
+    # Préparer le contexte pour le template dynamique
+    room = {
+        'name': f"Voyage de {trip.departure_city} à {trip.arrival_city}",
+        'hotel_name': trip.vehicle_type,  # Type de véhicule comme nom d'hôtel
+        'hotel_address': trip.departure_city,  # Ville de départ comme adresse
+        'description': f"Départ: {trip.departure_city}, Arrivée: {trip.arrival_city}, Durée: {trip.duration}, Prix: {trip.price} FCFA",
+        'type': trip.vehicle_type,
+        'side': _('N/A'),
+        'floor': _('N/A'),
+        'view': _('N/A'),
+        'size': _('N/A'),
+        'images': [{'url': trip.image}] if trip.image else [],
+    }
+    context = {
+        'room': room,
+        'current_booking': None,
+        'bookings': [],
+        'pagination': {
+            'start': 0,
+            'end': 0,
+            'total': 0,
+            'has_prev': False,
+            'has_next': False,
+            'pages': [],
+        },
+    }
+    return render(request, 'pages/admin-booking-detail.html', context)
 
 class LogoutView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
@@ -186,4 +222,17 @@ admin_booking_list_view = admin_booking_list_view
 TripViewSet = TripViewSet
 
 
+def admin_guest_list_view(request):
+    users = User.objects.all()
+    return render(request, 'pages/admin-guest-list.html', {'guests': users})
 
+
+from booking.users.models import User
+from .models import Trip
+from django.shortcuts import get_object_or_404
+
+def admin_agent_detail_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    # Si Trip n'est pas lié à User, on affiche tous les voyages (à adapter si relation ajoutée)
+    trips = Trip.objects.all()
+    return render(request, 'pages/admin-agent-detail.html', {'user': user, 'trips': trips})

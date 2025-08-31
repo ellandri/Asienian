@@ -7,7 +7,7 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from allauth.account.views import LoginView
 from booking.pages.views import ModalLoginView
-from backoffice.views import BackofficeView
+from backoffice.views import BackofficeView, admin_booking_list_view
 
 
 
@@ -22,6 +22,7 @@ urlpatterns = [
     path('accounts/login/', ModalLoginView.as_view(), name='account_login'),
     path('backoffice/', include('backoffice.urls', namespace='backoffice')),
     path("", include("booking.pages.urls", namespace="pages")),
+    path('admin-booking-list/', admin_booking_list_view, name='admin_booking_list_root'),
 
 
     # ...

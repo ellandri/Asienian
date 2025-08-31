@@ -3,7 +3,7 @@
 <nav class="navbar sidebar navbar-expand-xl navbar-light">
     <!-- Navbar brand for xl START -->
     <div class="d-flex align-items-center">
-        <a class="navbar-brand" href="/Booking/booking/static">
+        <a class="navbar-brand" href="/">
             <img class="light-mode-item navbar-brand-item" src="{% static 'images/logo.svg' %}" alt="logo">
             <img class="dark-mode-item navbar-brand-item" src="{% static 'images/logo-light.svg' %}" alt="logo">
         </a>
@@ -17,7 +17,7 @@
             <!-- Sidebar menu START -->
             <ul class="navbar-nav flex-column" id="sidebar-account">
                 <!-- Menu item -->
-                <li class="nav-item"><a href="#" class="nav-link">Dashboard</a></li>
+                <li class="nav-item"><a href="" class="nav-link">Dashboard</a></li>
 
                 <!-- Title -->
                 <li class="nav-item ms-2 my-2">Pages</li>
@@ -30,8 +30,8 @@
                     </a>
                     <!-- Submenu -->
                     <ul class="nav collapse flex-column" id="collapsebooking" data-bs-parent="#sidebarAccount">
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-booking-list' %}">Liste des voyages</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-booking-detail' %}">Détail d’un voyage</a>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'backoffice:admin_booking_list' %}">Liste des voyages</a></li>
+<!--                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-booking-detail' %}">Détail d’un voyage</a>-->
                         </li>
                     </ul>
                 </li>
@@ -44,23 +44,11 @@
                     </a>
                     <!-- Submenu -->
                     <ul class="nav collapse flex-column" id="collapseguest" data-bs-parent="#navbar-sidebar">
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-guest-list' %}">Liste des clients</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-guest-detail' %}">Profil client</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="{% url 'backoffice:admin_guest_list' %}">Liste des invités</a></li>
+<!--                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-guest-detail' %}">Profil invité</a></li>-->
                     </ul>
                 </li>
 
-                <!-- Menu item -->
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#collapseagent" role="button"
-                        aria-expanded="false" aria-controls="collapseagent">
-                      Réservations
-                    </a>
-                    <!-- Submenu -->
-                    <ul class="nav collapse flex-column" id="collapseagent" data-bs-parent="#navbar-sidebar">
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-agent-list' %}">Liste des réservations</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-agent-detail' %}">Détail réservation</a></li>
-                    </ul>
-                </li>
 
                 <!-- Menu item -->
                 <li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='admin-reviews' %}">Avis & retours</a></li>

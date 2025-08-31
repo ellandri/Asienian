@@ -14,6 +14,34 @@
     </div>
   </div>
 
+  <!-- Section Meilleurs Voyages -->
+  {% if best_trips %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <h4 class="mb-3">Meilleurs voyages</h4>
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for trip in best_trips %}
+        <div class="col">
+          <div class="card border-primary shadow h-100">
+            <img src="{{ trip.image|default:'https://via.placeholder.com/400x300' }}" class="card-img-top" alt="{{ trip.departure_city }} à {{ trip.arrival_city }}">
+            <div class="card-body">
+              <h5 class="card-title">{{ trip.departure_city }} à {{ trip.arrival_city }}</h5>
+              <p class="card-text">Type: {{ trip.vehicle_type }}<br>Durée: {{ trip.duration }}<br>Prix: <span class="text-success">{{ trip.price }} FCFA</span></p>
+              <div class="mb-2">
+                {% for i in "12345" %}
+                  <i class="fas fa-star {% if forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
+                {% endfor %}
+              </div>
+              <a href="{% url 'backoffice:admin-trip-detail' trip.id %}" class="btn btn-sm btn-primary">Voir détails</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="tab-content mt-5" id="myTabContent">
     <!-- Grid View -->
     <div class="tab-pane fade show active" id="grid-tab-pane">
@@ -25,7 +53,7 @@
               <img src="{{ trip.image|default:'https://via.placeholder.com/400x300' }}" class="card-img-top" alt="{{ trip.departure_city }} à {{ trip.arrival_city }}">
               <div class="card-img-overlay d-flex flex-column p-3">
                 <div class="d-flex justify-content-between align-items-center">
-                  <div class="badge text-bg-dark"><i class="bi fa-fw bi-star-fill me-2 text-warning"></i>{{ trip.rating|floatformat:1 }}</div>
+<!--                  <div class="badge text-bg-dark"><i class="bi fa-fw bi-star-fill me-2 text-warning"></i>{{ trip.rating|floatformat:1 }}</div>-->
                   <div class="list-inline-item dropdown">
                     <a href="#" class="btn btn-sm btn-round btn-light" role="button" id="dropdownAction{{ trip.id }}" data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="bi bi-three-dots-vertical"></i>
@@ -33,6 +61,15 @@
                     <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow rounded small" aria-labelledby="dropdownAction{{ trip.id }}">
                       <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>Rapport</a></li>
                       <li><a class="dropdown-item" href="#"><i class="bi bi-slash-circle me-2"></i>Désactiver</a></li>
+                      <li>
+                        <a class="dropdown-item toggle-best-trip" href="#" data-trip-id="{{ trip.id }}">
+                          {% if trip.is_best_trip %}
+                            <i class="bi bi-star-fill text-warning me-2"></i>Retirer des meilleurs voyages
+                          {% else %}
+                            <i class="bi bi-star me-2"></i>Activer comme meilleur voyage
+                          {% endif %}
+                        </a>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -179,3 +216,46 @@
   </div>
 </div>
 {% endblock page_content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.toggle-best-trip').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var tripId = this.getAttribute('data-trip-id');
+      var csrftoken = getCookie('csrftoken');
+      fetch('/backoffice/toggle-best-trip/' + tripId + '/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'Accept': 'application/json',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert('Erreur: ' + (data.error || 'Action impossible'));
+        }
+      });
+    });
+  });
+});
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+{% endblock %}
