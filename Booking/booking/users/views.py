@@ -13,6 +13,12 @@ from django.contrib import messages
 from booking.users.forms import UserSignupForm
 from booking.users.models import User
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UserSerializer
+
 
 
 
@@ -74,3 +80,27 @@ class UserSignupView(FormView):
             return self.form_invalid(form)
 
 user_signup_view = UserSignupView.as_view()
+
+
+# class TravelerProfileView(APIView):
+#     def post(self, request):
+#         travelers_data = [
+#             {
+#                 'title': request.data.get(f'title_{i}'),
+#                 'first_name': request.data.get(f'first_name_{i}'),
+#                 'last_name': request.data.get(f'last_name_{i}'),
+#                 'date_of_birth': request.data.get(f'dob_{i}'),
+#                 'passport_number': request.data.get(f'passport_number_{i}')
+#             } for i in [1, 2]
+#         ]
+#
+#         response_data = []
+#         for traveler_data in travelers_data:
+#             serializer = UserSerializer(data=traveler_data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 response_data.append(serializer.data)
+#             else:
+#                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#         return Response(response_data, status=status.HTTP_201_CREATED)

@@ -1,0 +1,701 @@
+{% extends 'admin.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block page_content %}
+
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.18);
+  }
+
+  .container {
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  }
+
+  /* Réduction de la taille des SVG sur la page */
+  svg {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 12px;
+    min-height: 12px;
+    max-width: 20px;
+    max-height: 20px;
+    vertical-align: middle;
+    display: inline-block;
+  }
+
+  .page-wrapper {
+    background: transparent;
+    backdrop-filter: blur(10px);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    color: #374151;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+  }
+
+  .back-button:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    color: #1f2937;
+    text-decoration: none;
+  }
+
+  .main-title {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: #6b7280;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    font-weight: 500;
+  }
+
+  .modern-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+  }
+
+  .modern-section:hover {
+    transform: translateY(-5px);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .section-header {
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding: 1.5rem 2rem;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .section-title {
+    color: #333337;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  .section-icon {
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 0.75rem;
+    color: #667eea;
+  }
+
+  .section-body {
+    padding: 2.5rem;
+    background-color: #dce3fb;
+
+    border-radius: 0 0 24px 24px;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+
+  }
+
+  .form-group {
+    position: relative;
+
+  }
+
+  .form-group label {
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+    width: 100%;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(255, 255, 255, 1);
+    box-shadow:
+      0 0 0 4px rgba(102, 126, 234, 0.1),
+      0 8px 20px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .form-group input:hover,
+  .form-group select:hover,
+  .form-group textarea:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    background-color: #dbe0f6;
+
+  }
+
+  .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+    /*background-color: #146cd1;*/
+
+  }
+
+  .input-with-icon {
+    position: relative;
+  }
+
+  .input-with-icon input {
+    padding-left: 3rem;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    transition: color 0.3s ease;
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .form-group:focus-within .input-icon {
+    color: #667eea;
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .checkbox-group:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(102, 126, 234, 0.2);
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid #667eea;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+  }
+
+  .checkbox-group label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 600;
+    color: #374151;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .btn-primary-modern {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 16px;
+    padding: 1rem 2.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .btn-primary-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-primary-modern:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary-modern:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+
+  }
+
+  .floating-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .floating-circle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .floating-circle:nth-child(2) {
+    width: 120px;
+    height: 120px;
+    top: 20%;
+    right: 15%;
+    animation-delay: 2s;
+  }
+
+  .floating-circle:nth-child(3) {
+    width: 60px;
+    height: 60px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+
+  @media (max-width: 768px) {
+    .form-grid-2,
+    .form-grid-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .main-title {
+      font-size: 2rem;
+    }
+
+    .section-body {
+      padding: 1.5rem;
+    }
+
+    .page-wrapper {
+      padding: 1rem;
+    }
+  }
+
+  .gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .prose-editor textarea {
+    min-height: 150px;
+  }
+</style>
+<div class="container">
+<div class="floating-elements">
+  <div class="floating-circle"></div>
+  <div class="floating-circle"></div>
+  <div class="floating-circle"></div>
+</div>
+
+<div class="page-wrapper">
+  <div class="content-container">
+    <!-- Header avec navigation -->
+    <div class="mb-8">
+      <a href="{% url 'backoffice:admin_booking_list' %}" class="back-button">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Retour à la liste
+      </a>
+    </div>
+
+    <!-- Titre principal -->
+    <div class="mb-8 text-center">
+      <h1 class="main-title">
+        <i class="fas fa-edit me-3"></i>
+        Modifier le voyage
+      </h1>
+      <p class="subtitle">Modifiez les informations de votre voyage</p>
+    </div>
+
+    <!-- Formulaire principal -->
+    <form method="post" class="space-y-8">
+      {% csrf_token %}
+
+      <!-- Section: Informations générales -->
+      <div class="modern-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Informations générales
+          </h3>
+        </div>
+        <div class="section-body">
+          <div class="form-grid form-grid-2">
+            <div class="form-group">
+              {{ form.departure_city.label_tag }}
+              <div class="input-with-icon">
+                {{ form.departure_city }}
+                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="form-group">
+              {{ form.arrival_city.label_tag }}
+              <div class="input-with-icon">
+                {{ form.arrival_city }}
+                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="form-group">
+              {{ form.vehicle_type.label_tag }}
+              {{ form.vehicle_type }}
+            </div>
+
+            <div class="form-group">
+              {{ form.duration.label_tag }}
+              {{ form.duration }}
+            </div>
+
+            <div class="form-group">
+              {{ form.price.label_tag }}
+              <div class="input-with-icon">
+                {{ form.price }}
+                <span class="input-icon" style="font-size: 14px; font-weight: bold;">€</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              {{ form.rating.label_tag }}
+              {{ form.rating }}
+            </div>
+
+            <div class="form-group">
+              {{ form.departure_time.label_tag }}
+              {{ form.departure_time }}
+            </div>
+
+            <div class="form-group">
+              {{ form.image.label_tag }}
+              {{ form.image }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Points géographiques -->
+      <div class="modern-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"></path>
+            </svg>
+            Points géographiques
+          </h3>
+        </div>
+        <div class="section-body">
+          <div class=" form-grid ">
+            <div class="form-group">
+              {{ form.lieux_couverts.label_tag }}
+              <div class="prose-editor">
+                {{ form.lieux_couverts|add_class:"ckeditor" }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              {{ form.point_depart.label_tag }}
+              {{ form.point_depart }}
+            </div>
+
+            <div class="form-group">
+              {{ form.point_arrivee.label_tag }}
+              {{ form.point_arrivee }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Options et préférences -->
+      <div class="modern-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+            Options et préférences
+          </h3>
+        </div>
+        <div class="section-body">
+          <div class="checkbox-group">
+            {{ form.is_best_trip }}
+            {{ form.is_best_trip.label_tag }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Détails du voyage -->
+      <div class="modern-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Détails du voyage
+          </h3>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group">
+              {{ form.description.label_tag }}
+              <div class="prose-editor">
+                {{ form.description|add_class:"ckeditor" }}
+              </div>
+            </div>
+            <div class="form-group">
+              {{ form.points_forts.label_tag }}
+              <div class="prose-editor">
+                {{ form.points_forts|add_class:"ckeditor" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Inclusions et exclusions -->
+      <div class="modern-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            Inclusions et exclusions
+          </h3>
+        </div>
+        <div class="section-body">
+          <div class="form-grid ">
+            <div class="form-group">
+              {{ form.inclusions.label_tag }}
+              <div class="prose-editor">
+                {{ form.inclusions|add_class:"ckeditor" }}
+              </div>
+            </div>
+            <div class="form-group">
+              {{ form.exclusions.label_tag }}
+              <div class="prose-editor">
+                {{ form.exclusions|add_class:"ckeditor" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Politique -->
+      <div class="modern-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            Politique
+          </h3>
+        </div>
+        <div class="section-body">
+          <div class="form-group">
+            {{ form.politique_annulation.label_tag }}
+            <div class="prose-editor">
+              {{ form.politique_annulation|add_class:"ckeditor" }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="button-group">
+        <button type="submit" class="btn-primary-modern">
+          <i class="fas fa-save me-2"></i>
+          Enregistrer les modifications
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+<!-- CKEditor 5 CDN -->
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script>
+  // Effet de parallaxe léger pour les éléments flottants
+  document.addEventListener('mousemove', function(e) {
+    const circles = document.querySelectorAll('.floating-circle');
+    const x = e.clientX / window.innerWidth;
+    const y = e.clientY / window.innerHeight;
+
+    circles.forEach((circle, index) => {
+      const speed = (index + 1) * 0.5;
+      const xOffset = (x - 0.5) * speed * 20;
+      const yOffset = (y - 0.5) * speed * 20;
+      circle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+    });
+  });
+
+  // Animation d'entrée pour les sections
+  document.addEventListener('DOMContentLoaded', function() {
+    const sections = document.querySelectorAll('.modern-section');
+    sections.forEach((section, index) => {
+      section.style.opacity = '0';
+      section.style.transform = 'translateY(30px)';
+      section.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+      setTimeout(() => {
+        section.style.opacity = '1';
+        section.style.transform = 'translateY(0)';
+      }, index * 150);
+    });
+
+    // Animation pour le titre
+    const title = document.querySelector('.main-title');
+    if (title) {
+      title.style.opacity = '0';
+      title.style.transform = 'translateY(-20px)';
+      setTimeout(() => {
+        title.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        title.style.opacity = '1';
+        title.style.transform = 'translateY(0)';
+      }, 100);
+    }
+  });
+
+  // Amélioration des interactions avec les champs de formulaire
+  document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
+    });
+  });
+
+  // Initialisation CKEditor 5 sur tous les textarea avec la classe ckeditor
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('textarea.ckeditor').forEach(function(el) {
+      ClassicEditor.create(el).catch(error => { console.error(error); });
+    });
+  });
+</script>
+
+{% endblock page_content %}

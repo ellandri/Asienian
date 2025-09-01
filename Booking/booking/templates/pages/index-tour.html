@@ -693,7 +693,7 @@ Packages START -->
                 <i class="fas fa-star {% if forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
                 {% endfor %}
               </div>
-              <a href="{% url 'backoffice:admin-trip-detail' trip.id %}" class="btn btn-sm btn-primary">Voir détails</a>
+              <a href="{% url 'pages:trip_detail' trip.id %}" class="btn btn-sm btn-primary">Voir détails</a>
             </div>
           </div>
         </div>

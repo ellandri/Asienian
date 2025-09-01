@@ -10,7 +10,11 @@
 		<div class="col-12 mb-4 mb-sm-5">
 			<div class="d-sm-flex justify-content-between align-items-center">
 				<h1 class="h3 mb-2 mb-sm-0">{{ room.name }}</h1>
-				<a href="#" class="btn btn-primary-soft text-nowrap mb-0"><i class="bi bi-pencil-square fa-fw"></i> {% trans "Edit Room" %}</a>
+				{% if trip.id %}
+				<a href="{% url 'pages:trip_edit' trip.id %}" class="btn btn-primary-soft text-nowrap mb-0">
+  <i class="bi bi-pencil-square fa-fw"></i> Modifier le voyage
+</a>
+				{% endif %}
 			</div>
 		</div>
 	</div>

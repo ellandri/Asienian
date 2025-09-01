@@ -192,6 +192,7 @@ def trip_detail_view(request, trip_id):
     }
     context = {
         'room': room,
+        'trip': trip,
         'current_booking': None,
         'bookings': [],
         'pagination': {

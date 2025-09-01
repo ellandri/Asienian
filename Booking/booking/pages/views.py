@@ -18,6 +18,8 @@ from allauth.account.views import LoginView
 from allauth.account.forms import SignupForm, LoginForm
 from django.urls import reverse
 from backoffice.models import Trip
+from backoffice.forms import TripForm
+from django.shortcuts import get_object_or_404
 
 
 
@@ -112,3 +114,63 @@ def search_trip_view(request):
         'user_authenticated': request.user.is_authenticated,
         'form': LoginForm(),
     })
+
+def trip_detail_view(request, trip_id):
+    from backoffice.models import Trip
+    try:
+        trip = Trip.objects.get(id=trip_id)
+    except Trip.DoesNotExist:
+        raise Http404("Ce voyage n'existe pas.")
+    # Préparation des listes pour le template
+    points_forts_list = trip.points_forts.split('\n') if getattr(trip, 'points_forts', None) else []
+    inclusions_list = trip.inclusions.split('\n') if getattr(trip, 'inclusions', None) else []
+    exclusions_list = trip.exclusions.split('\n') if getattr(trip, 'exclusions', None) else []
+    return render(request, 'pages/tour-detail.html', {
+        'trip': trip,
+        'points_forts_list': points_forts_list,
+        'inclusions_list': inclusions_list,
+        'exclusions_list': exclusions_list,
+    })
+
+
+
+def trip_edit_view(request, trip_id):
+    trip = Trip.objects.get(id=trip_id)
+    if request.method == 'POST':
+        form = TripForm(request.POST, instance=trip)
+        if form.is_valid():
+            form.save()
+            return redirect('pages:trip_detail', trip_id=trip.id)
+    else:
+        form = TripForm(instance=trip)
+    return render(request, 'pages/tour-edit.html', {'form': form, 'trip': trip})
+
+def tour_booking_view(request, id):
+    try:
+        trip = Trip.objects.get(id=id)
+    except Trip.DoesNotExist:
+        raise Http404("Ce voyage n'existe pas.")
+
+    if request.method == 'POST':
+        # Traiter le formulaire de réservation ici
+        # Par exemple, enregistrer la réservation dans la base de données
+        return redirect('pages:dashboard')  # Rediriger vers une page de confirmation ou la page d'accueil
+
+    return render(request, 'pages/tour-booking.html', {'trip': trip})
+
+def trip_detail(request, trip_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+
+    price_base = trip.price
+    remise = (trip.price * trip.discount) / 100  # remise en FCFA
+    taxes = trip.taxes
+    total = price_base - remise + taxes
+
+    context = {
+        "trip": trip,
+        "price_base": price_base,
+        "remise": remise,
+        "taxes": taxes,
+        "total": total,
+    }
+    return render(request, "trip_detail.html", context)

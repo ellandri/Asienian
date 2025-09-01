@@ -1,4 +1,6 @@
 from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field
+from tinymce.models import HTMLField
 
 class Trip(models.Model):
     departure_city = models.CharField(max_length=100)
@@ -12,6 +14,14 @@ class Trip(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_best_trip = models.BooleanField(default=False)
+    lieux_couverts = HTMLField(blank=True, null=True)
+    point_depart = HTMLField(blank=True, null=True)
+    point_arrivee = HTMLField(blank=True, null=True)
+    points_forts = HTMLField(blank=True, null=True)
+    inclusions = HTMLField(blank=True, null=True)
+    exclusions = HTMLField(default="Aucune exclusion", blank=True)
+    politique = HTMLField(blank=True, null=True)
+    description = HTMLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.departure_city} à {self.arrival_city}"

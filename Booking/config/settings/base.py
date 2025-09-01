@@ -53,6 +53,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.admin",
     "django.forms",
+    'tinymce',  # Ajoutez ceci pour django-tinymce
 ]
 
 THIRD_PARTY_APPS = [
@@ -65,6 +66,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount.providers.google",
     "fontawesomefree",
     "widget_tweaks",
+
 ]
 
 LOCAL_APPS = [
@@ -72,6 +74,8 @@ LOCAL_APPS = [
     "booking.users",
     'backoffice',
 ]
+
+
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -131,9 +135,17 @@ STATICFILES_FINDERS = [
 
 # MEDIA
 # ------------------------------------------------------------------------------
-MEDIA_ROOT = str(APPS_DIR / "media")
-MEDIA_URL = "/media/"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 360,
+    'width': 800,
+    'menubar': True,
+    'plugins': 'advlist autolink lists link image charmap print preview anchor',
+    'toolbar': 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image',
+    'content_css': '//www.tinymce.com/css/codepen.min.css',  # Optionnel
+}
 # TEMPLATES
 # ------------------------------------------------------------------------------
 TEMPLATES = [
