@@ -10,157 +10,211 @@ class="dashboard"
 
 <div class="col-lg-8 col-xl-9 ps-xl-5">
 
-	<!-- Offcanvas menu button -->
-	<div class="d-grid mb-0 d-lg-none w-100">
-		<button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
-			aria-controls="offcanvasSidebar">
-			<i class="fas fa-sliders-h"></i> Menu
-		</button>
-	</div>
+  <!-- Bouton de menu offcanvas -->
+  <div class="d-grid mb-0 d-lg-none w-100">
+    <button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
+            aria-controls="offcanvasSidebar">
+      <i class="fas fa-sliders-h"></i> Menu
+    </button>
+  </div>
 
-	<!-- Payment detail START -->
-	<div class="card bg-transparent border">
-		<!-- Card header -->
-		<div class="card-header bg-transparent border-bottom">
-			<h4 class="card-header-title">Payment Details</h4>
-		</div>
+  <!-- Détails de paiement START -->
+  <div class="card bg-transparent border">
+    <!-- En-tête de la carte -->
+    <div class="card-header bg-transparent border-bottom">
+      <h4 class="card-header-title">Détails de paiement</h4>
+    </div>
 
-		<!-- Card body START -->
-		<div class="card-body p-2 p-sm-4">
-			<h5>Saved Card</h5>
-			<div class="row g-4">
-				<!-- Visa card -->
-				<div class="col-md-6">
-					<div class="card">
-						<div class="bg-primary p-4 rounded-3">
-							<div class="d-flex justify-content-between align-items-start">
-								<img class="w-40px" src="{% static 'images/element/visa.svg' %}" alt="">
-								<!-- Card action START -->
-								<div class="dropdown">
-									<a class="text-white" href="#" id="creditcardDropdown" role="button"
-										data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-										<!-- Dropdown Icon -->
-										<svg width="24" height="24" fill="none">
-											<circle fill="currentColor" cx="12.5" cy="3.5" r="2.5">
-											</circle>
-											<circle fill="currentColor" opacity="0.5" cx="12.5" cy="11.5" r="2.5">
-											</circle>
-											<circle fill="currentColor" opacity="0.3" cx="12.5" cy="19.5" r="2.5">
-											</circle>
-										</svg>
-									</a>
-									<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="creditcardDropdown">
-										<li><a class="dropdown-item" href="#"><i
-													class="bi bi-credit-card-2-front-fill me-2 fw-icon"></i>Edit
-												card</a></li>
-										<li><a class="dropdown-item" href="#"><i
-													class="bi bi-calculator me-2 fw-icon"></i>Currency
-												converter</a></li>
-									</ul>
-								</div>
-								<!-- Card action END -->
-							</div>
-							<h4 class="text-white mt-4">**** **** **** 1569</h4>
-							<div class="d-flex justify-content-between text-white">
-								<span>Valid thru: 12/26</span>
-								<span>CVV: ***</span>
-							</div>
-						</div>
-					</div>
-				</div>
+    <!-- Corps de la carte START -->
+    <div class="card-body p-2 p-sm-4">
+      <h5>Cartes enregistrées</h5>
+      {% if bookings_with_payment %}
+      <div class="row g-4">
+        {% for booking in bookings_with_payment %}
+        <!-- Élément de carte -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="bg-{% if booking.payment_method == 'card' %}primary{% else %}danger{% endif %} p-4 rounded-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <img class="w-40px" src="{% static 'images/element/visa.svg' %}" alt="">
+                <!-- Action de la carte START -->
+                <div class="dropdown">
+                  <a class="text-white" href="#" id="creditcardDropdown{{ booking.id }}" role="button"
+                     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <svg width="24" height="24" fill="none">
+                      <circle fill="currentColor" cx="12.5" cy="3.5" r="2.5"></circle>
+                      <circle fill="currentColor" opacity="0.5" cx="12.5" cy="11.5" r="2.5"></circle>
+                      <circle fill="currentColor" opacity="0.3" cx="12.5" cy="19.5" r="2.5"></circle>
+                    </svg>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="creditcardDropdown{{ booking.id }}">
+                    <li>
+                      <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editCardModal{{ booking.id }}">
+                        <i class="bi bi-credit-card-2-front-fill me-2 fw-icon"></i>Modifier la carte
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewCardModal{{ booking.id }}">
+                        <i class="bi bi-eye-fill me-2 fw-icon"></i>Voir les détails
+                      </a>
+                    </li>
+                    <li>
+<!--                      <form method="post" action="{% url 'pages:delete_payment_method' booking.id %}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette carte ?');">-->
+<!--                        {% csrf_token %}-->
+<!--                        <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-2 fw-icon"></i>Supprimer la carte</button>-->
+<!--                      </form>-->
+                    </li>
+                  </ul>
+                </div>
+                <!-- Action de la carte END -->
+              </div>
+              <h4 class="text-white mt-4">
+                **** **** **** {{ booking.card_number|slice:"-4:" }}
+              </h4>
+              <div class="d-flex justify-content-between text-white">
+                <span>Valide jusqu'au : {{ booking.card_expiry_month }}/{{ booking.card_expiry_year }}</span>
+                <span>CVV : ***</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-				<!-- Master card -->
-				<div class="col-md-6">
-					<div class="card">
-						<div class="bg-danger p-4 rounded-3">
-							<div class="d-flex justify-content-between align-items-start">
-								<img class="w-40px" src="{% static 'images/element/mastercard.svg' %}" alt="">
-								<!-- Card action START -->
-								<div class="dropdown">
-									<a class="text-white" href="#" id="creditcardDropdown2" role="button"
-										data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-										<!-- Dropdown Icon -->
-										<svg width="24" height="24" fill="none">
-											<circle fill="currentColor" cx="12.5" cy="3.5" r="2.5">
-											</circle>
-											<circle fill="currentColor" opacity="0.5" cx="12.5" cy="11.5" r="2.5">
-											</circle>
-											<circle fill="currentColor" opacity="0.3" cx="12.5" cy="19.5" r="2.5">
-											</circle>
-										</svg>
-									</a>
-									<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="creditcardDropdown2">
-										<li><a class="dropdown-item" href="#"><i
-													class="bi bi-credit-card-2-front-fill fw-icon me-2"></i>Edit
-												card</a></li>
-										<li><a class="dropdown-item" href="#"><i
-													class="bi bi-calculator fw-icon me-2"></i>Currency
-												converter</a></li>
-									</ul>
-								</div>
-								<!-- Card action END -->
-							</div>
-							<h4 class="text-white mt-4">**** **** **** 5620</h4>
-							<div class="d-flex justify-content-between text-white">
-								<span>Valid thru: 02/35</span>
-								<span>CVV: ***</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+        <!-- Modal de modification START -->
+        <div class="modal fade" id="editCardModal{{ booking.id }}" tabindex="-1" aria-labelledby="editCardModalLabel{{ booking.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editCardModalLabel{{ booking.id }}">Modifier la carte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+              </div>
+              <div class="modal-body">
+                <form method="post" action="{% url 'pages:edit_payment_method' booking.id %}">
+                  {% csrf_token %}
+                  <!-- Numéro de carte -->
+                  <div class="mb-3">
+                    <label class="form-label">Numéro de carte<span class="text-danger">*</span></label>
+                    <div class="position-relative">
+                      <input type="text" name="card_number" class="form-control" value="{{ booking.card_number }}" placeholder="xxxx xxxx xxxx xxxx" required>
+                      <img src="{% static 'images/element/visa.svg' %}" class="w-40px position-absolute top-50 end-0 translate-middle-y me-2 d-none d-sm-block" alt="">
+                    </div>
+                  </div>
+                  <!-- Date d'expiration -->
+                  <div class="mb-3">
+                    <label class="form-label">Date d'expiration<span class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <input type="text" name="expiry_month" class="form-control" maxlength="2" value="{{ booking.card_expiry_month }}" placeholder="MM" required>
+                      <input type="text" name="expiry_year" class="form-control" maxlength="4" value="{{ booking.card_expiry_year }}" placeholder="AAAA" required>
+                    </div>
+                  </div>
+                  <!-- Code CVV -->
+                  <div class="mb-3">
+                    <label class="form-label">CVV / CVC<span class="text-danger">*</span></label>
+                    <input type="text" name="cvv" class="form-control" maxlength="3" placeholder="xxx" required>
+                  </div>
+                  <!-- Nom sur la carte -->
+                  <div class="mb-3">
+                    <label class="form-label">Nom sur la carte<span class="text-danger">*</span></label>
+                    <input type="text" name="cardholder_name" class="form-control" value="{{ booking.cardholder_name }}" placeholder="Entrez le nom" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modal de modification END -->
 
-			<!-- Add new card START -->
-			<div class="card border mt-4">
-				<div class="card-header border-bottom">
-					<h5 class="card-header-title">Add New Card</h5>
-				</div>
+        <!-- Modal d'affichage des détails START -->
+        <div class="modal fade" id="viewCardModal{{ booking.id }}" tabindex="-1" aria-labelledby="viewCardModalLabel{{ booking.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="viewCardModalLabel{{ booking.id }}">Détails de la carte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label">Numéro de carte</label>
+                  <p class="form-control-plaintext">**** **** **** {{ booking.card_number|slice:"-4:" }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Date d'expiration</label>
+                  <p class="form-control-plaintext">{{ booking.card_expiry_month }}/{{ booking.card_expiry_year }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Nom sur la carte</label>
+                  <p class="form-control-plaintext">{{ booking.cardholder_name }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Type de carte</label>
+                  <p class="form-control-plaintext">{{ booking.payment_method|capfirst }}</p>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modal d'affichage des détails END -->
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="alert alert-info" role="alert">
+        Aucune méthode de paiement enregistrée. Ajoutez une nouvelle carte ci-dessous pour commencer.
+      </div>
+      {% endif %}
 
-				<div class="card-body">
-					<form class="row text-start g-4">
-						<!-- Card number -->
-						<div class="col-12">
-							<label class="form-label">Card Number<span class="text-danger">*</span></label>
-							<div class="position-relative">
-								<input type="text" class="form-control" placeholder="xxxx xxxx xxxx xxxx">
-								<img src="{% static 'images/element/visa.svg' %}"
-									class="w-40px position-absolute top-50 end-0 translate-middle-y me-2 d-none d-sm-block"
-									alt="">
-							</div>
-						</div>
-						<!-- Expiration Date -->
-						<div class="col-md-6">
-							<label class="form-label">Expiration Date<span class="text-danger">*</span></label>
-							<div class="input-group">
-								<input type="text" class="form-control" maxlength="2" placeholder="Month">
-								<input type="text" class="form-control" maxlength="4" placeholder="Year">
-							</div>
-						</div>
-						<!-- Cvv code  -->
-						<div class="col-md-6">
-							<label class="form-label">CVV / CVC<span class="text-danger">*</span></label>
-							<input type="text" class="form-control" maxlength="3" placeholder="xxx">
-						</div>
-						<!-- Card name -->
-						<div class="col-12">
-							<label class="form-label">Name on Card<span class="text-danger">*</span></label>
-							<input type="text" class="form-control" aria-label="name of card holder"
-								placeholder="Enter name">
-						</div>
-						<!-- Button -->
-						<div class="col-12">
-							<button class="btn btn-primary mb-0">Add card</button>
-						</div>
-					</form>
-				</div>
-			</div>
-			<!-- Add new card END -->
+      <!-- Ajouter une nouvelle carte START -->
+<!--      <div class="card border mt-4">-->
+<!--        <div class="card-header border-bottom">-->
+<!--          <h5 class="card-header-title">Ajouter une nouvelle carte</h5>-->
+<!--        </div>-->
 
-		</div>
-		<!-- Card body END -->
-	</div>
-	<!-- Payment detail END -->
-
+<!--        <div class="card-body">-->
+<!--          <form class="row text-start g-4" method="post" action="{% url 'pages:add_payment_method' %}">-->
+<!--            {% csrf_token %}-->
+<!--            &lt;!&ndash; Numéro de carte &ndash;&gt;-->
+<!--            <div class="col-12">-->
+<!--              <label class="form-label">Numéro de carte<span class="text-danger">*</span></label>-->
+<!--              <div class="position-relative">-->
+<!--                <input type="text" name="card_number" class="form-control" placeholder="xxxx xxxx xxxx xxxx" required>-->
+<!--                <img src="{% static 'images/element/visa.svg' %}"-->
+<!--                     class="w-40px position-absolute top-50 end-0 translate-middle-y me-2 d-none d-sm-block"-->
+<!--                     alt="">-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Date d'expiration &ndash;&gt;-->
+<!--            <div class="col-md-6">-->
+<!--              <label class="form-label">Date d'expiration<span class="text-danger">*</span></label>-->
+<!--              <div class="input-group">-->
+<!--                <input type="text" name="expiry_month" class="form-control" maxlength="2" placeholder="MM" required>-->
+<!--                <input type="text" name="expiry_year" class="form-control" maxlength="4" placeholder="AAAA" required>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Code CVV &ndash;&gt;-->
+<!--            <div class="col-md-6">-->
+<!--              <label class="form-label">CVV / CVC<span class="text-danger">*</span></label>-->
+<!--              <input type="text" name="cvv" class="form-control" maxlength="3" placeholder="xxx" required>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Nom sur la carte &ndash;&gt;-->
+<!--            <div class="col-12">-->
+<!--              <label class="form-label">Nom sur la carte<span class="text-danger">*</span></label>-->
+<!--              <input type="text" name="cardholder_name" class="form-control" aria-label="nom du titulaire de la carte"-->
+<!--                     placeholder="Entrez le nom" required>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Bouton &ndash;&gt;-->
+<!--            <div class="col-12">-->
+<!--              <button type="submit" class="btn btn-primary mb-0">Ajouter la carte</button>-->
+<!--            </div>-->
+<!--          </form>-->
+<!--        </div>-->
+<!--      </div>-->
+      <!-- Ajouter une nouvelle carte END -->
+    </div>
+    <!-- Corps de la carte END -->
+  </div>
+  <!-- Détails de paiement END -->
 </div>
 
 {% endblock page_content %}

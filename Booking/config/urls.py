@@ -23,6 +23,8 @@ urlpatterns = [
     path('backoffice/', include('backoffice.urls', namespace='backoffice')),
     path("", include("booking.pages.urls", namespace="pages")),
     path('admin-booking-list/', admin_booking_list_view, name='admin_booking_list_root'),
+    path("ckeditor5/", include('django_ckeditor_5.urls')),  # ⚡ Ajoute ceci
+
 
 
     # ...

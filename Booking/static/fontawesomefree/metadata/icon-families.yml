@@ -4394,7 +4394,7 @@ bed:
   search:
     terms:
       - hospital
-      - hotel
+      - plages
       - lodging
       - mattress
       - patient
@@ -4573,7 +4573,7 @@ bell-concierge:
       - bell
       - bellhop
       - bellhop bell
-      - hotel
+      - plages
       - receptionist
       - request
       - service
@@ -26601,7 +26601,7 @@ hotel:
   search:
     terms:
       - building
-      - hotel
+      - plages
       - inn
       - lodging
       - motel
@@ -44703,7 +44703,7 @@ square-h:
       - directions
       - emergency
       - hospital
-      - hotel
+      - plages
       - letter
       - map
   unicode: f0fd

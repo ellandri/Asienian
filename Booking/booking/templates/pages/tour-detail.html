@@ -65,47 +65,57 @@ Main Banner START -->
 
 			<!-- Image gallery START -->
 			<div class="row mt-md-5">
-				<div class="col-12">
-					<!-- Primary image -->
-					<div class="splide splide-main mb-3"
-						data-splide='{"type" : "fade","autoplay": true,"heightRatio":0.5,"pagination":false,"arrows":false,"cover":true,"lazyLoad":"sequential"}'>
-						<div class="splide__track">
-							<ul class="splide__list">
-								<li class="splide__slide rounded">
-									<!-- Glightbox image -->
-									<a href="{% static 'images/gallery/04.jpg' %}" class="stretched-link"
-										data-glightbox="" data-gallery="banner"></a>
-								</li>
-							</ul>
-						</div>
-					</div>
-					<!-- Secondary image -->
-					<div class="splide splide-thumb"
-						data-splide='{"rewind":true,"fixedWidth":200,"fixedHeight":120,"isNavigation":true,"gap":20,"focus":"center","pagination":false,"cover":true,"lazyLoad":"sequential","breakpoints":{"600":{"fixedWidth":150,"fixedHeight":80}}}'>
-						<div class="splide__track">
-							<ul class="splide__list">
-								<li class="splide__slide"><img src="{% static 'images/gallery/04.jpg' %}" alt=""></li>
-								<li class="splide__slide"><img src="{% static 'images/gallery/05.jpg' %}" alt=""></li>
-								<li class="splide__slide"><img src="{% static 'images/gallery/03.jpg' %}" alt=""></li>
-								<li class="splide__slide"><img src="{% static 'images/gallery/09.jpg' %}" alt=""></li>
-								<li class="splide__slide"><img src="{% static 'images/gallery/10.jpg' %}" alt=""></li>
-								<li class="splide__slide"><img src="{% static 'images/gallery/06.jpg' %}" alt=""></li>
-								<li class="splide__slide"><img src="{% static 'images/gallery/07.jpg' %}" alt=""></li>
-								<li class="splide__slide"><img src="{% static 'images/gallery/08.jpg' %}" alt=""></li>
-							</ul>
-						</div>
-						<!-- Arrows -->
-						<div class="splide__arrows">
-							<button class="splide__arrow  splide__arrow--prev p-splide__arrow--prev bg-primary"><span
-									class="spi-angle-left text-white"><i
-										class="fa-solid fa-fw fa-angle-left"></i></span></button>
-							<button class="splide__arrow splide__arrow--next p-splide__arrow--next bg-primary"><span
-									class="spi-angle-right text-white"><i
-										class="fa-solid fa-fw fa-angle-right"></i></span></button>
-						</div>
-					</div>
-				</div>
-			</div>
+        {% load static %}
+
+        <div class="col-12">
+          <!-- Primary image -->
+          <div class="splide splide-main mb-3"
+               data-splide='{"type" : "fade","autoplay": true,"heightRatio":0.5,"pagination":false,"arrows":false,"cover":true,"lazyLoad":"sequential"}'>
+            <div class="splide__track">
+              <ul class="splide__list">
+                {% if trip.image %}
+                <li class="splide__slide rounded">
+                  <!-- Glightbox image -->
+                  <a href="{{ trip.image }}" class="stretched-link"
+                     data-glightbox="" data-gallery="banner">
+                    <img src="{{ trip.image }}" alt="{{ trip.departure_city }} to {{ trip.arrival_city }}" class="w-100 h-100 object-fit-cover">
+                  </a>
+                </li>
+                {% else %}
+                <li class="splide__slide rounded">
+                  <img src="{% static 'images/gallery/placeholder.jpg' %}" alt="Placeholder image" class="w-100 h-100 object-fit-cover">
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+          <!-- Secondary image (thumbnails) -->
+          <div class="splide splide-thumb"
+               data-splide='{"rewind":true,"fixedWidth":200,"fixedHeight":120,"isNavigation":true,"gap":20,"focus":"center","pagination":false,"cover":true,"lazyLoad":"sequential","breakpoints":{"600":{"fixedWidth":150,"fixedHeight":80}}}'>
+            <div class="splide__track">
+              <ul class="splide__list">
+                {% if trip.image %}
+                <li class="splide__slide"><img src="{{ trip.image }}" alt=""></li>
+                {% else %}
+                <li class="splide__slide"><img src="{% static 'images/gallery/placeholder.jpg' %}" alt=""></li>
+                {% endif %}
+                <!-- Ajouter des images supplémentaires si nécessaire -->
+<!--                <li class="splide__slide"><img src="{% static 'images/gallery/08.jpg' %}" alt=""></li>-->
+<!--                <li class="splide__slide"><img src="{% static 'images/gallery/09.jpg' %}" alt=""></li>-->
+<!--                <li class="splide__slide"><img src="{% static 'images/gallery/10.jpg' %}" alt=""></li>-->
+              </ul>
+            </div>
+            <!-- Arrows -->
+            <div class="splide__arrows">
+              <button class="splide__arrow splide__arrow--prev p-splide__arrow--prev bg-primary">
+                <span class="spi-angle-left text-white"><i class="fa-solid fa-fw fa-angle-left"></i></span>
+              </button>
+              <button class="splide__arrow splide__arrow--next p-splide__arrow--next bg-primary">
+                <span class="spi-angle-right text-white"><i class="fa-solid fa-fw fa-angle-right"></i></span>
+              </button>
+            </div>
+          </div>
+        </div>			</div>
 			<!-- Image gallery END -->
 
 		</div>
@@ -181,22 +191,22 @@ Tabs-content START -->
 								<div class="card-body p-0 pt-3">
                   <p></p>
 
-                  <p class="mb-4">{{ trip.description|linebreaksbr }}</p>
+                  <p class="mb-4">{{ trip.description|safe }}</p>
 
 									<!-- List -->
 									<h5>Informations sur le voyage</h5>
 									<ul class="list-group list-group-borderless mb-4">
 										<li class="list-group-item">
 											<span class="h6 mb-0 me-1">Lieux couverts :</span>
-											<span class="h6 fw-light mb-0">{{ trip.lieux_couverts }}</span>
+											<span class="h6 fw-light mb-0">{{ trip.lieux_couverts|safe }}</span>
 										</li>
 										<li class="list-group-item">
 											<span class="h6 mb-0 me-1">Durée :</span>
-											<span class="h6 fw-light mb-0">{{ trip.duration }}</span>
+											<span class="h6 fw-light mb-0">{{ trip.duration |safe}}</span>
 										</li>
 										<li class="list-group-item">
 											<span class="h6 mb-0 me-1">Point de départ :</span>
-											<span class="h6 fw-light mb-0">{{ trip.point_depart }}</span>
+											<span class="h6 fw-light mb-0">{{ trip.point_depart |safe}}</span>
 										</li>
 										<li class="list-group-item">
 											<span class="h6 mb-0 me-1">Point d'arrivée :</span>
@@ -209,7 +219,7 @@ Tabs-content START -->
 									<ul class="list-group list-group-borderless mb-4">
 										{% for point in points_forts_list %}
 										<li class="list-group-item h6 fw-light d-flex mb-0">
-											<i class="bi bi-arrow-right me-2"></i>{{ point|linebreaksbr|safe }}
+											<i class="bi bi-arrow-right me-2"></i>{{ point|safe }}
 										</li>
 										{% endfor %}
 									</ul>
@@ -332,7 +342,7 @@ Tabs-content START -->
                   <ul class="list-group list-group-borderless mb-3">
                     {% for inclusion in inclusions_list %}
                     <li class="list-group-item d-flex mb-0"><i class="fa-solid fa-check text-success me-2"></i>
-                      <span class="h6 fw-normal">{{ inclusion|linebreaksbr|safe }}</span>
+                      <span class="h6 fw-normal">{{ inclusion|safe }}</span>
                     </li>
                     {% endfor %}
                   </ul>
@@ -340,7 +350,7 @@ Tabs-content START -->
                   <ul class="list-group list-group-borderless mb-3">
                     {% for exclusion in exclusions_list %}
                     <li class="list-group-item d-flex mb-0"><i class="fa-solid fa-times text-danger me-2"></i>
-                      <span class="h6 fw-normal">{{ exclusion|linebreaksbr|safe }}</span>
+                      <span class="h6 fw-normal">{{ exclusion|safe }}</span>
                     </li>
                     {% endfor %}
                   </ul>
@@ -360,7 +370,7 @@ Tabs-content START -->
                   <h5 class="mb-0">Politique</h5>
                 </div>
 								<!-- Card body START -->
-                <p>{{ trip.politique|linebreaksbr }}</p>
+                <p>{{ trip.politique|safe }}</p>
 								<!-- Card body END -->
 							</div>
 						</div>

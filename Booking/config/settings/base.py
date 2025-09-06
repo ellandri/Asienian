@@ -53,7 +53,6 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.admin",
     "django.forms",
-    'tinymce',  # Ajoutez ceci pour django-tinymce
 ]
 
 THIRD_PARTY_APPS = [
@@ -66,6 +65,8 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount.providers.google",
     "fontawesomefree",
     "widget_tweaks",
+    "django_ckeditor_5",
+
 
 ]
 

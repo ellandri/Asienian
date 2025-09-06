@@ -284,7 +284,7 @@ buildings:
     - gopuram
     - hospital
     - hospital-user
-    - hotel
+    - plages
     - house
     - house-chimney
     - house-chimney-crack
@@ -1451,7 +1451,7 @@ humanitarian:
     - hill-avalanche
     - hill-rockslide
     - hospital
-    - hotel
+    - plages
     - house-chimney
     - house-chimney-crack
     - house-circle-check
@@ -2836,7 +2836,7 @@ travel-hotel:
     - earth-oceania
     - elevator
     - hot-tub-person
-    - hotel
+    - plages
     - infinity
     - key
     - kitchen-set

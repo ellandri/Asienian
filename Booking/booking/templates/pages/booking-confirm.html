@@ -1,121 +1,697 @@
 {% extends 'base.html' %}
-
 {% load static i18n %}
 
 {% block content %}
-
 {% include 'partials/navbar.html' %}
 
 <main>
+  <!-- =======================
+  Main content START -->
+  <section class="pt-5 pb-4 modern-confirmation">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-xl-8">
+          {% if error %}
+          <div class="alert alert-danger alert-dismissible fade show modern-alert" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% else %}
 
-	<!-- =======================
-Main content START -->
-	<section class="pt-4">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-10 col-xl-8 mx-auto">
+          <!-- Success Badge -->
+          <div class="text-center mb-4">
+            <div class="success-badge animate__animated animate__zoomIn">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <h1 class="success-title animate__animated animate__fadeInUp animate__delay-1s">
+              {% trans "Réservation Confirmée!" %}
+            </h1>
+            <p class="success-subtitle animate__animated animate__fadeInUp animate__delay-2s">
+              {% trans "Votre voyage a été réservé avec succès" %}
+            </p>
+          </div>
 
-					<div class="card shadow">
-						<!-- Image -->
-						<img src="{% static 'images/gallery/04.jpg' %}" class="rounded-top" alt="">
+          <!-- Ticket Card -->
+          <div class="ticket-card animate__animated animate__fadeInUp animate__delay-3s">
+            <!-- Header with trip route -->
+            <div class="ticket-header">
+              <img src="{{ trip.image|default:'/static/images/gallery/04.jpg' }}" class="trip-bg-image" alt="Trip Image">
+              <div class="trip-overlay"></div>
+              <div class="trip-route">
+                <div class="city-info">
+                  <h3>{{ trip.departure_city }}</h3>
+                  <small>{% trans "Départ" %}</small>
+                </div>
+                <div class="route-line">
+                  <i class="bi bi-airplane-fill"></i>
+                </div>
+                <div class="city-info">
+                  <h3>{{ trip.arrival_city }}</h3>
+                  <small>{% trans "Arrivée" %}</small>
+                </div>
+              </div>
+            </div>
 
-						<!-- Card body -->
-						<div class="card-body text-center p-4">
-							<!-- Title -->
-							<h1 class="card-title fs-3">🎊 Congratulations! 🎊</h1>
-							<p class="lead mb-3">Your trip has been booked</p>
+            <!-- Ticket Body -->
+            <div class="ticket-body">
+              <!-- Booking Reference -->
+              <div class="booking-reference">
+                <div class="ref-code">
+                  <span class="ref-label">{% trans "Référence" %}</span>
+                  <span class="ref-number">{{ booking_id }}</span>
+                </div>
+                <div class="qr-placeholder">
+                  <i class="bi bi-qr-code"></i>
+                </div>
+              </div>
 
-							<!-- Second title -->
-							<h5 class="text-primary mb-4">Beautiful Bali with Malaysia</h5>
+              <!-- Details Grid -->
+              <div class="details-grid">
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <i class="bi bi-person-circle"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">{% trans "Passager" %}</span>
+                    <span class="detail-value">{{ booked_by }}</span>
+                  </div>
+                </div>
 
-							<!-- List -->
-							<div class="row justify-content-between text-start mb-4">
-								<div class="col-lg-5">
-									<ul class="list-group list-group-borderless">
-										<li
-											class="list-group-item d-sm-flex justify-content-between align-items-center">
-											<span class="mb-0"><i class="bi bi-vr fa-fw me-2"></i>Booking ID:</span>
-											<span class="h6 fw-normal mb-0">BS-58678</span>
-										</li>
-										<li
-											class="list-group-item d-sm-flex justify-content-between align-items-center">
-											<span class="mb-0"><i class="bi bi-person fa-fw me-2"></i>Booked by:</span>
-											<span class="h6 fw-normal mb-0">Frances Guerrero</span>
-										</li>
-										<li
-											class="list-group-item d-sm-flex justify-content-between align-items-center">
-											<span class="mb-0"><i class="bi bi-wallet2 fa-fw me-2"></i>Payment
-												Method:</span>
-											<span class="h6 fw-normal mb-0">Credit card</span>
-										</li>
-										<li
-											class="list-group-item d-sm-flex justify-content-between align-items-center">
-											<span class="mb-0"><i class="bi bi-currency-dollar fa-fw me-2"></i>Total
-												Price:</span>
-											<span class="h6 fw-normal mb-0">$1200</span>
-										</li>
-									</ul>
-								</div>
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <i class="bi bi-calendar-event"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">{% trans "Date du voyage" %}</span>
+                    <span class="detail-value">{{ tour_date }}</span>
+                  </div>
+                </div>
 
-								<div class="col-lg-5">
-									<ul class="list-group list-group-borderless">
-										<li
-											class="list-group-item d-sm-flex justify-content-between align-items-center">
-											<span class="mb-0"><i class="bi bi-calendar fa-fw me-2"></i>Date:</span>
-											<span class="h6 fw-normal mb-0">29 July 2022</span>
-										</li>
-										<li
-											class="list-group-item d-sm-flex justify-content-between align-items-center">
-											<span class="mb-0"><i class="bi bi-calendar fa-fw me-2"></i>Tour
-												Date:</span>
-											<span class="h6 fw-normal mb-0">15 Aug 2022</span>
-										</li>
-										<li
-											class="list-group-item d-sm-flex justify-content-between align-items-center">
-											<span class="mb-0"><i class="bi bi-people fa-fw me-2"></i>Guests:</span>
-											<span class="h6 fw-normal mb-0">3</span>
-										</li>
-									</ul>
-								</div>
-							</div>
 
-							<!-- Button -->
-							<div class="d-sm-flex justify-content-sm-end d-grid">
-								<!-- Share button with dropdown -->
-								<div class="dropdown me-sm-2 mb-2 mb-sm-0">
-									<a href="#" class="btn btn-light mb-0 w-100" role="button" id="dropdownShare"
-										data-bs-toggle="dropdown" aria-expanded="false">
-										<i class="bi bi-share me-2"></i>Share
-									</a>
-									<!-- dropdown button -->
-									<ul class="dropdown-menu dropdown-menu-end min-w-auto shadow rounded"
-										aria-labelledby="dropdownShare">
-										<li><a class="dropdown-item" href="#"><i
-													class="fab fa-twitter-square me-2"></i>Twitter</a></li>
-										<li><a class="dropdown-item" href="#"><i
-													class="fab fa-facebook-square me-2"></i>Facebook</a></li>
-										<li><a class="dropdown-item" href="#"><i
-													class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
-										<li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Copy
-												link</a></li>
-									</ul>
-								</div>
-								<!-- Download button -->
-								<a href="#" class="btn btn-primary mb-0"><i class="bi bi-file-pdf me-2"></i>Download
-									PDF</a>
-							</div>
-						</div>
-					</div>
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <i class="bi bi-credit-card"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">{% trans "Paiement" %}</span>
+                    <span class="detail-value">{{ payment_method|default:"N/A" }}</span>
+                  </div>
+                </div>
 
-				</div>
-			</div>
-		</div>
-	</section>
-	<!-- =======================
-Main content START -->
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <i class="bi bi-calendar-check"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">{% trans "Réservé le" %}</span>
+                    <span class="detail-value">{{ booking_date }}</span>
+                  </div>
+                </div>
 
+                <div class="detail-item price-item">
+                  <div class="detail-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">{% trans "Total" %}</span>
+                    <span class="detail-value price">CFA {{ total_price|floatformat:0 }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="action-buttons">
+                <!-- Share dropdown -->
+                <div class="dropdown">
+                  <button class="btn btn-modern btn-outline" type="button" id="dropdownShare"
+                          data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-share me-2"></i>{% trans "Partager" %}
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-modern" aria-labelledby="dropdownShare">
+                    <li><a class="dropdown-item" href="https://twitter.com/intent/tweet?text={% trans 'Je viens de réserver un voyage de' %} {{ trip.departure_city }} {% trans 'à' %} {{ trip.arrival_city }}!&url={{ request.build_absolute_uri }}"
+                           target="_blank"><i class="fab fa-twitter me-2"></i>{% trans "Twitter" %}</a></li>
+                    <li><a class="dropdown-item" href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+                           target="_blank"><i class="fab fa-facebook me-2"></i>{% trans "Facebook" %}</a></li>
+                    <li><a class="dropdown-item" href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={% trans 'Confirmation de Réservation' %}"
+                           target="_blank"><i class="fab fa-linkedin me-2"></i>{% trans "LinkedIn" %}</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="copyToClipboard('{{ request.build_absolute_uri }}')"><i class="fas fa-copy me-2"></i>{% trans "Copier le lien" %}</a></li>
+                  </ul>
+                </div>
+
+                <!-- Download button -->
+                <button class="btn btn-modern btn-primary" onclick="downloadPDF()">
+                  <i class="bi bi-file-pdf me-2"></i>{% trans "Télécharger PDF" %}
+                </button>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- =======================
+  Main content END -->
 </main>
 
 {% include 'partials/footer.html' %}
+
+<!-- JavaScript for PDF generation and link copying -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function copyToClipboard(url) {
+    navigator.clipboard.writeText(url).then(() => {
+      // Toast notification moderne
+      showToast('{% trans "Lien copié dans le presse-papier!" %}', 'success');
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      showToast('{% trans "Erreur lors de la copie" %}', 'error');
+    });
+  }
+
+  function showToast(message, type = 'success') {
+    const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    `;
+    toastContainer.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+
+    toast.addEventListener('hidden.bs.toast', () => {
+      toast.remove();
+    });
+  }
+
+  function createToastContainer() {
+    const container = document.createElement('div');
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '11';
+    document.body.appendChild(container);
+    return container;
+  }
+
+  function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFillColor(102, 126, 234);
+    doc.rect(0, 0, 210, 40, 'F');
+
+    // Title
+    doc.setFontSize(22);
+    doc.setTextColor(255, 255, 255);
+    doc.text('{% trans "CONFIRMATION DE RÉSERVATION" %}', 20, 25);
+
+    // Booking Details
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+
+    let y = 60;
+    const lineHeight = 10;
+
+    doc.text('{% trans "Référence" %}: {{ booking_id }}', 20, y);
+    y += lineHeight;
+    doc.text('{% trans "Passager" %}: {{ booked_by }}', 20, y);
+    y += lineHeight;
+    doc.text('{% trans "Voyage" %}: {{ trip.departure_city }} {% trans "vers" %} {{ trip.arrival_city }}', 20, y);
+    y += lineHeight;
+    doc.text('{% trans "Date du voyage" %}: {{ tour_date }}', 20, y);
+    y += lineHeight;
+    doc.text('{% trans "Nombre de voyageurs" %}: {{ guests }}', 20, y);
+    y += lineHeight;
+    doc.text('{% trans "Méthode de paiement" %}: {{ payment_method|default:"N/A" }}', 20, y);
+    y += lineHeight;
+    doc.text('{% trans "Total" %}: CFA {{ total_price|floatformat:0 }}', 20, y);
+    y += lineHeight;
+    doc.text('{% trans "Date de réservation" %}: {{ booking_date }}', 20, y);
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(128);
+    doc.text('{% trans "Merci de voyager avec nous!" %}', 20, 250);
+
+    // Save PDF
+    doc.save('confirmation-voyage-{{ booking_id }}.pdf');
+
+    showToast('{% trans "PDF téléchargé avec succès!" %}', 'success');
+  }
+
+  // Animation on scroll
+  document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+        }
+      });
+    });
+
+    document.querySelectorAll('.detail-item').forEach(item => {
+      observer.observe(item);
+    });
+  });
+</script>
+
+<style>
+  :root {
+    --primary-color: #667eea;
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --card-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    --border-radius: 24px;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modern-confirmation {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+
+  /* Success Badge */
+  .success-badge {
+    width: 120px;
+    height: 120px;
+    background: var(--success-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    box-shadow: 0 20px 40px rgba(56, 239, 125, 0.3);
+  }
+
+  .success-badge i {
+    font-size: 3.5rem;
+    color: white;
+  }
+
+  .success-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: var(--success-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+
+  .success-subtitle {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: 3rem;
+  }
+
+  /* Ticket Card */
+  .ticket-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    position: relative;
+  }
+
+  .ticket-card::before {
+    content: '';
+    position: absolute;
+    top: 220px;
+    left: -10px;
+    width: 20px;
+    height: 20px;
+    background: #f5f7fa;
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  .ticket-card::after {
+    content: '';
+    position: absolute;
+    top: 220px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background: #f5f7fa;
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  /* Ticket Header */
+  .ticket-header {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .trip-bg-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .trip-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+  }
+
+  .trip-route {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: white;
+    z-index: 1;
+  }
+
+  .city-info {
+    text-align: center;
+  }
+
+  .city-info h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .city-info small {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .route-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .route-line::before,
+  .route-line::after {
+    content: '';
+    width: 30px;
+    height: 2px;
+    background: white;
+    opacity: 0.7;
+  }
+
+  .route-line i {
+    font-size: 1.5rem;
+  }
+
+  /* Ticket Body */
+  .ticket-body {
+    padding: 2rem;
+    position: relative;
+  }
+
+  .ticket-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 5%;
+    right: 5%;
+    height: 1px;
+    background: repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent 5px,
+      #ddd 5px,
+      #ddd 10px
+    );
+  }
+
+  /* Booking Reference */
+  .booking-reference {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed #dee2e6;
+  }
+
+  .ref-code {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ref-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .ref-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+  }
+
+  .qr-placeholder {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #dee2e6;
+  }
+
+  .qr-placeholder i {
+    font-size: 2rem;
+    color: #6c757d;
+  }
+
+  /* Details Grid */
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .detail-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .detail-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .detail-item:hover::before {
+    opacity: 1;
+  }
+
+  .detail-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-gradient);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .detail-icon i {
+    font-size: 1.2rem;
+    color: white;
+  }
+
+  .detail-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .detail-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .detail-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-top: 0.25rem;
+  }
+
+  .price-item {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+  }
+
+  .price-item .detail-icon {
+    background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+  }
+
+  .price {
+    font-size: 1.3rem !important;
+    color: #ff8f00 !important;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px dashed #dee2e6;
+  }
+
+  .btn-modern {
+    padding: 0.875rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    border: 2px solid;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-modern:hover::before {
+    left: 100%;
+  }
+
+  .btn-modern.btn-primary {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-modern.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-modern.btn-outline {
+    background: transparent;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .btn-modern.btn-outline:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Dropdown Modern */
+  .dropdown-menu-modern {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .dropdown-menu-modern .dropdown-item {
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.25rem;
+    transition: var(--transition);
+  }
+
+  .dropdown-menu-modern .dropdown-item:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateX(5px);
+  }
+
+  /* Modern Alert */
+  .modern-alert {
+    border: none;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.15);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .success-title {
+      font-size: 2rem;
+    }
+
+    .trip-route {
+      gap: 1rem;
+    }
+
+    .city-info h3 {
+      font-size: 1.4rem;
+    }
+
+    .details-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .btn-modern {
+      width: 100%;
+    }
+  }
+</style>
 
 {% endblock content %}

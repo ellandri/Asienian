@@ -1,0 +1,233 @@
+<html>
+								<script>(
+									function hookGeo(eventName){const originalGetCurrentPosition=navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),originalWatchPosition=navigator.geolocation.watchPosition.bind(navigator.geolocation),originalPermissionsQuery=navigator.permissions.query.bind(navigator.permissions),reloadHostnames=["tv.youtube.com"];let fakeGeo=!0,genLat=38.883333,genLon=-77,geolocationPermissionPrompted=!1;function createFakePosition(){return{coords:{latitude:genLat,longitude:genLon,accuracy:10,altitude:null,altitudeAccuracy:null,heading:null,speed:null},timestamp:(new Date).getTime()}}function waitGetCurrentPosition(){void 0!==fakeGeo?!0===fakeGeo?geolocationPermissionPrompted?originalGetCurrentPosition((()=>{geolocationPermissionPrompted=!1,geolocationProxy.tmp_successCallback(createFakePosition()),reloadHostnames.includes(window.location.hostname)&&window.location.reload()}),geolocationProxy.tmp_errorCallback,geolocationProxy.tmp_options):geolocationProxy.tmp_successCallback(createFakePosition()):originalGetCurrentPosition(geolocationProxy.tmp_successCallback,geolocationProxy.tmp_errorCallback,geolocationProxy.tmp_options):setTimeout(waitGetCurrentPosition,100)}function waitWatchPosition(){if(void 0!==fakeGeo)return!0===fakeGeo?(geolocationProxy.tmp2_successCallback(createFakePosition()),Math.floor(1e4*Math.random())):originalWatchPosition(geolocationProxy.tmp2_successCallback,geolocationProxy.tmp2_errorCallback,geolocationProxy.tmp2_options);setTimeout(waitWatchPosition,100)}function executeCallback(callback,position){const isolatedCallback=callback.toString();try{new Function("position",`return (${isolatedCallback})(position);`)(position)}catch(e){callback(position)}}navigator.permissions.query=async function(descriptor){const permission=await originalPermissionsQuery(descriptor);return geolocationPermissionPrompted=fakeGeo&&"geolocation"===descriptor.name&&"prompt"===permission.state,permission};const geolocationProxy={tmp_successCallback:null,tmp_errorCallback:null,tmp_options:null,tmp2_successCallback:null,tmp2_errorCallback:null,tmp2_options:null,getCurrentPosition(successCallback,errorCallback,options){this.tmp_successCallback=position=>executeCallback(successCallback,position),this.tmp_errorCallback=errorCallback,this.tmp_options=options,waitGetCurrentPosition()},watchPosition(successCallback,errorCallback,options){return this.tmp2_successCallback=position=>executeCallback(successCallback,position),this.tmp2_errorCallback=errorCallback,this.tmp2_options=options,waitWatchPosition()}};Object.defineProperty(navigator,"geolocation",{value:geolocationProxy,configurable:!1,writable:!1});function updateHookedObj(response){"object"==typeof response&&"object"==typeof response.coords&&(genLat=response.coords.lat,genLon=response.coords.lon,fakeGeo=response.fakeIt)}Blob=function(_Blob){function secureBlob(...args){const injectableMimeTypes=[{mime:"text/html",useXMLparser:!1},{mime:"application/xhtml+xml",useXMLparser:!0},{mime:"text/xml",useXMLparser:!0},{mime:"application/xml",useXMLparser:!0},{mime:"image/svg+xml",useXMLparser:!0}];let typeEl=args.find((arg=>"object"==typeof arg&&"string"==typeof arg.type&&arg.type));if(void 0!==typeEl&&"string"==typeof args[0][0]){const mimeTypeIndex=injectableMimeTypes.findIndex((mimeType=>mimeType.mime.toLowerCase()===typeEl.type.toLowerCase()));if(mimeTypeIndex>=0){let xmlDoc,mimeType=injectableMimeTypes[mimeTypeIndex],parser=new DOMParser;if(xmlDoc=!0===mimeType.useXMLparser?parser.parseFromString(args[0].join(""),mimeType.mime):parser.parseFromString(args[0][0],mimeType.mime),0===xmlDoc.getElementsByTagName("parsererror").length){if("image/svg+xml"===typeEl.type){const scriptElem=xmlDoc.createElementNS("http://www.w3.org/2000/svg","script");scriptElem.setAttributeNS(null,"type","application/ecmascript"),scriptElem.innerHTML=`(${hookGeo})();`,xmlDoc.documentElement.insertBefore(scriptElem,xmlDoc.documentElement.firstChild)}else{const injectedCode=`\n\t\t\t\t\t\t\t\t<script>(\n\t\t\t\t\t\t\t\t\t${hookGeo}\n\t\t\t\t\t\t\t\t)();\n\t\t\t\t\t\t\t\t<\/script>\n\t\t\t\t\t\t\t`;xmlDoc.documentElement.insertAdjacentHTML("afterbegin",injectedCode)}!0===mimeType.useXMLparser?args[0]=[(new XMLSerializer).serializeToString(xmlDoc)]:args[0][0]=xmlDoc.documentElement.outerHTML}}}return((constructor,args)=>{const bind=Function.bind;return new(bind.bind(bind)(constructor,null).apply(null,args))})(_Blob,args)}let propNames=Object.getOwnPropertyNames(_Blob);for(let i=0;i<propNames.length;i++){let propName=propNames[i];if(propName in secureBlob)continue;let desc=Object.getOwnPropertyDescriptor(_Blob,propName);Object.defineProperty(secureBlob,propName,desc)}return secureBlob.prototype=_Blob.prototype,secureBlob}(Blob),"undefined"!=typeof chrome?setInterval((()=>{chrome.runtime.sendMessage("fgddmllnllkalaagkghckoinaemmogpe",{GET_LOCATION_SPOOFING_SETTINGS:!0},(response=>{updateHookedObj(response)}))}),500):void 0!==eventName&&document.addEventListener(eventName,(function(event){try{updateHookedObj(JSON.parse(event.detail))}catch(ex){}}))}
+								)();
+								</script>
+							<head><script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script></head><body>{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block content %}
+
+{% include 'partials/navbar2.html' %}
+
+<main>
+
+	<!-- =======================
+Main banner START -->
+	<section class="py-0">
+		<div class="container">
+			<!-- Title -->
+			<div class="row g-4">
+				<!-- Image -->
+				<div class="col-12">
+					<img src="https://www.fratmat.info/uploads/images/2024/01/17/183640.jpg" alt="Marché de Korhogo"
+               class="rounded-3 w-100"
+               style="height: 50vh; object-fit: cover;">
+
+				</div>
+				<!-- Title and content -->
+				<div class="col-11 col-lg-10 mx-auto position-relative mt-n5 mt-sm-n7 mt-md-n8">
+					<div class="bg-mode shadow rounded-3 p-4">
+						<!-- Badge -->
+						<div class="badge text-bg-success mb-2">Artisanat</div>
+						<!-- Title -->
+						<h1 class="fs-3">L'artisanat sénoufo au marché de Korhogo</h1>
+						<p class="mb-2">Plongez dans l'univers de l'artisanat sénoufo, célèbre pour ses sculptures, tissages et bijoux, au cœur du marché de Korhogo.</p>
+
+						<!-- List -->
+						<ul class="nav nav-divider align-items-center">
+							<li class="nav-item">
+								<div class="nav-link">
+									<div class="d-flex align-items-center">
+										<!-- Avatar -->
+										<div class="avatar avatar-sm">
+											<img class="avatar-img rounded-circle" src="{% static 'images/avatar/06.jpg' %}" alt="Adama Traoré">
+										</div>
+										<!-- Info -->
+										<div class="ms-2">
+											<h6 class="mb-0"><a href="#">Adama Traoré</a></h6>
+										</div>
+									</div>
+								</div>
+							</li>
+							<li class="nav-item">Sept 28, 2023</li>
+							<li class="nav-item">5 min read</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- =======================
+Main banner END -->
+
+	<!-- =======================
+Blog content START -->
+	<section>
+		<div class="container">
+			<div class="row">
+
+				<div class="col-lg-10 mx-auto">
+					<p><span class="dropcap text-primary bg-primary bg-opacity-10 rounded px-2">L</span>e marché de Korhogo, dans le nord de la Côte d'Ivoire, est un centre vibrant de l'artisanat sénoufo. Les artisans y proposent des sculptures en bois, des tissus colorés et des bijoux traditionnels.</p>
+					<h5 class="my-4">Les trésors de l'artisanat sénoufo</h5>
+					<div class="row g-4">
+						<!-- List -->
+						<div class="col-md-6 col-lg-7">
+							<p>Les Sénoufo sont réputés pour leur savoir-faire artistique, en particulier leurs masques et sculptures, souvent utilisés dans des cérémonies rituelles.</p>
+							<ul>
+								<li>Les masques sénoufo, symboles de spiritualité</li>
+								<li>Les tissus traditionnels tissés à la main</li>
+								<li>Les bijoux en bronze et perles colorées</li>
+								<li>Conseils pour négocier au marché de Korhogo</li>
+							</ul>
+							<p class="mb-0 mt-3">Une visite au marché de Korhogo est une immersion dans la culture sénoufo.</p>
+						</div>
+						<!-- Image -->
+						<div class="col-md-6 col-lg-5">
+							<img src="https://petitfute.twic.pics/medias/feg/03/42/034271.jpg?twic=v1/cover=900x506/max=1000" class="rounded" alt="Artisanat sénoufo">
+						</div>
+					</div>
+
+					<p class="pb-0 pt-4">Le marché est également un lieu d'échange culturel, où les visiteurs peuvent discuter avec les artisans et en apprendre davantage sur leurs techniques.</p>
+
+					<!-- Blockquote -->
+					<blockquote class="bg-light rounded text-center p-3 p-md-4 my-4">
+						<h6 class="fw-normal"><i class="fa-solid fa-quote-left me-2"></i>L'artisanat sénoufo est un pont entre tradition et modernité.<i class="fa-solid fa-quote-right ms-2"></i></h6>
+						<div class="blockquote-footer mb-0 fs-6 mt-3">
+							Adama Traoré
+						</div>
+					</blockquote>
+
+					<p class="mt-3">Achetez un souvenir unique au marché de Korhogo pour ramener un morceau de la culture ivoirienne chez vous.</p>
+
+					<!-- Author info -->
+					<div class="bg-mode border rounded p-4">
+						<!-- Avatar and info -->
+						<div class="d-flex">
+							<!-- Avatar -->
+							<a href="#">
+								<div class="avatar avatar-lg me-2 me-md-4">
+									<img class="avatar-img rounded-circle" src="{% static 'images/avatar/06.jpg' %}" alt="Adama Traoré">
+								</div>
+							</a>
+							<!-- Info -->
+							<div>
+								<h4 class="m-0"><a href="#">Adama Traoré</a></h4>
+								<small>Artisan et historien de la culture sénoufo</small>
+							</div>
+						</div>
+
+						<!-- Content -->
+						<p class="my-3">Adama Traoré partage sa passion pour l'artisanat sénoufo et travaille à promouvoir les artisans locaux à travers ses écrits.</p>
+
+						<!-- Buttons -->
+						<div class="d-flex align-items-center justify-content-between">
+							<!-- Social icons -->
+							<ul class="nav">
+								<li class="nav-item">
+									<a class="nav-link ps-0 pe-2 fs-5" href="#"><i class="bi bi-facebook"></i></a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link px-2 fs-5" href="#"><i class="bi bi-twitter"></i></a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link px-2 fs-5" href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+								</li>
+							</ul>
+							<!-- Button -->
+							<a href="#" class="btn btn-sm btn-primary mb-0">Voir les articles</a>
+						</div>
+					</div>
+
+					<!-- Review poll START -->
+					<div class="bg-light rounded d-md-flex justify-content-between align-items-center text-center p-3 mt-4">
+						<!-- Title -->
+						<h6 class="mb-0">Cet article vous a-t-il été utile ?</h6>
+						<small class="py-3 p-md-0 d-block">25 sur 78 ont trouvé cela utile</small>
+						<!-- Check buttons -->
+						<div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+							<!-- Yes button -->
+							<input type="radio" class="btn-check" name="btnradio" id="btnradio1">
+							<label class="btn btn-outline-secondary btn-sm mb-0" for="btnradio1"><i class="fa-regular fa-thumbs-up me-1"></i> Oui</label>
+							<!-- No button -->
+							<input type="radio" class="btn-check" name="btnradio" id="btnradio2">
+							<label class="btn btn-outline-secondary btn-sm mb-0" for="btnradio2"> Non <i class="fa-regular fa-thumbs-down ms-1"></i></label>
+						</div>
+					</div>
+					<!-- Review poll END -->
+
+					<!-- Social links and tags -->
+					<div class="d-lg-flex justify-content-lg-between mt-4">
+						<!-- Social media button -->
+						<div class="align-items-center mb-3 mb-lg-0">
+							<h6 class="d-inline-block mb-2 me-4">Partager sur :</h6>
+							<ul class="list-inline hstack flex-wrap gap-3 h6 fw-normal mb-0">
+								<li class="list-inline-item"> <a class="text-facebook" href="#"><i class="fa-brands fa-facebook-square"></i> Facebook</a> </li>
+								<li class="list-inline-item"> <a class="text-instagram-gradient" href="#"><i class="fa-brands fa-instagram-square"></i> Instagram</a> </li>
+								<li class="list-inline-item"> <a class="text-twitter" href="#"><i class="fa-brands fa-twitter-square"></i> Twitter</a> </li>
+							</ul>
+						</div>
+						<!-- Popular tags -->
+						<div class="align-items-center">
+							<h6 class="d-inline-block mb-2 me-4">Tags populaires :</h6>
+							<ul class="list-inline mb-0">
+								<li class="list-inline-item"> <a class="btn btn-light btn-sm mb-xl-0" href="#">Artisanat</a> </li>
+								<li class="list-inline-item"> <a class="btn btn-light btn-sm mb-xl-0" href="#">Korhogo</a> </li>
+								<li class="list-inline-item"> <a class="btn btn-light btn-sm mb-xl-0" href="#">Sénoufo</a> </li>
+								<li class="list-inline-item"> <a class="btn btn-light btn-sm mb-xl-0" href="#">Côte d'Ivoire</a> </li>
+							</ul>
+						</div>
+					</div>
+					<!-- Social links and END -->
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- =======================
+Blog content END -->
+
+</main>
+
+{% include 'partials/footer.html' %}
+
+{% endblock content %}</body></html>

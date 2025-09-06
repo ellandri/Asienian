@@ -14,15 +14,16 @@ from django.template import TemplateDoesNotExist
 from django.http import HttpResponse
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
-from .models import Trip
+from .models import Trip, Traveler, Booking
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import TripSerializer
 from rest_framework import viewsets
-from django.urls import reverse  # Ajoutez cet import
-from .forms import TripForm
+from django.urls import reverse
+from .forms import TripForm, TravelerForm
+from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Guest
+from django.http import JsonResponse
 
 
 
@@ -237,3 +238,68 @@ def admin_agent_detail_view(request, user_id):
     # Si Trip n'est pas lié à User, on affiche tous les voyages (à adapter si relation ajoutée)
     trips = Trip.objects.all()
     return render(request, 'pages/admin-agent-detail.html', {'user': user, 'trips': trips})
+
+
+def trip_edit_view(request, trip_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+
+    if request.method == 'POST':
+        form = TripForm(request.POST, instance=trip)
+        if form.is_valid():
+            form.save()
+            return redirect('backoffice:admin-trip-detail', trip_id=trip.id)
+    else:
+        form = TripForm(instance=trip)
+
+    return render(request, 'pages/tour-edit.html', {'form': form, 'trip': trip})
+
+def traveler_create(request, trip_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+    success = False
+
+    if request.method == "POST":
+        form = TravelerForm(request.POST)
+        if form.is_valid():
+            traveler = form.save(commit=False)
+            traveler.user = request.user
+            traveler.trip = trip
+            traveler.save()
+            messages.success(request, "Profil enregistré avec succès ✅")
+            success = True
+            form = TravelerForm()  # réinitialiser le formulaire si besoin
+    else:
+        form = TravelerForm()
+
+    return render(request, "traveler_form.html", {
+        "form": form,
+        "trip": trip,
+        "success": success,
+    })
+
+def booking_payment(request, traveler_id, trip_id):
+    if request.method == "POST" and request.is_ajax():
+        traveler = Traveler.objects.get(id=traveler_id)
+        trip = Trip.objects.get(id=trip_id)
+
+        payment_method = request.POST.get("payment_method")
+        card_number = request.POST.get("card_number")
+        card_expiry_month = request.POST.get("card_expiry_month")
+        card_expiry_year = request.POST.get("card_expiry_year")
+        card_cvv = request.POST.get("card_cvv")
+        cardholder_name = request.POST.get("cardholder_name")
+
+        booking = Booking.objects.create(
+            traveler=traveler,
+            trip=trip,
+            payment_method=payment_method,
+            card_number=card_number,
+            card_expiry_month=card_expiry_month,
+            card_expiry_year=card_expiry_year,
+            card_cvv=card_cvv,
+            cardholder_name=cardholder_name,
+            status='paid' if payment_method else 'pending'
+        )
+
+        return JsonResponse({"success": True, "message": "Paiement enregistré ✅"})
+
+    return JsonResponse({"success": False, "message": "Méthode non autorisée"}, status=405)

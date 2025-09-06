@@ -2,7 +2,7 @@ from django.urls import path, include
 from .views import dynamic_pages_view
 from rest_framework.routers import DefaultRouter
 from .views import login_admin_view, backoffice_view, logout_view
-from .views import admin_trips_view, add_trip_form_view, TripViewSet, admin_booking_list_view,trip_detail_view
+from .views import admin_trips_view, add_trip_form_view, TripViewSet, admin_booking_list_view,trip_detail_view,trip_edit_view
 from . import views
 
 
@@ -18,6 +18,7 @@ urlpatterns = [
     path('dashboard/', backoffice_view, name='backoffice_dashboard'),
     path('api/', include(router.urls)),
     # path('trips/', admin_trips_view, name='admin_trips'),
+    path('trip/edit/<int:trip_id>/', views.trip_edit_view, name='trip_edit'),
     path('add-trip-form/', add_trip_form_view, name='admin-add-trip-form'),
     path('admin-booking-list/', views.admin_booking_list_view, name='admin_booking_list'),
     path('admin-guest-list/', views.admin_guest_list_view, name='admin_guest_list'),

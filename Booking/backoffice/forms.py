@@ -1,6 +1,6 @@
 from django import forms
 import requests
-from .models import Trip
+from .models import Trip, Traveler
 
 class TripForm(forms.ModelForm):
     class Meta:
@@ -18,4 +18,20 @@ class TripForm(forms.ModelForm):
             'exclusions': forms.Textarea(attrs={'cols': 80, 'rows': 10}),
             'politique': forms.Textarea(attrs={'cols': 80, 'rows': 10}),
             'lieux_couverts': forms.Textarea(attrs={'cols': 80, 'rows': 10}),
+
+        }
+
+class TravelerForm(forms.ModelForm):
+    class Meta:
+        model = Traveler
+        fields = ["title", "first_name", "last_name", "date_of_birth", "email"]
+        widgets = {
+            "title": forms.Select(attrs={"class": "form-select form-select-sm js-choice border-0"}),
+            "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Nom"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Prénoms"}),
+            "date_of_birth": forms.DateInput(
+                attrs={"class": "form-control flatpickr", "data-date-format": "d M Y"},
+                format="%d %b %Y"
+            ),
+            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Email"}),
         }

@@ -99,8 +99,9 @@ Steps START -->
 
 						<!-- Main content START -->
 						<div class="col-xl-8">
-							<form onsubmit="return false">
-
+              <form id="traveler-form" method="post" action="{% url 'pages:save_profile' %}">
+                {% csrf_token %}
+                <input type="hidden" name="trip_id" value="{{ trip.id }}">
 								<!-- Step 1 content START -->
 								<div id="step-1" role="tabpanel" class="content fade" aria-labelledby="steppertrigger1">
 									<div class="vstack gap-4">
@@ -239,309 +240,101 @@ Steps START -->
 									</div>
 								</div>
 								<!-- Step 1 content END -->
+                <!-- Step 2 content START -->
+                <div id="step-2" role="tabpanel" class="content fade" aria-labelledby="steppertrigger2">
+                  <div class="vstack gap-4">
+                    <h4 class="mb-0">Traveler Detail</h4>
+                    <hr class="my-0">
+                    <div class="alert alert-warning d-flex" role="alert">
+                      <span class="alert-heading h5 mb-0 me-2"><i class="bi bi-exclamation-octagon-fill"></i></span>
+                      Les infos ci-dessous sont obligatoires. (Pour chaque voyageur)
+                    </div>
 
-								<!-- Step 2 content START -->
-								<div id="step-2" role="tabpanel" class="content fade" aria-labelledby="steppertrigger2">
-									<div class="vstack gap-4">
-										<!-- Title -->
-										<h4 class="mb-0">Traveler Detail</h4>
-
-										<hr class="my-0"> <!-- Divider -->
-
-										<!-- Alert box START -->
-										<div class="alert alert-warning d-flex" role="alert">
-											<span class="alert-heading h5 mb-0 me-2"><i
-													class="bi bi-exclamation-octagon-fill"></i></span>
-                      Un passeport client est obligatoire. Il doit comporter deux pages vierges et être valable six mois(Pour les voyages par avion).
-										</div>
-										<!-- Alert box END -->
-                    {% load static %}
-                    {% csrf_token %}
-                      <!-- Traveler 1 form START -->
-                      <div class="card border">
-                        <!-- Card header -->
-                        <div class="card-header border-bottom">
-                          <h5 class="mb-0">Votre Profil</h5>
-                        </div>
-
-                        <!-- Card body START -->
-                        <div class="card-body">
-                          <div class="row g-4">
-                            <!-- Title -->
-                            <div class="col-md-2">
-                              <label class="form-label">Titre</label>
-                              <div class="form-control-bg-light">
-                                <select class="form-select form-select-sm js-choice border-0" name="title_1" required>
-                                  <option value="Mr" {% if user.title == 'Mr' %}selected{% endif %}>Mr</option>
-                                  <option value="Mrs" {% if user.title == 'Mrs' %}selected{% endif %}>Mrs</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <!-- First Name -->
-                            <div class="col-md-5">
-                              <div class="form-control-bg-light">
-                                <label class="form-label">Nom</label>
-                                <input type="text" class="form-control" name="first_name_1" value="{{ user.first_name }}" required>
-                              </div>
-                            </div>
-
-                            <!-- Last name -->
-                            <div class="col-md-5">
-                              <div class="form-control-bg-light">
-                                <label class="form-label">Prénoms</label>
-                                <input type="text" class="form-control" name="last_name_1" value="{{ user.last_name }}" required>
-                              </div>
-                            </div>
-
-                            <!-- DOB -->
-                            <div class="col-md-6">
-                              <div class="form-control-bg-light">
-                                <label class="form-label">Date de naissance</label>
-                                <input type="text" class="form-control flatpickr" name="dob_1" data-date-format="d M Y" value="{{ user.date_of_birth|date:'d M Y' }}" required>
-                              </div>
-                            </div>
-
-
+                    <!-- Traveler 1 form START -->
+                    <div class="card border">
+                      <div class="card-header border-bottom">
+                        <h5 class="mb-0">Votre Profil</h5>
+                      </div>
+                      <div class="card-body">
+                        <div class="row g-4">
+                          <div class="col-md-2">
+                            <label class="form-label">Titre</label>
+                            <input type="text" class="form-control" name="title" required>
+                          </div>
+                          <div class="col-md-5">
+                            <label class="form-label">Nom</label>
+                            <input type="text" class="form-control" name="first_name" required>
+                          </div>
+                          <div class="col-md-5">
+                            <label class="form-label">Prénoms</label>
+                            <input type="text" class="form-control" name="last_name" required>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Date de naissance</label>
+                            <input type="text" class="form-control flatpickr" name="date_of_birth" data-date-format="Y-m-d" required>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control form-control-lg" placeholder="Entrez votre email" required>
                           </div>
                         </div>
-                        <!-- Card body END -->
                       </div>
-                      <!-- Traveler 1 form END -->
+                    </div>
+                    <!-- Traveler 1 form END -->
 
-                      <button type="submit" class="btn btn-primary mt-3">Enregistrer le profil</button>
+                    <div class="hstack gap-2 flex-wrap justify-content-between">
+                      <button class="btn btn-secondary prev-btn mb-0" type="button">Previous</button>
+                      <button class="btn btn-primary next-btn mb-0" type="button">Continue to payment</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- Step 2 content END -->
 
-                    <script>
-                      document.getElementById('traveler-form').addEventListener('submit', function(event) {
-                        event.preventDefault();
-                        const formData = new FormData(this);
+                <!-- Step 3 content START -->
+                <div id="step-3" role="tabpanel" class="content fade" aria-labelledby="steppertrigger3">
+                  <div class="vstack gap-4">
+                    <h4 class="mb-0">Payment options</h4>
+                    <hr class="my-0">
+                    <div class="card border">
+                      <div class="card-header border-bottom d-sm-flex justify-content-between align-items-center">
+                        <h5 class="mb-2 mb-sm-0">Credit or Debit Card</h5>
+                      </div>
+                      <div class="card-body">
+                        <div class="row g-4">
+                          <div class="col-12">
+                            <label class="form-label">Card Number</label>
+                            <input type="text" name="card_number" class="form-control" maxlength="16" placeholder="XXXX XXXX XXXX XXXX">
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Expiration Month</label>
+                            <input type="text" name="card_expiry_month" class="form-control" maxlength="2">
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Expiration Year</label>
+                            <input type="text" name="card_expiry_year" class="form-control" maxlength="4">
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">CVV / CVC</label>
+                            <input type="text" name="card_cvv" class="form-control" maxlength="3">
+                          </div>
+                          <div class="col-12">
+                            <label class="form-label">Name of the cardholder</label>
+                            <input type="text" name="cardholder_name" class="form-control">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                          .then(response => {
-                            if (!response.ok) {
-                              return response.json().then(err => { throw err; });
-                            }
-                            return response.json();
-                          })
-                          .then(data => {
-                            alert('Profil mis à jour avec succès !');
-                            window.location.href = '/profile/'; // Rediriger vers la page de profil
-                          })
-                          .catch(error => {
-                            console.error('Erreur:', error);
-                            alert('Erreur : ' + (error.errors ? JSON.stringify(error.errors) : 'Une erreur est survenue'));
-                          });
-                      });
-                    </script>
-
-<!--										&lt;!&ndash; Traveler 2 form START &ndash;&gt;-->
-<!--										<div class="card border">-->
-<!--											&lt;!&ndash; Card header &ndash;&gt;-->
-<!--											<div class="card-header border-bottom">-->
-<!--												<h5 class="mb-0">Traveler 2</h5>-->
-<!--											</div>-->
-
-<!--											&lt;!&ndash; Card body START &ndash;&gt;-->
-<!--											<div class="card-body">-->
-<!--												<div class="row g-4">-->
-<!--													&lt;!&ndash; Title &ndash;&gt;-->
-<!--													<div class="col-md-2">-->
-<!--														<label class="form-label">Title</label>-->
-<!--														<div class="form-control-bg-light">-->
-<!--															<select-->
-<!--																class="form-select form-select-sm js-choice border-0">-->
-<!--																<option value="Mr">Mr</option>-->
-<!--																<option value="Mrs">Mrs</option>-->
-<!--															</select>-->
-<!--														</div>-->
-<!--													</div>-->
-
-<!--													&lt;!&ndash; First Name &ndash;&gt;-->
-<!--													<div class="col-md-5">-->
-<!--														<div class="form-control-bg-light">-->
-<!--															<label class="form-label">First name</label>-->
-<!--															<input type="text" class="form-control">-->
-<!--														</div>-->
-<!--													</div>-->
-
-<!--													&lt;!&ndash; Last name &ndash;&gt;-->
-<!--													<div class="col-md-5">-->
-<!--														<div class="form-control-bg-light">-->
-<!--															<label class="form-label">Last name</label>-->
-<!--															<input type="text" class="form-control">-->
-<!--														</div>-->
-<!--													</div>-->
-
-<!--													&lt;!&ndash; DOB &ndash;&gt;-->
-<!--													<div class="col-md-6">-->
-<!--														<div class="form-control-bg-light">-->
-<!--															<label class="form-label">Date of birth</label>-->
-<!--															<input type="text" class="form-control flatpickr"-->
-<!--																data-date-format="d M Y">-->
-<!--														</div>-->
-<!--													</div>-->
-
-<!--													&lt;!&ndash; Passport number &ndash;&gt;-->
-<!--													<div class="col-md-6">-->
-<!--														<div class="form-control-bg-light">-->
-<!--															<label class="form-label">Passport number</label>-->
-<!--															<input type="text" class="form-control">-->
-<!--														</div>-->
-<!--													</div>-->
-<!--												</div>-->
-<!--											</div>-->
-<!--											&lt;!&ndash; Card body END &ndash;&gt;-->
-<!--										</div>-->
-<!--										&lt;!&ndash; Traveler 2 form END &ndash;&gt;-->
-
-										<!-- Booking detail START -->
-										<div class="card border">
-											<!-- Card header -->
-											<div class="card-header border-bottom">
-												<h5 class="mb-0">Les détails de votre réservation seront envoyés ici</h5>
-											</div>
-
-											<!-- Card body START -->
-											<div class="card-body">
-												<div class="row g-4">
-
-
-													<!-- Email id -->
-													<div class="col-md-6">
-														<div class="form-control-bg-light">
-															<label class="form-label">Email</label>
-                              <input type="email" class="form-control form-control-lg" placeholder="Entrez votre email" value="{{ user.email }}">
-														</div>
-													</div>
-												</div>
-											</div>
-											<!-- Card body END -->
-										</div>
-										<!-- Booking detail END -->
-
-										<!-- Step 2 button -->
-										<div class="hstack gap-2 flex-wrap justify-content-between">
-											<button class="btn btn-secondary prev-btn mb-0">Previous</button>
-											<button class="btn btn-primary next-btn mb-0">Continue to payment</button>
-										</div>
-									</div>
-								</div>
-								<!-- Step 2 content END -->
-
-								<!-- Step 3 content START -->
-								<div id="step-3" role="tabpanel" class="content fade" aria-labelledby="steppertrigger3">
-									<div class="vstack gap-4">
-										<!-- Title -->
-										<h4 class="mb-0">Payment options</h4>
-
-										<hr class="my-0"> <!-- Divider -->
-
-										<!-- Credit or Debit Card START -->
-										<div class="card border">
-											<!-- Card header -->
-											<div
-												class="card-header border-bottom d-sm-flex justify-content-between align-items-center">
-												<h5 class="mb-2 mb-sm-0">Credit or Debit Card</h5>
-												<ul class="list-inline my-0">
-													<li class="list-inline-item"> <a href="#"><img
-																src="{% static 'images/element/visa.svg' %}"
-																class="h-30px" alt=""></a></li>
-													<li class="list-inline-item"> <a href="#"><img
-																src="{% static 'images/element/mastercard.svg' %}"
-																class="h-30px" alt=""></a></li>
-													<li class="list-inline-item"> <a href="#"><img
-																src="{% static 'images/element/expresscard.svg' %}"
-																class="h-30px" alt=""></a></li>
-												</ul>
-											</div>
-
-											<!-- Card body -->
-											<div class="card-body">
-												<div class="row g-4">
-													<!-- Card number -->
-													<div class="col-12">
-														<label class="form-label">Card Number</label>
-														<div class="position-relative form-control-bg-light">
-															<input type="text" class="form-control" maxlength="14"
-																placeholder="XXXX XXXX XXXX XXXX">
-															<img src="{% static 'images/element/visa.svg' %}"
-																class="w-30px position-absolute top-50 end-0 translate-middle-y me-2 d-none d-sm-block"
-																alt="">
-														</div>
-													</div>
-
-													<!-- Expiration Month -->
-													<div class="col-md-4">
-														<label class="form-label">Expiration Month</label>
-														<div class="form-control-bg-light">
-															<input type="text" class="form-control" maxlength="2">
-														</div>
-													</div>
-
-													<!-- Expiration Year -->
-													<div class="col-md-4">
-														<label class="form-label">Expiration Year</label>
-														<div class="form-control-bg-light">
-															<input type="text" class="form-control" maxlength="4">
-														</div>
-													</div>
-
-													<!-- Cvv/CVC -->
-													<div class="col-md-4">
-														<label class="form-label">CVV / CVC</label>
-														<div class="form-control-bg-light">
-															<input type="text" class="form-control" maxlength="3"
-																placeholder="XXX">
-														</div>
-													</div>
-
-													<!-- Card holder name -->
-													<div class="col-12">
-														<label class="form-label">Name of the cardholder</label>
-														<div class="form-control-bg-light">
-															<input type="text" class="form-control"
-																aria-label="name of the cardholder">
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-										<!-- Credit or Debit Card END -->
-
-										<!-- Paypal START -->
-										<div class="card border">
-											<!-- Card header -->
-											<div class="card-header border-bottom">
-												<h5 class="mb-0">Pay with Paypal</h5>
-											</div>
-
-											<!-- Card body -->
-											<div class="card-body text-center">
-												<!-- Image -->
-												<img src="{% static 'images/element/paypal.svg' %}" class="h-70px mb-3"
-													alt="">
-												<p class="mb-3"><strong>Tips:</strong> Simply click on the payment
-													button below to proceed to the PayPal payment page.</p>
-
-												<!-- Button -->
-												<a href="#" class="btn btn-sm btn-outline-primary mb-0">Pay with
-													Paypal</a>
-											</div>
-										</div>
-										<!-- Paypal END -->
-
-										<!-- Step 3 button -->
-										<div class="d-flex justify-content-between">
-											<button class="btn btn-secondary prev-btn mb-0">Previous</button>
-											<button class="btn btn-success next-btn mb-0">Pay now</button>
-										</div>
-									</div>
-								</div>
-								<!-- Step 3 content END -->
-
-							</form>
+                    <div class="d-flex justify-content-between">
+                      <button class="btn btn-secondary prev-btn mb-0" type="button">Previous</button>
+                      <button class="btn btn-success next-btn mb-0" type="submit">Pay now</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- Step 3 content END -->
+              </form>
 						</div>
 						<!-- Main content END -->
-
 						<!-- Right sidebar START -->
 						<aside class="col-xl-4">
 							<div class="vstack gap-4">
@@ -607,7 +400,7 @@ Steps START -->
 									<div class="card-body">
 										<div class="form-control-bg-light">
 											<label class="form-label">Email</label>
-											<input type="email" class="form-control form-control-lg" placeholder="Entrez votre email" value="{{ user.email }}">
+											<input type="email" name="email_1" class="form-control form-control-lg" placeholder="Entrez votre email" value="{{ user.email }}">
 										</div>
 										<div class="mt-4 form-control-bg-light">
 											<label class="form-label">Laissez nous un message </label>
@@ -633,7 +426,6 @@ Steps START -->
 	</section>
 	<!-- =======================
 Steps END -->
-
 </main>
 
 {% include 'partials/footer.html' %}

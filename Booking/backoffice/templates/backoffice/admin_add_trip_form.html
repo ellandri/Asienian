@@ -117,7 +117,6 @@
     }
 
     .card-body-modern {
-      display: flex;
       padding: 2.5rem;
       background-color: #dce3fb;
 
@@ -562,21 +561,22 @@
                 {% if form.inclusions.errors %}
                 <div class="error-text">{{ form.inclusions.errors }}</div>
                 {% endif %}
+                <div class="form-group-modern">
+                  <label class="form-label-modern">
+                    <i class="fas fa-times-circle me-2 gradient-text"></i>
+                    Exclusions
+                  </label>
+                  <div style="position: relative;">
+                    {{ form.exclusions|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
+                    <i class="fas fa-minus-circle input-icon"></i>
+                  </div>
+                  {% if form.exclusions.errors %}
+                  <div class="error-text">{{ form.exclusions.errors }}</div>
+                  {% endif %}
+                </div>
+
               </div>
 
-              <div class="form-group-modern">
-                <label class="form-label-modern">
-                  <i class="fas fa-times-circle me-2 gradient-text"></i>
-                  Exclusions
-                </label>
-                <div style="position: relative;">
-                  {{ form.exclusions|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
-                  <i class="fas fa-minus-circle input-icon"></i>
-                </div>
-                {% if form.exclusions.errors %}
-                <div class="error-text">{{ form.exclusions.errors }}</div>
-                {% endif %}
-              </div>
             </div>
 
             <!-- Politique -->

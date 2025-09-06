@@ -129,12 +129,6 @@
 			</button>
 
 			<!-- Responsive category toggler -->
-			<button class="navbar-toggler ms-sm-auto mx-3 me-md-0 p-0 p-sm-2" type="button" data-bs-toggle="collapse"
-				data-bs-target="#navbarCategoryCollapse" aria-controls="navbarCategoryCollapse" aria-expanded="false"
-				aria-label="Toggle navigation">
-				<i class="bi bi-grid-3x3-gap-fill fa-fw"></i><span
-					class="d-none d-sm-inline-block small">Category</span>
-			</button>
 
 			<!-- Main navbar START -->
 			<div class="navbar-collapse collapse" id="navbarCollapse">
@@ -142,294 +136,131 @@
 
 					<!-- Nav item Listing -->
 					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="listingMenu" data-bs-toggle="dropdown"
-							aria-haspopup="true" aria-expanded="false">Listings</a>
-						<ul class="dropdown-menu" aria-labelledby="listingMenu">
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Hotel</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="/">Hotel Home</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='index-hotel-chain' %}">Hotel Chain</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='index-resort' %}">Hotel Resort</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hotel-grid' %}">Hotel Grid</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hotel-list' %}">Hotel List</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hotel-detail' %}">Hotel Detail</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='room-detail' %}">Room Detail</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hotel-booking' %}">Hotel Booking</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Flight</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='index-flight' %}">Flight Home</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='flight-list' %}">Flight List</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='flight-detail' %}">Flight Detail</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='flight-booking' %}">Flight Booking</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Tour</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='index-tour' %}">Tour Home</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='tour-grid' %}">Tour Grid</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='tour-detail' %}">Tour Detail</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='tour-booking' %}">Tour Booking</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Cab</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='index-cab' %}">Cab Home</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='cab-list' %}">Cab List</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='cab-detail' %}">Cab Detail</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='cab-booking' %}">Cab Booking</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Directory</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='index-directory' %}">Directory Home</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='directory-detail' %}">Directory Detail</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Add Listing</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='join-us' %}">Join us</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='add-listing' %}">Add Listing</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='add-listing-minimal' %}">Add Listing
-											Minimal</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='listing-added' %}">Listing Added</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Hero</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hero-inline-form' %}">Hero Inline Form</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hero-multiple-search' %}">Hero Multiple
-											Search</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hero-image-gallery' %}">Hero Image Gallery</a>
-									</li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='hero-split' %}">Hero Split</a></li>
-								</ul>
-							</li>
-
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='booking-confirm' %}">Booking Confirmed</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='compare-listing' %}">Compare Listing</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='offer-detail' %}">Offer Detail</a></li>
-						</ul>
-					</li>
+						<a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='about' %}" >A propos de nous</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='team' %}" >Notre équipe</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='blog' %}" >Blogs</a>
+          </li>
 
 					<!-- Nav item Pages -->
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="pagesMenu" data-bs-toggle="dropdown"
-							aria-haspopup="true" aria-expanded="false">Pages</a>
-						<ul class="dropdown-menu" aria-labelledby="pagesMenu">
-
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='about' %}">About</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='contact' %}">Contact</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='contact-2' %}">Contact 2</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='team' %}">Our Team</a></li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Authentication</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='sign-in' %}">Sign In</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='sign-up' %}">Sign Up</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='forgot-password' %}">Forgot Password</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='two-factor-auth' %}">Two factor
-											authentication</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Blog</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='blog' %}">Blog</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='blog-detail' %}">Blog Detail</a></li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Help</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='help-center' %}">Help Center</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='help-detail' %}">Help Detail</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='privacy-policy' %}">Privacy Policy</a></li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='terms-of-service' %}">Terms of Service</a></li>
-								</ul>
-							</li>
-
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='pricing' %}">Pricing</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='faq' %}">FAQs</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='error' %}">Error 404</a></li>
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='coming-soon' %}">Coming Soon</a></li>
-						</ul>
-					</li>
 
 					<!-- Nav item Account -->
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="accounntMenu" data-bs-toggle="dropdown"
-							aria-haspopup="true" aria-expanded="false">Accounts</a>
-						<ul class="dropdown-menu" aria-labelledby="accounntMenu">
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">User Profile</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='account-profile' %}">My Profile</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='account-bookings' %}">My Bookings</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='account-travelers' %}">Travelers</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='account-payment-details' %}">Payment
-											Details</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='account-wishlist' %}">Wishlist</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='account-settings' %}">Settings</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='account-delete' %}">Delete Profile</a> </li>
-								</ul>
-							</li>
-
-							<!-- Dropdown submenu -->
-							<li class="dropdown-submenu dropend">
-								<a class="dropdown-item dropdown-toggle" href="#">Agent Dashboard</a>
-								<ul class="dropdown-menu" data-bs-popper="none">
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='agent-dashboard' %}">Dashboard</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='agent-listings' %}">Listings</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='agent-bookings' %}">Bookings</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='agent-activities' %}">Activities</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='agent-earnings' %}">Earnings</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='agent-reviews' %}">Reviews</a> </li>
-									<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='agent-settings' %}">Settings</a> </li>
-								</ul>
-							</li>
-
-							<li> <a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='admin-dashboard' %}">Master Admin</a> </li>
-						</ul>
-					</li>
 
 					<!-- Nav item link-->
-					<li class="nav-item dropdown">
-						<a class="nav-link" href="#" id="advanceMenu" data-bs-toggle="dropdown" aria-haspopup="true"
-							aria-expanded="false">
-							<i class="fas fa-ellipsis-h"></i>
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end min-w-auto" data-bs-popper="none">
-							<li>
-								<a class="dropdown-item" href="https://1.envato.market/stackbros" target="_blank">
-									<i class="text-warning fa-fw bi bi-life-preserver me-2"></i>Support
-								</a>
-							</li>
-							<li>
-								<hr class="dropdown-divider">
-							</li>
-							<li>
-								<a class="dropdown-item" href=""
-									target="_blank">
-									<i class="text-success fa-fw bi bi-cloud-download-fill me-2"></i>Buy Booking!
-								</a>
-							</li>
-							<li>
-								<hr class="dropdown-divider">
-							</li>
-						</ul>
-					</li>
+<!--					<li class="nav-item dropdown">-->
+<!--						<a class="nav-link" href="#" id="advanceMenu" data-bs-toggle="dropdown" aria-haspopup="true"-->
+<!--							aria-expanded="false">-->
+<!--							<i class="fas fa-ellipsis-h"></i>-->
+<!--						</a>-->
+<!--						<ul class="dropdown-menu dropdown-menu-end min-w-auto" data-bs-popper="none">-->
+<!--							<li>-->
+<!--								<a class="dropdown-item" href="https://1.envato.market/stackbros" target="_blank">-->
+<!--									<i class="text-warning fa-fw bi bi-life-preserver me-2"></i>Support-->
+<!--								</a>-->
+<!--							</li>-->
+<!--							<li>-->
+<!--								<hr class="dropdown-divider">-->
+<!--							</li>-->
+<!--							<li>-->
+<!--								<a class="dropdown-item" href=""-->
+<!--									target="_blank">-->
+<!--									<i class="text-success fa-fw bi bi-cloud-download-fill me-2"></i>Buy Booking!-->
+<!--								</a>-->
+<!--							</li>-->
+<!--							<li>-->
+<!--								<hr class="dropdown-divider">-->
+<!--							</li>-->
+<!--						</ul>-->
+<!--					</li>-->
 				</ul>
 			</div>
 			<!-- Main navbar END -->
 
 			<!-- Nav category menu START -->
-			<div class="navbar-collapse collapse" id="navbarCategoryCollapse">
-				<ul class="navbar-nav navbar-nav-scroll nav-pills-primary-soft text-center ms-auto p-2 p-xl-0">
-					<!-- Nav item Hotel -->
-					<li class="nav-item"> <a class="nav-link" href="/"><i
-								class="fa-solid fa-hotel me-2"></i>Hotel</a> </li>
+<!--			<div class="navbar-collapse collapse" id="navbarCategoryCollapse">-->
+<!--				<ul class="navbar-nav navbar-nav-scroll nav-pills-primary-soft text-center ms-auto p-2 p-xl-0">-->
+<!--					&lt;!&ndash; Nav item Hotel &ndash;&gt;-->
+<!--					<li class="nav-item"> <a class="nav-link" href="/"><i-->
+<!--								class="fa-solid fa-hotel me-2"></i>Hotel</a> </li>-->
 
-					<!-- Nav item Flight -->
-					<li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='index-flight' %}"><i
-								class="fa-solid fa-plane me-2"></i>Flight</a> </li>
+<!--					&lt;!&ndash; Nav item Flight &ndash;&gt;-->
+<!--					<li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='index-flight' %}"><i-->
+<!--								class="fa-solid fa-plane me-2"></i>Flight</a> </li>-->
 
-					<!-- Nav item Tour -->
-					<li class="nav-item"> <a class="nav-link active" href="{% url 'pages:dynamic_pages' template_name='index-tour' %}"><i
-								class="fa-solid fa-globe-americas me-2"></i>Tour</a> </li>
+<!--					&lt;!&ndash; Nav item Tour &ndash;&gt;-->
+<!--					<li class="nav-item"> <a class="nav-link active" href="{% url 'pages:dynamic_pages' template_name='index-tour' %}"><i-->
+<!--								class="fa-solid fa-globe-americas me-2"></i>Tour</a> </li>-->
 
-					<!-- Nav item Cabs -->
-					<li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='index-cab' %}"><i
-								class="fa-solid fa-car me-2"></i>Cab</a></li>
-				</ul>
-			</div>
+<!--					&lt;!&ndash; Nav item Cabs &ndash;&gt;-->
+<!--					<li class="nav-item"> <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='index-cab' %}"><i-->
+<!--								class="fa-solid fa-car me-2"></i>Cab</a></li>-->
+<!--				</ul>-->
+<!--			</div>-->
 			<!-- Nav category menu END -->
 
 			<!-- Profile and Notification START -->
-			<ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+			<ul class="nav flex-row align-items-center list-unstyled ms-xl-auto navbar-nav navbar-nav-scroll me-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='contact' %}" >Contactez-nous</a>
+        </li>
 
 				<!-- Notification dropdown START -->
-				<li class="nav-item dropdown ms-0 ms-md-3">
-					<!-- Notification button -->
-					<a class="nav-notification btn btn-light p-0 mb-0" href="#" role="button" data-bs-toggle="dropdown"
-						aria-expanded="false" data-bs-auto-close="outside">
-						<i class="bi bi-bell fa-fw"></i>
-					</a>
-					<!-- Notification dote -->
-					<span class="notif-badge animation-blink"></span>
+<!--				<li class="nav-item dropdown ms-0 ms-md-3">-->
+<!--					&lt;!&ndash; Notification button &ndash;&gt;-->
+<!--					<a class="nav-notification btn btn-light p-0 mb-0" href="#" role="button" data-bs-toggle="dropdown"-->
+<!--						aria-expanded="false" data-bs-auto-close="outside">-->
+<!--						<i class="bi bi-bell fa-fw"></i>-->
+<!--					</a>-->
+<!--					&lt;!&ndash; Notification dote &ndash;&gt;-->
+<!--					<span class="notif-badge animation-blink"></span>-->
 
-					<!-- Notification dropdown menu START -->
-					<div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md shadow-lg p-0">
-						<div class="card bg-transparent">
-							<!-- Card header -->
-							<div
-								class="card-header bg-transparent d-flex justify-content-between align-items-center border-bottom">
-								<h6 class="m-0">Notifications <span
-										class="badge bg-danger bg-opacity-10 text-danger ms-2">4 new</span></h6>
-								<a class="small" href="#">Clear all</a>
-							</div>
+<!--					&lt;!&ndash; Notification dropdown menu START &ndash;&gt;-->
+<!--					<div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md shadow-lg p-0">-->
+<!--						<div class="card bg-transparent">-->
+<!--							&lt;!&ndash; Card header &ndash;&gt;-->
+<!--							<div-->
+<!--								class="card-header bg-transparent d-flex justify-content-between align-items-center border-bottom">-->
+<!--								<h6 class="m-0">Notifications <span-->
+<!--										class="badge bg-danger bg-opacity-10 text-danger ms-2">4 new</span></h6>-->
+<!--								<a class="small" href="#">Clear all</a>-->
+<!--							</div>-->
 
-							<!-- Card body START -->
-							<div class="card-body p-0">
-								<ul class="list-group list-group-flush list-unstyled p-2">
-									<!-- Notification item -->
-									<li>
-										<a href="#"
-											class="list-group-item list-group-item-action rounded notif-unread border-0 mb-1 p-3">
-											<h6 class="mb-2">New! Booking flights from New York ✈️</h6>
-											<p class="mb-0 small">Find the flexible ticket on flights around the world.
-												Start searching today</p>
-											<span>Wednesday</span>
-										</a>
-									</li>
-									<!-- Notification item -->
-									<li>
-										<a href="#"
-											class="list-group-item list-group-item-action rounded border-0 mb-1 p-3">
-											<h6 class="mb-2">Sunshine saving are here 🌞 save 30% or more on a stay</h6>
-											<span>15 Nov 2022</span>
-										</a>
-									</li>
-								</ul>
-							</div>
-							<!-- Card body END -->
+<!--							&lt;!&ndash; Card body START &ndash;&gt;-->
+<!--							<div class="card-body p-0">-->
+<!--								<ul class="list-group list-group-flush list-unstyled p-2">-->
+<!--									&lt;!&ndash; Notification item &ndash;&gt;-->
+<!--									<li>-->
+<!--										<a href="#"-->
+<!--											class="list-group-item list-group-item-action rounded notif-unread border-0 mb-1 p-3">-->
+<!--											<h6 class="mb-2">New! Booking flights from New York ✈️</h6>-->
+<!--											<p class="mb-0 small">Find the flexible ticket on flights around the world.-->
+<!--												Start searching today</p>-->
+<!--											<span>Wednesday</span>-->
+<!--										</a>-->
+<!--									</li>-->
+<!--									&lt;!&ndash; Notification item &ndash;&gt;-->
+<!--									<li>-->
+<!--										<a href="#"-->
+<!--											class="list-group-item list-group-item-action rounded border-0 mb-1 p-3">-->
+<!--											<h6 class="mb-2">Sunshine saving are here 🌞 save 30% or more on a stay</h6>-->
+<!--											<span>15 Nov 2022</span>-->
+<!--										</a>-->
+<!--									</li>-->
+<!--								</ul>-->
+<!--							</div>-->
+<!--							&lt;!&ndash; Card body END &ndash;&gt;-->
 
-							<!-- Card footer -->
-							<div class="card-footer bg-transparent text-center border-top">
-								<a href="#" class="btn btn-sm btn-link mb-0 p-0">See all incoming activity</a>
-							</div>
-						</div>
-					</div>
-					<!-- Notification dropdown menu END -->
-				</li>
+<!--							&lt;!&ndash; Card footer &ndash;&gt;-->
+<!--							<div class="card-footer bg-transparent text-center border-top">-->
+<!--								<a href="#" class="btn btn-sm btn-link mb-0 p-0">See all incoming activity</a>-->
+<!--							</div>-->
+<!--						</div>-->
+<!--					</div>-->
+<!--					&lt;!&ndash; Notification dropdown menu END &ndash;&gt;-->
+<!--				</li>-->
 				<!-- Notification dropdown END -->
 
         <!-- Script Bootstrap commenté pour éviter le conflit -->
@@ -482,11 +313,10 @@
 						<li>
 							<hr class="dropdown-divider">
 						</li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-bookmark-check fa-fw me-2"></i>My
-								Bookings</a></li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-heart fa-fw me-2"></i>My Wishlist</a></li>
+						<li><a class="dropdown-item" href="{% url 'pages:account_profile' %}"><i class="bi bi-bookmark-check fa-fw me-2"></i>My Profil</a></li>
+						<li><a class="dropdown-item" href="{% url 'pages:my_bookings' %}"><i class="bi bi-bookmark-check fa-fw me-2"></i>My Bookings</a></li>
 						<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Settings</a></li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help
+						<li><a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='help-center' %}"><i class="bi bi-info-circle fa-fw me-2"></i>Help
 								Center</a></li>
 						<li><form method="post" action="{% url 'account_logout' %}">
               {% csrf_token %}
@@ -558,9 +388,9 @@ Main Banner START -->
 				<!-- Banner title -->
 				<div class="row justify-content-between pt-0 pb-5">
 					<div class="col-md-7 col-lg-8 col-xxl-7 pb-5 mb-0 mb-lg-5">
-						<h1 class="text-white">Life Is Adventure Make The Best Of It</h1>
-						<p class="text-white mb-0">Planning for a trip? we will organize your best trip with the best
-							destination and within the best budgets!</p>
+						<h1 class="text-white">La vie est une aventure, tire le meilleur de celle-ci.
+            </h1>
+						<p class="text-white mb-0">Vous planifiez un voyage ? Nous organiserons votre meilleur voyage avec la meilleure destination et dans les meilleurs budgets !</p>
 					</div>
 				</div>
 			</div>
@@ -593,6 +423,76 @@ Main Banner START -->
             </div>
         </form>
         <!-- Booking from END -->
+      <div class="row g-4 mt-4">
+        {% for trip in trips %}
+        <div class="col-md-6 col-lg-4">
+          <a href="{% url 'pages:trip_detail' trip.id %}"
+             style="text-decoration: none; color: inherit;">
+            <div style="
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: #fff;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        "
+                 onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.15)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)';"
+            >
+              <!-- Image -->
+              <div style="position: relative; height: 220px;  overflow: hidden;">
+                <img src="{{ trip.image }}"
+                     alt="{{ trip.title }}"
+                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;"
+                     onmouseover="this.style.transform='scale(1.08)';"
+                     onmouseout="this.style.transform='scale(1)';">
+                <span style="
+                position: absolute;
+                bottom: 12px;
+                left: 12px;
+                background: rgba(0,0,0,0.7);
+                color: #fff;
+                padding: 6px 12px;
+                font-size: 0.9rem;
+                border-radius: 12px;
+            ">
+              {{ trip.arrival_city }}
+            </span>
+              </div>
+
+              <!-- Contenu -->
+              <div style="padding: 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <h5 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; color: #333;">
+                  {{ trip.title }}
+                </h5>
+                <p style="flex: 1; color: #666; font-size: 0.95rem; margin-bottom: 12px;">
+                  {{ trip.description|truncatewords:15 }}
+                </p>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 700; font-size: 1.1rem; color: #2c3e50;">
+                {{ trip.price }} €
+              </span>
+                  <span style="
+                  background: #007bff;
+                  color: #fff;
+                  font-size: 0.85rem;
+                  padding: 6px 12px;
+                  border-radius: 20px;
+              ">
+                {{ trip.duration_days }} jours
+              </span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% empty %}
+        <p style="text-align:center; color:#666;">Aucun voyage trouvé.</p>
+        {% endfor %}
+      </div>
+
     </div>
 </div>
 <!-- Search END -->
@@ -675,7 +575,7 @@ Packages START -->
 			<!-- Title -->
 			<div class="row mb-4">
 				<div class="col-12 text-center">
-					<h2 class="mb-0">Our Best Packages</h2>
+					<h2 class="mb-0">Nos Meilleurs voyages</h2>
 				</div>
 			</div>
 
@@ -718,7 +618,7 @@ Top category START -->
 			<!-- Title -->
 			<div class="row mb-3 mb-sm-4">
 				<div class="col-12 text-center">
-					<h2 class="mb-0">Top Categories</h2>
+					<h2 class="mb-0">Top catégories</h2>
 				</div>
 			</div>
 
@@ -728,12 +628,12 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/20.jpg' %}" class="rounded-3" alt="">
+							<img src="https://petitfute.twic.pics/medias/membre/avis/900_600/13/1c/67e6cfac02295.jpg?twic=v1/cover=300x169/max=800" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
 						<div class="col-md-6">
 							<div class="p-2 p-md-0">
-								<h5 class="mb-1"><a href="#" class="stretched-link">Beach</a></h5>
+								<h5 class="mb-1"><a href="#" class="stretched-link">Plages</a></h5>
 								<span>4,568 Places</span>
 							</div>
 						</div>
@@ -745,12 +645,12 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/19.jpg' %}" class="rounded-3" alt="">
+							<img src="https://petitfute.twic.pics/medias/feg/03/42/034271.jpg?twic=v1/cover=900x506/max=1000" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
 						<div class="col-md-6">
 							<div class="p-2 p-md-0">
-								<h5 class="mb-1"><a href="#" class="stretched-link">Heritage</a></h5>
+								<h5 class="mb-1"><a href="#" class="stretched-link">Histoires</a></h5>
 								<span>2,845 Places</span>
 							</div>
 						</div>
@@ -762,12 +662,12 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/18.jpg' %}" class="rounded-3" alt="">
+							<img src="https://petitfute.twic.pics/medias/feg/03/42/034264.jpg?twic=v1/cover=900x506/max=1000" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
 						<div class="col-md-6">
 							<div class="p-2 p-md-0">
-								<h5 class="mb-1"><a href="#" class="stretched-link">Desert</a></h5>
+								<h5 class="mb-1"><a href="#" class="stretched-link">Coutumes</a></h5>
 								<span>1,587 Places</span>
 							</div>
 						</div>
@@ -779,12 +679,12 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/17.jpg' %}" class="rounded-3" alt="">
+							<img src="https://petitfute.twic.pics/medias/photo/originale/3c/fa/159173-abidjan-la-cathedrale-saint-paul.jpg?twic=v1/cover=250x141/max=1200" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
 						<div class="col-md-6">
 							<div class="p-2 p-md-0">
-								<h5 class="mb-1"><a href="#" class="stretched-link">Tower</a></h5>
+								<h5 class="mb-1"><a href="#" class="stretched-link">Découvertes</a></h5>
 								<span>986 Places</span>
 							</div>
 						</div>
@@ -796,12 +696,12 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/16.jpg' %}" class="rounded-3" alt="">
+							<img src="https://www.petitfute.com/medias/mag/15259/originale/12480-10-destinations-a-decouvrir.jpg" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
 						<div class="col-md-6">
 							<div class="p-2 p-md-0">
-								<h5 class="mb-1"><a href="#" class="stretched-link">Mountain</a></h5>
+								<h5 class="mb-1"><a href="#" class="stretched-link">Paysages</a></h5>
 								<span>786 Places</span>
 							</div>
 						</div>
@@ -813,12 +713,12 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/15.jpg' %}" class="rounded-3" alt="">
+							<img src="https://petitfute.twic.pics/medias/feg/03/42/034200.jpg?twic=v1/cover=900x506/max=1000" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
 						<div class="col-md-6">
 							<div class="p-2 p-md-0">
-								<h5 class=""><a href="#" class="stretched-link">Safari</a></h5>
+								<h5 class=""><a href="#" class="stretched-link">Architectures</a></h5>
 								<span>568 Places</span>
 							</div>
 						</div>
@@ -830,15 +730,9 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/14.jpg' %}" class="rounded-3" alt="">
+							<img src="{% static 'images/category/pages/nearby/14.jpg' %}" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
-						<div class="col-md-6">
-							<div class="p-2 p-md-0">
-								<h5 class="mb-1"><a href="#" class="stretched-link">Temple</a></h5>
-								<span>256 Places</span>
-							</div>
-						</div>
 					</div>
 				</div>
 
@@ -847,7 +741,7 @@ Top category START -->
 					<div class="row g-2 g-md-3 align-items-center position-relative">
 						<!-- Image -->
 						<div class="col-md-6">
-							<img src="{% static 'images/category/hotel/nearby/13.jpg' %}" class="rounded-3" alt="">
+							<img src="https://www.fratmat.info/uploads/images/2025/04/22/236476.jpg" class="rounded-3" alt="">
 						</div>
 						<!-- Content -->
 						<div class="col-md-6">
@@ -873,7 +767,7 @@ Stories START-->
 
 				<div class="col-lg-4">
 					<!-- Title -->
-					<h2 class="mb-0">Discover the best places to visit🔥</h2>
+					<h2 class="mb-0">Découvrez les meilleurs endroits à visiter🔥</h2>
 
 					<div class="d-sm-flex justify-content-sm-between align-items-center mt-4">
 						<!-- Avatar group -->
@@ -917,54 +811,54 @@ Stories START-->
 							<!-- Card item -->
 							<div class="card card-element-hover card-overlay-hover overflow-hidden">
 								<!-- Image -->
-								<img src="{% static 'images/category/tour/06.jpg' %}" class="rounded-3" alt="">
+								<img src="https://petitfute.twic.pics/medias/feg/03/42/034264.jpg?twic=v1/cover=900x506/max=1000" class="rounded-3" alt="">
 								<!-- Full screen button -->
 								<a class="hover-element position-absolute w-100 h-100" data-glightbox
-									data-gallery="gallery" href="{% static 'images/gallery/01.jpg' %}">
+									data-gallery="gallery" href="https://petitfute.twic.pics/medias/feg/03/42/034200.jpg?twic=v1/cover=900x506/max=1000">
 									<i
 										class="bi bi-fullscreen fs-6 text-white position-absolute top-50 start-50 translate-middle bg-dark rounded-1 p-2 lh-1"></i>
 								</a>
 							</div>
 
 							<!-- Testimonials START -->
-							<div class="tiny-slider arrow-round arrow-blur arrow-hover arrow-xs my-4 mb-md-0" dir="ltr">
-								<div class="tiny-slider-inner pb-1" data-autoplay="true" data-arrow="true"
-									data-dots="false" data-items="1">
-									<!-- Testimonial item -->
-									<div class="card bg-transparent">
-										<div class="row align-items-center">
-											<!-- Image -->
-											<div class="col-4">
-												<img src="{% static 'images/team/01.jpg' %}" class="card-img" alt="">
-											</div>
-											<!-- Card body -->
-											<div class="col-8">
-												<div class="card-body p-0">
-													<p class="mb-0">Farther-related bed and passage comfort civilly.</p>
-													<h6 class="card-title mb-0 mt-2">Louis Ferguson</h6>
-												</div>
-											</div>
-										</div>
-									</div>
+<!--							<div class="tiny-slider arrow-round arrow-blur arrow-hover arrow-xs my-4 mb-md-0" dir="ltr">-->
+<!--								<div class="tiny-slider-inner pb-1" data-autoplay="true" data-arrow="true"-->
+<!--									data-dots="false" data-items="1">-->
+<!--									&lt;!&ndash; Testimonial item &ndash;&gt;-->
+<!--									<div class="card bg-transparent">-->
+<!--										<div class="row align-items-center">-->
+<!--											&lt;!&ndash; Image &ndash;&gt;-->
+<!--											<div class="col-4">-->
+<!--												<img src="{% static 'images/team/01.jpg' %}" class="card-img" alt="">-->
+<!--											</div>-->
+<!--											&lt;!&ndash; Card body &ndash;&gt;-->
+<!--											<div class="col-8">-->
+<!--												<div class="card-body p-0">-->
+<!--													<p class="mb-0">Farther-related bed and passage comfort civilly.</p>-->
+<!--													<h6 class="card-title mb-0 mt-2">Louis Ferguson</h6>-->
+<!--												</div>-->
+<!--											</div>-->
+<!--										</div>-->
+<!--									</div>-->
 
-									<!-- Testimonial item -->
-									<div class="card bg-transparent">
-										<div class="row align-items-center">
-											<!-- Image -->
-											<div class="col-4">
-												<img src="{% static 'images/team/02.jpg' %}" class="card-img" alt="">
-											</div>
-											<!-- Card body -->
-											<div class="col-8">
-												<div class="card-body p-0">
-													<p class="mb-0">Farther-related bed and passage comfort civilly.</p>
-													<h6 class="card-title mb-0 mt-2">Lori Stevens</h6>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
+<!--									&lt;!&ndash; Testimonial item &ndash;&gt;-->
+<!--									<div class="card bg-transparent">-->
+<!--										<div class="row align-items-center">-->
+<!--											&lt;!&ndash; Image &ndash;&gt;-->
+<!--											<div class="col-4">-->
+<!--												<img src="{% static 'images/team/02.jpg' %}" class="card-img" alt="">-->
+<!--											</div>-->
+<!--											&lt;!&ndash; Card body &ndash;&gt;-->
+<!--											<div class="col-8">-->
+<!--												<div class="card-body p-0">-->
+<!--													<p class="mb-0">Farther-related bed and passage comfort civilly.</p>-->
+<!--													<h6 class="card-title mb-0 mt-2">Lori Stevens</h6>-->
+<!--												</div>-->
+<!--											</div>-->
+<!--										</div>-->
+<!--									</div>-->
+<!--								</div>-->
+<!--							</div>-->
 							<!-- Testimonials END -->
 						</div>
 
@@ -972,10 +866,10 @@ Stories START-->
 							<!-- Card item -->
 														<div class="card card-element-hover card-overlay-hover overflow-hidden mb-4">
 								<!-- Image -->
-								<img src="{% static 'images/gallery/02.jpg' %}" class="rounded-3" alt="">
+								<img src="https://www.petitfute.com/medias/mag/15259/originale/12480-10-destinations-a-decouvrir.jpg" class="rounded-3" alt="">
 								<!-- Full screen button -->
 								<a class="hover-element position-absolute w-100 h-100" data-glightbox
-									data-gallery="gallery" href="https://www.youtube.com/embed/tXHviS-4ygo">
+									data-gallery="gallery" href="https://youtu.be/ys8hv-uU2FM?si=2JkGEYeZMdEGskPe">
 									<span
 										class="btn text-danger btn-round btn-white position-absolute top-50 start-50 translate-middle mb-0">
 										<i class="fas fa-play"></i>
@@ -985,7 +879,7 @@ Stories START-->
 							<!-- Card item -->
 							<div class="card card-element-hover card-overlay-hover overflow-hidden">
 								<!-- Image -->
-								<img src="{% static 'images/gallery/03.jpg' %}" class="rounded-3" alt="">
+								<img src="https://petitfute.twic.pics/medias/membre/avis/900_600/13/1c/67e6cfac02295.jpg?twic=v1/cover=300x169/max=800" class="rounded-3" alt="">
 								<!-- Full screen button -->
 								<a class="hover-element position-absolute w-100 h-100" data-glightbox
 									data-gallery="gallery" href="{% static 'images/gallery/03.jpg' %}">
@@ -1015,11 +909,11 @@ Stories END-->
 				<div class="col-md-5 col-lg-4">
 					<!-- logo -->
 					<a class="me-0" href="/">
-						<img class="light-mode-item h-40px" src="{% static 'images/logo.svg' %}" alt="logo">
-						<img class="dark-mode-item h-40px" src="{% static 'images/logo-light.svg' %}" alt="logo">
+						<img class="light-mode-item h-40px" src="{% static 'images/bg/logo (1).png' %}" alt="logo">
+						<img class="dark-mode-item h-40px" src="{% static 'images/bg/logo (1).png' %}" alt="logo">
 					</a>
 
-					<p class="text-reset mt-4 mb-2">Subscribe to Our Newsletter</p>
+					<p class="text-reset mt-4 mb-2">Abonnez-vous à notre newsletter</p>
 					<!-- Newsletter -->
 					<form class="bg-body rounded-2 p-2">
 						<div class="input-group">
@@ -1038,23 +932,28 @@ Stories END-->
 						<div class="col-6">
 							<h5 class="mb-2 mb-md-4">Page</h5>
 							<ul class="nav flex-column">
-								<li class="nav-item"><a class="nav-link pt-0" href="#">Blog</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">About</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">Contact us</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">Services</a></li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='about' %}" >A propos de nous</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='team' %}" >Notre équipe</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='blog' %}" >Blogs</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='contact' %}">Contactez nous</a></li>
+<!--                <li class="nav-item"><a class="nav-link" href="#">Services</a></li>-->
 							</ul>
 						</div>
 
 						<!-- Link block -->
 						<div class="col-6">
-							<h5 class="mb-2 mb-md-4">Links</h5>
+							<h5 class="mb-2 mb-md-4">Liens</h5>
 							<ul class="nav flex-column">
-								<li class="nav-item"><a class="nav-link pt-0" href="#">Sign up</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">Sign in</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">Privacy Policy</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">Terms</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">Cookie</a></li>
-								<li class="nav-item"><a class="nav-link" href="#">Supports</a></li>
+								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='privacy-policy' %}">Politique</a></li>
+								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='terms-of-service' %}">Terms</a></li>
+								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='faq' %}">FAQ</a></li>
+								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='help-center' %}">Aide</a></li>
 							</ul>
 						</div>
 					</div>
@@ -1069,28 +968,8 @@ Stories END-->
 			<div class="container py-3 px-0">
 				<div class="d-md-flex justify-content-between align-items-center text-center text-md-left">
 					<!-- copyright text -->
-					<div class="text-primary-hover text-body"> Copyrights ©2023 Booking. build by <a
-							href="https://www.stackbros.in/" class="text-body">StackBros</a>. </div>
+					<div class="text-primary-hover text-body"> Copyrights ©2025 Asieniantour. </div>
 					<!-- copyright links-->
-					<div class="mt-3 mt-md-0">
-						<ul class="nav text-primary-hover justify-content-center justify-content-md-end">
-							<li class="nav-item">
-								<a class="nav-link text-body" href="#"><i class="fab fa-facebook-f"></i></a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link text-body" href="#"><i class="fab fa-twitter"></i></a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link text-body" href="#"><i class="fab fa-instagram"></i></a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link text-body" href="#"><i class="fab fa-linkedin-in"></i></a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link text-body" href="#"><i class="fab fa-github"></i></a>
-							</li>
-						</ul>
-					</div>
 				</div>
 			</div>
 		</div>
