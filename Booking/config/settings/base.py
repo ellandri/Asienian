@@ -3,14 +3,16 @@
 import os
 from pathlib import Path
 import environ
+import ssl
+import certifi
+
+
+
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = BASE_DIR / "booking"
 env = environ.Env()
-
-READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
-if READ_DOT_ENV_FILE:
-    env.read_env(str(BASE_DIR / ".env"))
+env.read_env(str(BASE_DIR / ".env"))  # Assure-toi que cette ligne est présente
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -92,7 +94,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 AUTH_USER_MODEL = "users.User"
 LOGIN_REDIRECT_URL = "pages:dashboard"
-LOGIN_URL = "account_login"
+from django.urls import reverse_lazy
+LOGIN_URL = reverse_lazy('pages:dashboard')  # Redirige vers index-tour.html
+ACCOUNT_LOGIN_REDIRECT_URL = '/'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/?login_required=true'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
@@ -187,8 +193,23 @@ X_FRAME_OPTIONS = "DENY"
 
 # EMAIL
 # ------------------------------------------------------------------------------
-EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")  # Supprimez la redondance
+
+
+
+EMAIL_BACKEND = "booking.users.email_backend.TLSCertifiEmailBackend"
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.sendgrid.net")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="apikey")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="asieniantour@gmail.com")
 EMAIL_TIMEOUT = 5
+
+
+print("EMAIL_HOST_USER:", env("EMAIL_HOST_USER"))
+print("EMAIL_HOST_PASSWORD:", env("EMAIL_HOST_PASSWORD"))
+
 
 # ADMIN
 # ------------------------------------------------------------------------------
@@ -200,23 +221,20 @@ DJANGO_ADMIN_FORCE_ALLAUTH = env.bool("DJANGO_ADMIN_FORCE_ALLAUTH", default=Fals
 # LOGGING
 # ------------------------------------------------------------------------------
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s",
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
         },
     },
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         },
     },
-    "root": {"level": "INFO", "handlers": ["console"]},
 }
-
 # django-allauth
 # ------------------------------------------------------------------------------
 ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)

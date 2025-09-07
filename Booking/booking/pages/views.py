@@ -30,6 +30,9 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash, logout
 from django.views.decorators.http import require_POST
+from django.contrib.auth import authenticate, login as auth_login
+from allauth.account.views import PasswordResetView
+from django.urls import reverse_lazy
 
 
 
@@ -44,15 +47,16 @@ logger = logging.getLogger(__name__)
 
 
 class CustomLoginView(LoginView):
-    template_name = 'account/login.html'  # ton template personnalisé
+    template_name = 'pages/index-tour.html'
 
-    def form_invalid(self, form):
-        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            errors = []
-            for field, field_errors in form.errors.items():
-                errors += field_errors
-            return JsonResponse({'success': False, 'errors': errors}, status=400)
-        return super().form_invalid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['login_required'] = True  # Ouvre le modal
+        context['user_authenticated'] = self.request.user.is_authenticated
+        context['best_trips'] = Trip.objects.filter(is_best_trip=True)
+        context['form'] = LoginForm(self.request.POST or None)
+        return context
+
 
 def root_page_view(request):
     form = LoginForm(request.POST or None)
@@ -61,13 +65,14 @@ def root_page_view(request):
         'user_authenticated': request.user.is_authenticated,
         'form': form,
         'best_trips': best_trips,
+        'login_required': request.GET.get('login_required') == 'true',  # Ajouter l'indicateur
     })
 
 
 def dynamic_pages_view(request, template_name):
     allowed_pages = [
         'account-profile', 'account-travelers', 'account-payment-details',
-        'account-wishlist', 'account-settings', 'account-delete', 'hotel-list',
+        'account-wishlist', 'account-settings', 'account-delete', 'hotel-list','index-tour',
         'sign-up', 'sign-in', 'about','contact','faq','terms-of-service','privacy-policy', 'blog-list', 'blog-single','team','help-center','help-detail',
         'blog','blog-detail','flight-list', 'tour-grid','tour-detail','blog-man-mountains','blog-attieke','blog-comoe','blog-danses', 'blog-san-pedro', 'blog-korhogo'
     ]
@@ -118,25 +123,86 @@ def dynamic_pages_view(request, template_name):
         logger.error(f"Template non trouvé : pages/{template_name}.html")
         raise Http404("Template non trouvé.")
 
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'account/password_reset.html'
+
+    def form_valid(self, form):
+        form.save(
+            request=self.request,
+            from_email=None,
+            email_template_name='account/email/password_reset_key.html',
+            subject_template_name='account/email/password_reset_subject.txt',
+        )
+        # Redirection vers la page d'accueil (dashboard) après envoi
+        return redirect('pages:dynamic_pages', template_name='index-tour')# ou 'pages:dynamic_pages', template_name='sign-in'
 
 class ModalLoginView(View):
     def post(self, request, *args, **kwargs):
+        logger.debug("Début de ModalLoginView.post")
+        logger.debug(f"Données POST reçues : {request.POST}")
+
+        # Vérifier si la requête est AJAX
         if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'success': False, 'errors': ["Connexion uniquement via le modal AJAX."]}, status=400)
-        form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.user
-            auth_login(request, user)
-            # Redirection vers index-tour.html après succès
-            return JsonResponse({'success': True, 'redirect_url': '/'})
-        else:
-            errors = []
-            for field, field_errors in form.errors.items():
-                errors += field_errors
-            return JsonResponse({'success': False, 'errors': errors})
+            logger.error("Requête non AJAX")
+            messages.error(request, "Veuillez utiliser le formulaire de connexion via le modal.")
+            return JsonResponse({
+                'success': False,
+                'errors': ["Requête non AJAX. Veuillez utiliser le formulaire de connexion."]
+            }, status=400)
+
+        try:
+            # Initialiser le formulaire avec data et request comme arguments nommés
+            form = LoginForm(data=request.POST, request=request)
+            logger.debug("Formulaire créé")
+
+            if form.is_valid():
+                logger.debug("Formulaire valide")
+                # Extraire les identifiants
+                login_field = form.cleaned_data.get('login')
+                password = form.cleaned_data.get('password')
+
+                # Authentifier l'utilisateur
+                user = authenticate(request, username=login_field, password=password)
+                if user is not None:
+                    # Connecter l'utilisateur
+                    auth_login(request, user)
+                    logger.debug(f"Connexion réussie pour l'utilisateur : {user.username}")
+                    messages.success(request, "Connexion réussie !")
+                    return JsonResponse({
+                        'success': True,
+                        'redirect_url': reverse('pages:dashboard')
+                    })
+                else:
+                    logger.debug("Échec de l'authentification : identifiants incorrects")
+                    return JsonResponse({
+                        'success': False,
+                        'errors': ["Identifiants incorrects. Veuillez réessayer."]
+                    }, status=400)
+            else:
+                logger.debug(f"Formulaire invalide, erreurs : {form.errors}")
+                errors = []
+                for field, field_errors in form.errors.items():
+                    errors.extend(field_errors)
+                for error in form.non_field_errors():
+                    errors.append(error)
+                return JsonResponse({
+                    'success': False,
+                    'errors': errors
+                }, status=400)
+        except Exception as e:
+            logger.error(f"Erreur dans ModalLoginView : {str(e)}", exc_info=True)
+            return JsonResponse({
+                'success': False,
+                'errors': [f"Erreur serveur : {str(e)}"]
+            }, status=500)
 
     def get(self, request, *args, **kwargs):
-        return JsonResponse({'success': False, 'errors': ['Méthode non autorisée.']}, status=405)
+        logger.debug("Requête GET non autorisée pour ModalLoginView")
+        return JsonResponse({
+            'success': False,
+            'errors': ['Méthode non autorisée.']
+        }, status=405)
+
 
 def search_trip_view(request):
     all_trips = Trip.objects.all()

@@ -17,83 +17,221 @@
 
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content p-0 bg-mode shadow rounded-3 overflow-hidden">
+    <div class="modal-content p-0 shadow-lg rounded-4 overflow-hidden" style="
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    ">
       <div class="row g-0">
         <!-- Illustration -->
-        <div class="col-lg-6 d-none d-lg-flex align-items-center order-2 order-lg-1 bg-light">
-          <div class="p-3 p-lg-5 w-100 text-center">
-            <img src="{% static 'images/element/signin.svg' %}" alt="Connexion" class="img-fluid">
-          </div>
+        <div class="col-lg-6 d-none d-lg-flex align-items-center order-2 order-lg-1 position-relative">
+
+                <img src="https://images.unsplash.com/photo-1642165835095-528b68f00663?q=80&w=685&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                     alt="Connexion Illustration"
+                     class="img-fluid rounded-3 shadow-sm"
+                     style="filter: drop-shadow(0 10px 30px rgba(102, 126, 234, 0.2));object-fit: cover;width: 100%; height: 100%;">
+                <!-- Effet de brillance sur l'image -->
+                <div class="position-absolute top-0 start-0 rounded-3" style="
+                  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+                  animation: shine 3s ease-in-out infinite;
+                "></div>
+          <div class="vr opacity-1 d-none d-lg-block" style="background: linear-gradient(to bottom, transparent, rgba(102, 126, 234, 0.3), transparent);"></div>
         </div>
+
         <!-- Formulaire -->
         <div class="col-lg-6 order-1">
-          <div class="p-4 p-sm-5">
-            <a href="/">
-              <img class="h-50px mb-4" src="{% static 'images/logo-icon.svg' %}" alt="logo">
-            </a>
-            <h1 class="mb-2 h3">Connexion</h1>
-            <p class="mb-0">Nouveau ? <a href="{% url 'pages:dynamic_pages' template_name='sign-up' %}">Créer un compte</a></p>
-            <div class="mt-4 text-start">
+          <div class="p-4 p-sm-7 position-relative">
+            <!-- Header avec logo -->
+            <div class="text-center mb-4">
+              <a href="/" class="d-inline-block position-relative">
+                <img src="{% static 'images/bg/logo (1).png' %}" alt="logo" style="width: 150px; filter: drop-shadow(0 5px 15px rgba(102, 126, 234, 0.3));">
+              </a>
+            </div>
 
-              <form method="post" action="{% url 'account_login' %}" class="mt-4 text-start" novalidate>
-                {% csrf_token %}
-                {% if form.errors %}
-                <div class="alert alert-danger">
-                  {% for field in form %}
-                  {% for error in field.errors %}
-                  <div>{{ error|escape }}</div>
-                  {% endfor %}
-                  {% endfor %}
-                  {% for error in form.non_field_errors %}
-                  <div>{{ error|escape }}</div>
-                  {% endfor %}
-                </div>
-                {% endif %}
+            <!-- Titre avec effet gradient -->
+            <div class="text-center mb-4">
+              <h1 class="mb-3 fw-bold" style="
+                background: linear-gradient(135deg, #0b5917, #37ac09);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-size: 2.2rem;
+              ">{% trans "Connexion" %}</h1>
+              <p class="text-muted fs-6 lh-base mb-0">
+                {% trans "Nouveau ?" %}
+                <a href="{% url 'pages:dynamic_pages' template_name='sign-up' %}"
+                   class="text-decoration-none fw-semibold position-relative"
+                   style="
+                     background: linear-gradient(135deg, #0b5917, #37ac09);
+                     -webkit-background-clip: text;
+                     -webkit-text-fill-color: transparent;
+                   ">
+                  {% trans "Créer un compte" %}
+                  <span class="position-absolute bottom-0 start-0 w-100 h-1" style="
+                    background: linear-gradient(135deg, #0b5917, #37ac09);
+                    transform: scaleX(0);
+                    transition: transform 0.3s ease;
+                  "></span>
+                </a>
+              </p>
+            </div>
 
-                <div class="mb-3">
-                  <label class="form-label" for="{{ form.login.id_for_label }}">Adresse e-mail</label>
-                  {{ form.login|add_class:"form-control"|attr:"aria-describedby=loginHelp"|attr:"required" }}
+            <!-- Messages et erreurs -->
+            {% if messages %}
+            <div class="alert alert-info border-0 rounded-3 shadow-sm" style="
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(102, 126, 234, 0.05));
+              border-left: 4px solid #0b5917 !important;
+            ">
+              {% for message in messages %}
+              <p class="mb-0 fw-medium">{{ message }}</p>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <div id="error-messages" class="alert alert-danger border-0 rounded-3 shadow-sm" style="
+              background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+              border-left: 4px solid #dc3545 !important;
+              display: none;
+            "></div>
+
+            <!-- Formulaire -->
+            <form method="post" action="{% url 'pages:modal_login' %}" class="mt-4 text-start" id="login-form" novalidate>
+              {% csrf_token %}
+              <!-- Input Email -->
+              <div class="mb-4">
+                <label for="id_login" class="form-label fw-semibold text-dark mb-3">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" class="me-2">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  {% trans "Adresse e-mail ou username" %}
+                </label>
+                <div class="position-relative">
+                  <input type="text"
+                         name="login"
+                         id="id_login"
+                         class="form-control form-control-lg border-0 rounded-3 ps-4 py-3 shadow-sm"
+                         required
+                         placeholder="{% trans 'Entrez votre e-mail' %}"
+                         style="
+                           background: rgba(102, 126, 234, 0.05);
+                           border: 2px solid transparent !important;
+                           transition: all 0.3s ease;
+                         "
+                         onfocus="this.style.background='white'; this.style.borderColor='#0b5917 !important'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)';"
+                         onblur="this.style.background='rgba(102, 126, 234, 0.05)'; this.style.borderColor='transparent'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.1)';">
+                  <div class="position-absolute top-50 end-0 translate-middle-y me-3">
+                    <svg width="20" height="20" fill="#0b5917" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                  </div>
                   {% if form.login.errors %}
-                  <div id="loginHelp" class="invalid-feedback d-block">
+                  <div class="invalid-feedback d-block">
                     {{ form.login.errors|join:", " }}
                   </div>
                   {% endif %}
                 </div>
+              </div>
 
-                <div class="mb-3 position-relative">
-                  <label class="form-label" for="{{ form.password.id_for_label }}">Mot de passe</label>
-                  {{ form.password|add_class:"form-control"|attr:"required" }}
+              <!-- Input Mot de passe -->
+              <div class="mb-4 position-relative">
+                <label for="id_password" class="form-label fw-semibold text-dark mb-3">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" class="me-2">
+                    <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.5 6c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5v2h-7V6z"/>
+                  </svg>
+                  {% trans "Mot de passe" %}
+                </label>
+                <div class="position-relative">
+                  <input type="password"
+                         name="password"
+                         id="id_password"
+                         class="form-control form-control-lg border-0 rounded-3 ps-4 py-3 shadow-sm"
+                         required
+                         placeholder="{% trans 'Entrez votre mot de passe' %}"
+                         style="
+                           background: rgba(102, 126, 234, 0.05);
+                           border: 2px solid transparent !important;
+                           transition: all 0.3s ease;
+                         "
+                         onfocus="this.style.background='white'; this.style.borderColor='#0b5917 !important'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)';"
+                         onblur="this.style.background='rgba(102, 126, 234, 0.05)'; this.style.borderColor='transparent'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.1)';">
+                  <div class="position-absolute top-50 end-0 translate-middle-y me-3">
+                    <svg width="20" height="20" fill="#0b5917" viewBox="0 0 24 24">
+                      <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.5 6c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5v2h-7V6z"/>
+                    </svg>
+                  </div>
                   {% if form.password.errors %}
                   <div class="invalid-feedback d-block">
                     {{ form.password.errors|join:", " }}
                   </div>
                   {% endif %}
                 </div>
+              </div>
 
-                <div class="mb-3 d-sm-flex justify-content-between align-items-center">
-                  <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="remember" name="remember" {% if request.POST.remember %}checked{% endif %}>
-                    <label class="form-check-label" for="remember">Se souvenir de moi</label>
-                  </div>
-                  <a href="{% url 'account_reset_password' %}">Mot de passe oublié ?</a>
+              <!-- Options -->
+              <div class="mb-4 d-sm-flex justify-content-between align-items-center">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="remember" name="remember" {% if request.POST.remember %}checked{% endif %}>
+                  <label class="form-check-label" for="remember">{% trans "Se souvenir de moi" %}</label>
                 </div>
+                <a href="{% url 'account_reset_password' %}"
+                   class="text-decoration-none fw-semibold position-relative"
+                   style="
+                     background: linear-gradient(135deg, #0b5917, #37ac09);
+                     -webkit-background-clip: text;
+                     -webkit-text-fill-color: transparent;
+                   ">
+                  {% trans "Mot de passe oublié ?" %}
+                  <span class="position-absolute bottom-0 start-0 w-100 h-1" style="
+                    background: linear-gradient(135deg, #0b5917, #37ac09);
+                    transform: scaleX(0);
+                    transition: transform 0.3s ease;
+                  "></span>
+                </a>
+              </div>
 
-                <div>
-                  <button type="submit" class="btn btn-primary w-100 mb-0">Connexion</button>
-                </div>
+              <!-- Bouton Connexion -->
+              <div class="d-grid mb-4">
+                <button type="submit"
+                        class="btn btn-lg text-white fw-semibold py-3 border-0 rounded-3 position-relative overflow-hidden"
+                        style="
+                          background: linear-gradient(135deg, #0b5917, #37ac09);
+                          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                          transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 35px rgba(102, 126, 234, 0.5)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(102, 126, 234, 0.4)';">
+                  <span class="position-relative z-index-2">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" class="me-2">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {% trans "Connexion" %}
+                  </span>
+                  <!-- Effet de brillance -->
+                  <div class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="
+                    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+                    transition: opacity 0.3s ease;
+                  "></div>
+                </button>
+              </div>
 
-                <div class="position-relative my-4">
-                  <hr>
-                  <p class="small bg-mode position-absolute top-50 start-50 translate-middle px-2">Ou se connecter avec</p>
-                </div>
+              <!-- Séparateur -->
+              <div class="position-relative my-4">
+                <hr style="border-color: rgba(102, 126, 234, 0.2);">
+                <p class="small bg-mode position-absolute top-50 start-50 translate-middle px-2 text-muted">
+                  {% trans "Ou se connecter avec" %}
+                </p>
+              </div>
+            </form>
 
-                <div class="vstack gap-3">
-                    <i class="fab fa-fw fa-google text-google-icon me-2"></i>Google
-                  </a>
-                </div>
-
-              </form>
-
+            <!-- Copyright -->
+            <div class="text-center mt-4">
+              <p class="text-muted small mb-0">
+                &copy;2025
+                <span style="
+                  background: linear-gradient(135deg, #0b5917, #37ac09);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  font-weight: 600;
+                ">Asieniantour</span>
+              </p>
             </div>
           </div>
         </div>
@@ -102,6 +240,83 @@
   </div>
 </div>
 
+<style>
+  @keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .form-control:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  }
+
+  .btn:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25) !important;
+  }
+
+  @media (max-width: 768px) {
+    .rounded-4 {
+      border-radius: 1rem !important;
+      margin: 1rem;
+    }
+
+    .p-4.p-sm-7 {
+      padding: 2rem 1.5rem !important;
+    }
+
+    h1 {
+      font-size: 1.8rem !important;
+    }
+  }
+
+  .btn:hover .opacity-0 {
+    opacity: 1 !important;
+  }
+
+  a[href*="sign-up"]:hover span, a[href*="account_reset_password"]:hover span {
+    transform: scaleX(1) !important;
+  }
+</style>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#login-form').on('submit', function(e) {
+      e.preventDefault();
+      $('#error-messages').html('').hide();
+      $.ajax({
+        url: '{% url "pages:modal_login" %}', // Forcer l'URL correcte
+        type: 'POST',
+        data: $(this).serialize(),
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        success: function(response) {
+          console.log('Réponse AJAX:', response);
+          if (response.success) {
+            window.location.href = response.redirect_url;
+          } else {
+            $('#error-messages').html(response.errors.join('<br>')).show();
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Erreur AJAX:', xhr.responseText);
+          $('#error-messages').html('Mot de passe; mail ou username incorrect.Veuillez réessayer.').show();
+        }
+      });
+    });
+
+    // Ouvrir le modal si login_required est true
+    {% if login_required %}
+    var myModal = new bootstrap.Modal(document.getElementById('loginModal'), {
+      keyboard: false
+    });
+    myModal.show();
+    {% endif %}
+  });
+</script>
 {# Overlay pour bloquer la page si non connecté (géré par le JS) #}
 <div class="modal-backdrop fade" id="loginOverlay" style="display: none;"></div>
 

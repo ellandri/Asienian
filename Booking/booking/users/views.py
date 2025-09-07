@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
+from django.http import HttpResponseRedirect
 
 
 
@@ -28,7 +29,13 @@ class UserDetailView(LoginRequiredMixin, DetailView):
     model = User
     slug_field = "username"
     slug_url_kwarg = "username"
+    login_url = reverse_lazy('pages:dashboard')  # Redirige vers index-tour.html
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            # Ajouter un paramètre pour indiquer que la connexion est requise
+            return HttpResponseRedirect(f"{self.login_url}?login_required=true")
+        return super().dispatch(request, *args, **kwargs)
 
 user_detail_view = UserDetailView.as_view()
 
@@ -63,7 +70,7 @@ user_redirect_view = UserRedirectView.as_view()
 class UserSignupView(FormView):
     template_name = "pages/sign-up.html"
     form_class = UserSignupForm
-    success_url = reverse_lazy("account_login")  # Redirige vers la page de connexion de django-allauth
+    success_url = reverse_lazy("pages:dashboard")  # Redirige vers la page de connexion de django-allauth
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -74,12 +81,13 @@ class UserSignupView(FormView):
         try:
             user = form.save(self.request)
             messages.success(self.request, _("Votre compte a été créé avec succès. Connectez-vous."))
-            return super().form_valid(form)
+            return HttpResponseRedirect(f"{self.success_url}?login_required=true")
         except Exception as e:
             messages.error(self.request, _("Une erreur s'est produite : %s") % str(e))
             return self.form_invalid(form)
 
 user_signup_view = UserSignupView.as_view()
+
 
 
 # class TravelerProfileView(APIView):

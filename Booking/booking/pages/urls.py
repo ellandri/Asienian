@@ -2,6 +2,9 @@ from django.urls import path, include
 from django.contrib.auth.views import LogoutView
 from pages.views import (root_page_view, dynamic_pages_view, search_trip_view,booking_confirm_view, my_bookings_view, payment_details_view, add_payment_method_view, delete_payment_method_view, edit_payment_method_view, ModalLoginView, update_profile_view, trip_detail_view, tour_booking_view, save_profile)
 from . import views
+from allauth.account.views import LoginView as CustomLoginView
+from .views import CustomPasswordResetView
+
 
 
 app_name = "pages"
@@ -19,8 +22,10 @@ urlpatterns = [
     path('add-payment-method/', views.add_payment_method_view, name='add_payment_method'),
     path('delete-payment-method/<int:booking_id>/', views.delete_payment_method_view, name='delete_payment_method'),
     path('edit-payment-method/<int:booking_id>/', views.edit_payment_method_view, name='edit_payment_method'),
-    path('modal-login/', views.ModalLoginView.as_view(), name='modal_login'),
-    path('accounts/login/', include('allauth.urls'), name='account_login'),
+    path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+    path('modal-login/', ModalLoginView.as_view(), name='modal_login'),
+    path('accounts/password/reset/', CustomPasswordResetView.as_view(), name='account_reset_password'),
+
     # path('update-password/', update_password_view, name='update_password'),  # Ajouté
     path('logout/', LogoutView.as_view(next_page='pages:dashboard'), name='logout'),
     path('accounts/', include('allauth.urls')),

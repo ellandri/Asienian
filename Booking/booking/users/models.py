@@ -26,6 +26,7 @@ class User(AbstractUser):
         """
         return reverse("users:detail", kwargs={"username": self.username})
 
+
 #     # booking/users/models.py
 # from django.contrib.auth.models import AbstractUser
 # from django.db import models
