@@ -1,433 +1,1289 @@
 {% extends 'base.html' %}
-
 {% load static i18n %}
 
 {% block content %}
-
 {% include 'partials/navbar.html' %}
 
-<main>
+<main class="bg-light">
+  <!-- Page Banner START -->
+  <section class="py-4 bg-primary text-white">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-12 col-sm-9">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-light mb-2">
+              <li class="breadcrumb-item"><a href="/" class="text-white"><i class="bi bi-house me-1"></i>Accueil</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'pages:trip_detail' trip_id=trip.id %}" class="text-white">Détails du voyage</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Réservation</li>
+            </ol>
+          </nav>
+          <h1 class="h2 mb-0">Vérifiez votre réservation</h1>
+        </div>
+        <div class="col-sm-3 text-end d-none d-sm-block">
+          <img src="{% static 'images/element/17.svg' %}" class="img-fluid" style="max-height: 80px;" alt="Décoration">
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Page Banner END -->
 
-	<!-- =======================
-Page Banner START -->
-	<section class="py-0">
-		<div class="container">
-			<div class="row mt-4 align-items-center">
-				<div class="col-12">
-					<!-- Card START -->
-					<div class="card bg-light overflow-hidden px-sm-5">
-						<div class="row align-items-center g-4">
+  <section class="py-4">
+    <div class="container">
+      {% if messages %}
+      <div class="alert alert-dismissible fade show mt-3" role="alert">
+        {% for message in messages %}
+        <div class="alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endif %}
 
-							<!-- Content -->
-							<div class="col-sm-9">
-								<div class="card-body">
-									<!-- Breadcrumb -->
-									<nav aria-label="breadcrumb">
-										<ol class="breadcrumb breadcrumb-dots mb-0">
-											<li class="breadcrumb-item"><a href="/"><i
-														class="bi bi-house me-1"></i>Accueil</a></li>
-											<li class="breadcrumb-item">Détails de l'hôtel</li>
-											<li class="breadcrumb-item active">Réservation</li>
-										</ol>
-									</nav>
-									<!-- Title -->
-									<h1 class="m-0 h2 card-title">Vérifiez votre réservation</h1>
-								</div>
-							</div>
+      {% if not user.is_authenticated %}
+      <div class="alert alert-warning" role="alert">
+        Veuillez vous <a href="{% url 'pages:account_login' %}?next={% url 'pages:tour_booking' trip_id=trip.id %}" class="alert-link">connecter</a> pour continuer la réservation.
+      </div>
+      {% else %}
+      <!-- Afficher les détails de la réservation existante si elle existe -->
+      {% if existing_booking %}
+      <div class="alert alert-info shadow-sm" role="alert">
+        <h4 class="alert-heading">Réservation existante</h4>
+        <p>Vous avez déjà réservé ce voyage. Voici les détails :</p>
+        <ul class="list-unstyled">
+          <li><strong>ID de réservation :</strong> {{ existing_booking.id }}</li>
+          <li><strong>Voyage :</strong> {{ existing_booking.trip.title }}</li>
+          <li><strong>Montant :</strong> {{ existing_booking.amount }} XOF</li>
+          <li><strong>Méthode de paiement :</strong> {{ existing_booking.payment_method }}</li>
+          <li><strong>Statut du paiement :</strong> {{ existing_booking.payment_status }}</li>
+          <li><strong>Date de réservation :</strong> {{ existing_booking.created_at|date:'d M Y H:i' }}</li>
+        </ul>
+        <a href="{% url 'pages:account_profile' %}" class="btn btn-primary mt-3">Voir mon profil</a>
+      </div>
+      {% else %}
 
-							<!-- Image -->
-							<div class="col-sm-3 text-end d-none d-sm-block">
-								<img src="{% static 'images/element/17.svg' %}" class="mb-n4" alt="">
-							</div>
-						</div>
-					</div>
-					<!-- Card END -->
-				</div>
-			</div>
-		</div>
-	</section>
-	<!-- =======================
-Page Banner END -->
+      <div id="stepper" class="bs-stepper stepper-outline shadow-sm rounded" aria-live="polite">
+        <div class="bs-stepper-header bg-white p-3" role="tablist">
+          <!-- Étape 1 : Informations du voyage -->
+          <div class="step {% if active_step == 1 %}active{% endif %}" data-target="#step-1">
+            <button type="button" class="step-trigger" role="tab" id="steppertrigger1" aria-controls="step-1" aria-selected="{% if active_step == 1 %}true{% else %}false{% endif %}">
+              <span class="bs-stepper-circle bg-primary text-white">1</span>
+              <span class="bs-stepper-label text-muted">Informations du voyage</span>
+            </button>
+          </div>
+          <div class="bs-stepper-line bg-primary"></div>
+          <!-- Étape 2 (Paiement) uniquement si traveler existe, sinon Étape 2 (Détails du voyageur) -->
+          <div class="step {% if active_step == 2 or active_step == 3 %}active{% endif %}" data-target="#step-{% if traveler %}3{% else %}2{% endif %}">
+            <button type="button" class="step-trigger" role="tab" id="steppertrigger{% if traveler %}3{% else %}2{% endif %}" aria-controls="step-{% if traveler %}3{% else %}2{% endif %}" aria-selected="{% if active_step == 2 or active_step == 3 %}true{% else %}false{% endif %}">
+              <span class="bs-stepper-circle bg-primary text-white">2</span>
+              <span class="bs-stepper-label text-muted">{% if traveler %}Paiement{% else %}Détails du voyageur{% endif %}</span>
+            </button>
+          </div>
+          {% if not traveler %}
+          <div class="bs-stepper-line bg-primary"></div>
+          <div class="step {% if active_step == 3 %}active{% endif %}" data-target="#step-3">
+            <button type="button" class="step-trigger" role="tab" id="steppertrigger3" aria-controls="step-3" aria-selected="{% if active_step == 3 %}true{% else %}false{% endif %}">
+              <span class="bs-stepper-circle bg-primary text-white">3</span>
+              <span class="bs-stepper-label text-muted">Paiement</span>
+            </button>
+          </div>
+          {% endif %}
+        </div>
 
-	<!-- =======================
-Steps START -->
-	<section>
-		<div class="container">
-			<div id="stepper" class="bs-stepper stepper-outline">
-				<!-- Step Buttons START -->
-				<div class="bs-stepper-header" role="tablist">
-					<!-- Step 1 -->
-					<div class="step" data-target="#step-1">
-						<div class="text-center">
-							<button type="button" class="btn btn-link step-trigger mb-0" role="tab" id="steppertrigger1"
-								aria-controls="step-1">
-								<span class="bs-stepper-circle">1</span>
-							</button>
-							<h6 class="bs-stepper-label d-none d-md-block">Revue des informations</h6>
-						</div>
-					</div>
-					<div class="line"></div>
-
-					<!-- Step 2 -->
-					<div class="step" data-target="#step-2">
-						<div class="text-center">
-							<button type="button" class="btn btn-link step-trigger mb-0" role="tab" id="steppertrigger2"
-								aria-controls="step-2">
-								<span class="bs-stepper-circle">2</span>
-							</button>
-							<h6 class="bs-stepper-label d-none d-md-block">Informations voyageurs</h6>
-						</div>
-					</div>
-					<div class="line"></div>
-
-					<!-- Step 3 -->
-					<div class="step" data-target="#step-3">
-						<div class="text-center">
-							<button type="button" class="btn btn-link step-trigger mb-0" role="tab" id="steppertrigger3"
-								aria-controls="step-3">
-								<span class="bs-stepper-circle">3</span>
-							</button>
-							<h6 class="bs-stepper-label d-none d-md-block">Effectuer le paiement</h6>
-						</div>
-					</div>
-				</div>
-				<!-- Step Buttons END -->
-
-				<!-- Step content START -->
-				<div class="bs-stepper-content p-0 pt-4">
-					<div class="row g-4">
-
-						<!-- Main content START -->
-						<div class="col-xl-8">
-              <form id="traveler-form" method="post" action="{% url 'pages:save_profile' %}">
+        <div class="bs-stepper-content p-3 bg-white">
+          <div class="row g-3">
+            <div class="col-xl-8">
+              <form id="traveler-form" method="post" enctype="multipart/form-data" action="{% url 'pages:booking_process' trip_id=trip.id %}">
                 {% csrf_token %}
+                <input type="hidden" name="step" id="step-input" value="{{ active_step|default:1 }}">
                 <input type="hidden" name="trip_id" value="{{ trip.id }}">
-								<!-- Step 1 content START -->
-								<div id="step-1" role="tabpanel" class="content fade" aria-labelledby="steppertrigger1">
-									<div class="vstack gap-4">
-										<!-- Title -->
-										<h4 class="mb-0">Tour Review</h4>
 
-										<hr class="my-0"> <!-- Divider -->
-
-										<!-- Tour list START -->
-										<div class="card shadow rounded-2 overflow-hidden">
-											<div class="row g-0">
-												<!-- Image -->
-												<div class="col-sm-6 col-md-4">
-													<img src="{{ trip.image_url }}" class="" alt="">
-												</div>
-
-												<!-- Card Body START -->
-												<div class="col-sm-6 col-md-8">
-													<div class="card-body p-3">
-														<!-- Title -->
-														<h5 class="card-title mb-1"><a href="#">Visite {{ trip.arrival_city }} avec Asienantour</a></h5>
-														<!-- Rating star -->
-														<ul class="list-inline mb-0">
-															{% for i in "12345" %}
-															<li class="list-inline-item me-0 small">
-																<i class="fa-solid fa-star {% if forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
-															</li>
-															{% endfor %}
-														</ul>
-
-														<!-- List -->
-														<ul class="nav nav-divider small mb-0 mt-2">
-															<li class="nav-item mb-1"><i class="far fa-calendar-alt me-2"></i>>Durée : {{ trip.duration }}</li>
-															<li class="nav-item mb-1"><i class="fa-solid fa-car me-2"></i>Type de véhicule : {{ trip.vehicle_type }}</li>
-															<li class="nav-item mb-1"><i class="bi bi-geo-alt-fill me-2"></i>Heure de départ : {{ trip.departure_time }}</li>
-														</ul>
-													</div>
-												</div>
-												<!-- Card body END -->
-											</div>
-										</div>
-										<!-- Tour list END -->
-
-										<!-- Flight detail START -->
-										<div class="card border">
-											<!-- Card header -->
-											<div class="card-header border-bottom d-flex justify-content-between">
-												<!-- Title -->
-												<h5 class="mb-0">Détails du trajet</h5>
-												<a href="#"
-													class="btn btn-link p-0 mb-0 text-primary-hover text-reset text-decoration-underline">Voir
-													détails</a>
-											</div>
-
-										</div>
-                    <!-- Card body START -->
-                    <!-- Card body START -->
-                    <div class="card-body p-0">
-                      <div class="row g-4">
-                        <!-- Type de véhicule -->
-                        <div class="col-md-3">
-                          <!-- Image -->
-                          <img src="{% static 'images/element/09.svg' %}"
-                               class="w-80px mb-3" alt="">
-                          <!-- Title -->
-                          <h6 class="fw-normal small mb-0">{{ trip.vehicle_type }}</h6>
+                <!-- Étape 1 : Revue du voyage (inclut les détails du voyageur si traveler existe) -->
+                <div id="step-1" role="tabpanel" class="content {% if active_step|default:1 == 1 %}active{% else %}fade{% endif %}" aria-labelledby="steppertrigger1">
+                  <div class="vstack gap-3">
+                    <h4 class="mb-0">Revue du voyage</h4>
+                    <hr class="my-0">
+                    {% if trip %}
+                    <div class="card shadow-sm border-0">
+                      <div class="row g-0 align-items-center">
+                        <div class="col-md-4">
+                          <img src="{% static 'images/trip-placeholder.jpg' %}" class="img-fluid rounded-start" alt="{{ trip.title|default:'Voyage inconnu' }}">
                         </div>
-
-                        <!-- Départ -->
-                        <div class="col-4 col-md-3">
-                          <h5>{{ trip.departure_city }}</h5>
-                          <h6 class="mb-0">{{ trip.departure_time }}</h6>
+                        <div class="col-md-8">
+                          <div class="card-body">
+                            <h5 class="card-title mb-1"><a href="{% url 'pages:trip_detail' trip_id=trip.id %}" class="text-decoration-none">{{ trip.title|default:'Voyage sans titre' }}</a></h5>
+                            <ul class="list-inline mb-2">
+                              {% for i in "12345" %}
+                              <li class="list-inline-item me-0 small">
+                                <i class="fa-solid fa-star {% if trip.rating and forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
+                              </li>
+                              {% endfor %}
+                            </ul>
+                            <ul class="nav nav-divider small mb-0">
+                              <li class="nav-item mb-1"><i class="far fa-calendar-alt me-2"></i>Durée : {{ trip.duration|default:'Non spécifiée' }}</li>
+                              <li class="nav-item mb-1"><i class="fa-solid fa-car me-2"></i>{{ trip.vehicle_type|default:'Non spécifié' }}</li>
+                              <li class="nav-item mb-1"><i class="bi bi-geo-alt-fill me-2"></i>{{ trip.departure_time|default:'Non spécifiée' }}</li>
+                            </ul>
+                          </div>
                         </div>
-
-                        <!-- Durée -->
-                        <div class="col-4 col-md-3 text-center">
-                          <h6>{{ trip.duration }}</h6>
-                          <div class="position-relative my-4">
-                            <hr class="bg-primary opacity-5 position-relative">
-                            <div class="icon-md bg-primary text-white rounded-circle position-absolute top-50 start-50 translate-middle">
-                              <i class="fa-solid fa-fw fa-plane"></i>
+                      </div>
+                    </div>
+                    <div class="card border-0 shadow-sm">
+                      <div class="card-header d-flex justify-content-between align-items-center bg-transparent py-2">
+                        <h5 class="mb-0">Détails du trajet</h5>
+                        <a href="{% url 'pages:trip_detail' trip_id=trip.id %}" class="btn btn-link p-0 text-primary-hover">Voir détails</a>
+                      </div>
+                      <div class="card-body py-2">
+                        <div class="row g-3 align-items-center">
+                          <div class="col-md-3 text-center">
+                            <img src="{% static 'images/element/09.svg' %}" class="w-50px mb-2" alt="">
+                            <h6 class="fw-normal small mb-0">{{ trip.vehicle_type|default:'Non spécifié' }}</h6>
+                          </div>
+                          <div class="col-md-3 text-center">
+                            <h5 class="mb-1">{{ trip.departure_city|default:'Ville de départ inconnue' }}</h5>
+                            <h6 class="mb-0 text-muted small">{{ trip.departure_time|default:'Non spécifiée' }}</h6>
+                          </div>
+                          <div class="col-md-3 text-center">
+                            <h6 class="text-muted small">{{ trip.duration|default:'Non spécifiée' }}</h6>
+                            <div class="position-relative my-3">
+                              <hr class="bg-primary opacity-5">
+                              <div class="icon-sm bg-primary text-white rounded-circle position-absolute top-50 start-50 translate-middle">
+                                <i class="fa-solid fa-plane"></i>
+                              </div>
                             </div>
                           </div>
-                        </div>
-
-                        <!-- Arrivée -->
-                        <div class="col-4 col-md-3 text-end">
-                          <h5>{{ trip.arrival_city }}</h5>
-                          <h6 class="mb-0">{{ trip.arrival_time }}</h6>
+                          <div class="col-md-3 text-center">
+                            <h5 class="mb-1">{{ trip.arrival_city|default:'Ville d\'arrivée inconnue' }}</h5>
+                            <h6 class="mb-0 text-muted small">{{ trip.arrival_time|default:'Non spécifiée' }}</h6>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <!-- Card body END -->
-                    <!-- Card body END -->
-										<!-- Flight detail END -->
-
-
-
-										<!-- Cancellation & Date change START -->
-										<div class="card border">
-											<!-- Card header -->
-											<div class="card-header border-bottom">
-												<!-- Title -->
-												<h5 class="mb-0">Annulation et changement de date</h5>
-											</div>
-
-											<!-- Card body START -->
-                      <div class="card-body">
-                        <ul class="list-group list-group-borderless">
-                          <li class="list-group-item">
-                            <span class="h6 fw-normal me-1 mb-0"><i class="bi bi-dot"></i>10 jours :</span>
-                            <span>100%</span>
-                          </li>
-                          <li class="list-group-item">
-                            <span class="h6 fw-normal me-1 mb-0"><i class="bi bi-dot"></i>10 à 15 jours :</span>
-                            <span>75% + Frais Non Remboursables</span>
-                          </li>
-                          <li class="list-group-item">
-                            <span class="h6 fw-normal me-1 mb-0"><i class="bi bi-dot"></i>15 à 30 jours :</span>
-                            <span>30% + Frais Non Remboursables</span>
-                          </li>
-                          <li class="list-group-item">
-                            <span class="h6 fw-normal me-1 mb-0"><i class="bi bi-dot"></i>Voyage :</span>
-                            <span>100% en cas de billet non-remboursable</span>
-                          </li>
+                    <div class="card border-0 shadow-sm">
+                      <div class="card-header bg-transparent py-2">
+                        <h5 class="mb-0">Annulation et changement</h5>
+                      </div>
+                      <div class="card-body py-2">
+                        <ul class="list-group list-group-borderless small">
+                          <li class="list-group-item"><i class="bi bi-dot"></i>10 jours : <span class="fw-bold">100%</span></li>
+                          <li class="list-group-item"><i class="bi bi-dot"></i>10 à 15 jours : <span class="fw-bold">75% + Frais</span></li>
+                          <li class="list-group-item"><i class="bi bi-dot"></i>15 à 30 jours : <span class="fw-bold">30% + Frais</span></li>
+                          <li class="list-group-item"><i class="bi bi-dot"></i>Voyage : <span class="fw-bold">100% (non-remboursable)</span></li>
                         </ul>
-                        <p class="mt-2">Tous les prix sont en Francs CFA et sont susceptibles d'être modifiés sans préavis.<br>Dans le cas d'un forfait voyage inclus, le montant total du vol sera payable au moment de la réservation.</p>
-                      </div>											<!-- Card body END -->
-										</div>
-										<!-- Cancellation & Date change END -->
+                        <p class="small mt-2">Tous les prix sont en Francs CFA et peuvent changer sans préavis.</p>
+                      </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning" role="alert">
+                      Aucune information de voyage disponible.
+                    </div>
+                    {% endif %}
 
-										<!-- Step 1 button -->
-										<div class="text-end">
-											<button class="btn btn-primary next-btn mb-0">Next</button>
-										</div>
-									</div>
-								</div>
-								<!-- Step 1 content END -->
-                <!-- Step 2 content START -->
-                <div id="step-2" role="tabpanel" class="content fade" aria-labelledby="steppertrigger2">
-                  <div class="vstack gap-4">
-                    <h4 class="mb-0">Traveler Detail</h4>
+                    <!-- Afficher les détails du voyageur dans l'étape 1 si traveler existe -->
+                    {% if traveler %}
+                    <hr class="my-2">
+                    <h4 class="mb-0">Détails du voyageur</h4>
                     <hr class="my-0">
-                    <div class="alert alert-warning d-flex" role="alert">
-                      <span class="alert-heading h5 mb-0 me-2"><i class="bi bi-exclamation-octagon-fill"></i></span>
-                      Les infos ci-dessous sont obligatoires. (Pour chaque voyageur)
+                    <div class="alert alert-info small py-1 mb-1" role="alert">
+                      Vos informations sont déjà enregistrées. Modifiez si nécessaire.
                     </div>
-
-                    <!-- Traveler 1 form START -->
-                    <div class="card border">
-                      <div class="card-header border-bottom">
-                        <h5 class="mb-0">Votre Profil</h5>
+                    <div class="row g-2">
+                      <div class="col-md-3">
+                        <label class="form-label small" for="title">Civilité * <span class="text-danger" id="title-error"></span></label>
+                        <select class="form-select form-select-sm" name="title" id="title" required aria-required="true">
+                          <option value="" {% if not traveler.title %}selected{% endif %}>Choisir...</option>
+                          <option value="Mr" {% if traveler.title == 'Mr' %}selected{% endif %}>Monsieur</option>
+                          <option value="Mrs" {% if traveler.title == 'Mrs' %}selected{% endif %}>Madame</option>
+                          <option value="Miss" {% if traveler.title == 'Miss' %}selected{% endif %}>Mademoiselle</option>
+                        </select>
                       </div>
-                      <div class="card-body">
-                        <div class="row g-4">
-                          <div class="col-md-2">
-                            <label class="form-label">Titre</label>
-                            <input type="text" class="form-control" name="title" required>
-                          </div>
-                          <div class="col-md-5">
-                            <label class="form-label">Nom</label>
-                            <input type="text" class="form-control" name="first_name" required>
-                          </div>
-                          <div class="col-md-5">
-                            <label class="form-label">Prénoms</label>
-                            <input type="text" class="form-control" name="last_name" required>
-                          </div>
-                          <div class="col-md-6">
-                            <label class="form-label">Date de naissance</label>
-                            <input type="text" class="form-control flatpickr" name="date_of_birth" data-date-format="Y-m-d" required>
-                          </div>
-                          <div class="col-md-6">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control form-control-lg" placeholder="Entrez votre email" required>
-                          </div>
-                        </div>
+                      <div class="col-md-4">
+                        <label class="form-label small" for="first_name">Prénom * <span class="text-danger" id="first_name-error"></span></label>
+                        <input type="text" class="form-control form-control-sm" name="first_name" id="first_name" value="{{ traveler.first_name|default_if_none:'' }}" required aria-required="true">
+                      </div>
+                      <div class="col-md-5">
+                        <label class="form-label small" for="last_name">Nom * <span class="text-danger" id="last_name-error"></span></label>
+                        <input type="text" class="form-control form-control-sm" name="last_name" id="last_name" value="{{ traveler.last_name|default_if_none:'' }}" required aria-required="true">
                       </div>
                     </div>
-                    <!-- Traveler 1 form END -->
-
-                    <div class="hstack gap-2 flex-wrap justify-content-between">
-                      <button class="btn btn-secondary prev-btn mb-0" type="button">Previous</button>
-                      <button class="btn btn-primary next-btn mb-0" type="button">Continue to payment</button>
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="form-label small" for="email">Email * <span class="text-danger" id="email-error"></span></label>
+                        <input type="email" class="form-control form-control-sm" name="email" id="email" value="{{ traveler.email|default_if_none:user.email }}" required aria-required="true">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small" for="date_of_birth">Date de naissance * <span class="text-danger" id="date_of_birth-error"></span></label>
+                        <input type="date" class="form-control form-control-sm" name="date_of_birth" id="date_of_birth" value="{{ traveler.date_of_birth|date:'Y-m-d'|default_if_none:'' }}" required aria-required="true">
+                      </div>
+                    </div>
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="form-label small" for="phone_number">Numéro de téléphone <span class="text-danger" id="phone_number-error"></span></label>
+                        <input type="text" class="form-control form-control-sm" name="phone_number" id="phone_number" value="{{ traveler.phone_number|default_if_none:'' }}" placeholder="+2250574328739">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small" for="nationality">Nationalité</label>
+                        <input type="text" class="form-control form-control-sm" name="nationality" id="nationality" value="{{ traveler.nationality|default_if_none:'' }}">
+                      </div>
+                    </div>
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="form-label small" for="gender">Genre * <span class="text-danger" id="gender-error"></span></label>
+                        <select class="form-select form-select-sm" name="gender" id="gender" required aria-required="true">
+                          <option value="" {% if not traveler.gender %}selected{% endif %}>Choisir...</option>
+                          <option value="M" {% if traveler.gender == 'M' %}selected{% endif %}>Masculin</option>
+                          <option value="F" {% if traveler.gender == 'F' %}selected{% endif %}>Féminin</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small" for="address">Adresse</label>
+                        <input type="text" class="form-control form-control-sm" name="address" id="address" value="{{ traveler.address|default_if_none:'' }}">
+                      </div>
+                    </div>
+                    <div class="mb-1">
+                      <label class="form-label small" for="profile_photo">Photo de profil (max 5 Mo) <span class="text-danger" id="profile_photo-error"></span></label>
+                      <input type="file" class="form-control form-control-sm" name="profile_photo" id="profile_photo" accept="image/jpeg,image/png,image/gif">
+                      {% if traveler.profile_photo %}
+                      <small class="text-muted">Photo actuelle : <a href="{{ traveler.profile_photo.url }}" target="_blank">Voir</a></small>
+                      {% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="text-end">
+                      <button class="btn btn-primary next-btn" type="button" data-step="{% if traveler %}3{% else %}2{% endif %}" aria-label="Aller à l'étape suivante">Suivant <i class="bi bi-arrow-right ms-2"></i></button>
                     </div>
                   </div>
                 </div>
-                <!-- Step 2 content END -->
 
-                <!-- Step 3 content START -->
-                <div id="step-3" role="tabpanel" class="content fade" aria-labelledby="steppertrigger3">
-                  <div class="vstack gap-4">
-                    <h4 class="mb-0">Payment options</h4>
+                <!-- Étape 2 : Détails du voyageur (uniquement si pas de traveler) -->
+                {% if not traveler %}
+                <div id="step-2" role="tabpanel" class="content {% if active_step == 2 %}active{% else %}fade{% endif %} dstepper-block" aria-labelledby="steppertrigger2">
+                  <div class="vstack gap-2">
+                    <h4 class="mb-0">Détails du voyageur</h4>
                     <hr class="my-0">
-                    <div class="card border">
-                      <div class="card-header border-bottom d-sm-flex justify-content-between align-items-center">
-                        <h5 class="mb-2 mb-sm-0">Credit or Debit Card</h5>
+                    <div class="row g-2">
+                      <div class="col-md-3">
+                        <label class="form-label small" for="title">Civilité * <span class="text-danger" id="title-error"></span></label>
+                        <select class="form-select form-select-sm" name="title" id="title" required aria-required="true">
+                          <option value="" {% if not traveler.title %}selected{% endif %}>Choisir...</option>
+                          <option value="Mr" {% if traveler.title == 'Mr' %}selected{% endif %}>Monsieur</option>
+                          <option value="Mrs" {% if traveler.title == 'Mrs' %}selected{% endif %}>Madame</option>
+                          <option value="Miss" {% if traveler.title == 'Miss' %}selected{% endif %}>Mademoiselle</option>
+                        </select>
                       </div>
-                      <div class="card-body">
-                        <div class="row g-4">
-                          <div class="col-12">
-                            <label class="form-label">Card Number</label>
-                            <input type="text" name="card_number" class="form-control" maxlength="16" placeholder="XXXX XXXX XXXX XXXX">
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label">Expiration Month</label>
-                            <input type="text" name="card_expiry_month" class="form-control" maxlength="2">
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label">Expiration Year</label>
-                            <input type="text" name="card_expiry_year" class="form-control" maxlength="4">
-                          </div>
-                          <div class="col-md-4">
-                            <label class="form-label">CVV / CVC</label>
-                            <input type="text" name="card_cvv" class="form-control" maxlength="3">
-                          </div>
-                          <div class="col-12">
-                            <label class="form-label">Name of the cardholder</label>
-                            <input type="text" name="cardholder_name" class="form-control">
-                          </div>
-                        </div>
+                      <div class="col-md-4">
+                        <label class="form-label small" for="first_name">Prénom * <span class="text-danger" id="first_name-error"></span></label>
+                        <input type="text" class="form-control form-control-sm" name="first_name" id="first_name" value="{{ traveler.first_name|default_if_none:'' }}" required aria-required="true">
+                      </div>
+                      <div class="col-md-5">
+                        <label class="form-label small" for="last_name">Nom * <span class="text-danger" id="last_name-error"></span></label>
+                        <input type="text" class="form-control form-control-sm" name="last_name" id="last_name" value="{{ traveler.last_name|default_if_none:'' }}" required aria-required="true">
                       </div>
                     </div>
-
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="form-label small" for="email">Email * <span class="text-danger" id="email-error"></span></label>
+                        <input type="email" class="form-control form-control-sm" name="email" id="email" value="{{ traveler.email|default_if_none:user.email }}" required aria-required="true">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small" for="date_of_birth">Date de naissance * <span class="text-danger" id="date_of_birth-error"></span></label>
+                        <input type="date" class="form-control form-control-sm" name="date_of_birth" id="date_of_birth" value="{{ traveler.date_of_birth|date:'Y-m-d'|default_if_none:'' }}" required aria-required="true">
+                      </div>
+                    </div>
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="form-label small" for="phone_number">Numéro de téléphone <span class="text-danger" id="phone_number-error"></span></label>
+                        <input type="text" class="form-control form-control-sm" name="phone_number" id="phone_number" value="{{ traveler.phone_number|default_if_none:'' }}" placeholder="+2250701234567">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small" for="nationality">Nationalité</label>
+                        <input type="text" class="form-control form-control-sm" name="nationality" id="nationality" value="{{ traveler.nationality|default_if_none:'' }}">
+                      </div>
+                    </div>
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="form-label small" for="gender">Genre * <span class="text-danger" id="gender-error"></span></label>
+                        <select class="form-select form-select-sm" name="gender" id="gender" required aria-required="true">
+                          <option value="" {% if not traveler.gender %}selected{% endif %}>Choisir...</option>
+                          <option value="M" {% if traveler.gender == 'M' %}selected{% endif %}>Masculin</option>
+                          <option value="F" {% if traveler.gender == 'F' %}selected{% endif %}>Féminin</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small" for="address">Adresse</label>
+                        <input type="text" class="form-control form-control-sm" name="address" id="address" value="{{ traveler.address|default_if_none:'' }}">
+                      </div>
+                    </div>
+                    <div class="mb-1">
+                      <label class="form-label small" for="profile_photo">Photo de profil (max 5 Mo) <span class="text-danger" id="profile_photo-error"></span></label>
+                      <input type="file" class="form-control form-control-sm" name="profile_photo" id="profile_photo" accept="image/jpeg,image/png,image/gif">
+                      {% if traveler.profile_photo %}
+                      <small class="text-muted">Photo actuelle : <a href="{{ traveler.profile_photo.url }}" target="_blank">Voir</a></small>
+                      {% endif %}
+                    </div>
                     <div class="d-flex justify-content-between">
-                      <button class="btn btn-secondary prev-btn mb-0" type="button">Previous</button>
-                      <button class="btn btn-success next-btn mb-0" type="submit">Pay now</button>
+                      <button class="btn btn-outline-secondary prev-btn" type="button" data-step="1" aria-label="Revenir à l'étape précédente"><i class="bi bi-arrow-left me-2"></i>Précédent</button>
+                      <button class="btn btn-primary next-btn" type="button" data-step="3" aria-label="Aller à l'étape suivante">Suivant <i class="bi bi-arrow-right ms-2"></i></button>
+                    </div>
+                    <div id="payment-errors" class="text-danger mt-1" role="alert"></div>
+                  </div>
+                </div>
+                {% endif %}
+
+                <!-- Étape 3 : Paiement -->
+                <div id="step-3" role="tabpanel" class="content {% if active_step == 3 %}active{% else %}fade{% endif %} dstepper-block" aria-labelledby="steppertrigger{% if traveler %}3{% else %}2{% endif %}">
+                  <div class="vstack gap-3">
+                    <h4 class="mb-0">Options de paiement</h4>
+                    <hr class="my-0">
+                    <div class="card border-0 shadow-sm">
+                      <div class="card-header bg-transparent py-2">
+                        <h5 class="mb-0">Choisissez votre méthode de paiement</h5>
+                      </div>
+                      <div class="card-body py-2">
+                        <div class="mb-2">
+                          <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="payment_method" id="card_payment" value="visa_card" checked aria-required="true">
+                            <label class="form-check-label" for="card_payment">
+                              Carte Visa <small class="text-muted d-block">Sécurisé et rapide (Djamo, Wave, etc.)</small>
+                            </label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="mobile_money" value="mobile_money" aria-required="true">
+                            <label class="form-check-label" for="mobile_money">
+                              Mobile Money <small class="text-muted d-block">Orange, MTN, Moov</small>
+                            </label>
+                          </div>
+                        </div>
+                        <div class="text-end">
+                          <button type="button" class="btn btn-primary visa-btn" data-bs-toggle="modal" data-bs-target="#visaPaymentModal" style="display: inline-block;" aria-label="Valider le paiement par Visa">Valider paiement Visa</button>
+                          <button type="button" class="btn btn-primary mobile-money-btn" data-bs-toggle="modal" data-bs-target="#mobileMoneyModal" style="display: none;" aria-label="Valider le paiement par Mobile Money">Valider paiement Mobile Money</button>
+                        </div>
+                        <div id="payment-method-errors" class="text-danger mt-2" role="alert"></div>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <button class="btn btn-outline-secondary prev-btn" type="button" data-step="1" aria-label="Revenir à l'étape précédente"><i class="bi bi-arrow-left me-2"></i>Précédent</button>
                     </div>
                   </div>
                 </div>
-                <!-- Step 3 content END -->
               </form>
-						</div>
-						<!-- Main content END -->
-						<!-- Right sidebar START -->
-						<aside class="col-xl-4">
-							<div class="vstack gap-4">
-								<!-- Price summary START -->
-								<div class="card border">
-									<!-- card header -->
-									<div class="card-header border-bottom">
-										<h5 class="card-title mb-0">Résumé du prix</h5>
-									</div>
+            </div>
 
-									<!-- Card body -->
-<!--                  <div class="card-body">-->
-<!--                    <ul class="list-group list-group-borderless">-->
-<!--                      &lt;!&ndash; Prix de base &ndash;&gt;-->
-<!--                      <li class="list-group-item d-flex justify-content-between align-items-center pt-0">-->
-<!--                        <span class="h6 fw-light mb-0">Prix de base</span>-->
-<!--                        <span class="fs-5">{{ price_base|floatformat:0 }} FCFA</span>-->
-<!--                      </li>-->
+            <aside class="col-xl-4">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                  <h5 class="card-title mb-2">{{ trip.title|default:'Voyage sans titre' }}</h5>
+                  <p class="card-text text-muted small">{{ trip.description|truncatewords:20|default:'Aucune description disponible' }}</p>
+                  <ul class="list-group list-group-flush small">
+                    <li class="list-group-item"><strong>Destination :</strong> {{ trip.destination|default:'Non spécifiée' }}</li>
+                    <li class="list-group-item"><strong>Date de départ :</strong> {{ trip.departure_date|date:'d M Y'|default:'Non spécifiée' }}</li>
+                    <li class="list-group-item"><strong>Prix :</strong> {{ trip.price|default:'Non spécifié' }} XOF</li>
+                  </ul>
+                  <a href="{% url 'pages:trip_detail' trip_id=trip.id %}" class="btn btn-outline-primary mt-3 w-100">Voir détails complets</a>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+  </section>
 
-<!--                      &lt;!&ndash; Remise &ndash;&gt;-->
-<!--                      <li class="list-group-item d-flex justify-content-between align-items-center">-->
-<!--                        <span class="h6 fw-light mb-0">-->
-<!--                            Remise totale-->
-<!--                            <span class="badge text-bg-danger smaller mb-0 ms-2">-->
-<!--                                {{ trip.discount }}% off-->
-<!--                            </span>-->
-<!--                        </span>-->
-<!--                        <span class="fs-5 text-success">-{{ remise|floatformat:0 }} FCFA</span>-->
-<!--                      </li>-->
+  <!-- Modal Paiement Visa -->
+  <div class="modal fade" id="visaPaymentModal" tabindex="-1" aria-labelledby="visaPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="visaPaymentModalLabel">Paiement par Carte Visa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="visaPaymentForm" method="post" action="{% url 'pages:booking_process' trip_id=trip.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="step" value="3">
+            <input type="hidden" name="payment_method" value="visa_card">
+            <input type="hidden" name="reference" id="visa-reference">
+            <div class="row g-3 mb-2">
+              <div class="col-12">
+                <label class="form-label small" for="card_number">Numéro de carte * <span class="text-danger" id="card_number-error"></span></label>
+                <input type="text" class="form-control" name="card_number" id="card_number" placeholder="1234 5678 9012 3456" maxlength="19" required aria-required="true">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small" for="card_expiry_month">Mois (MM) * <span class="text-danger" id="card_expiry_month-error"></span></label>
+                <input type="text" class="form-control" name="card_expiry_month" id="card_expiry_month" placeholder="12" maxlength="2" required aria-required="true">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small" for="card_expiry_year">Année (AA) * <span class="text-danger" id="card_expiry_year-error"></span></label>
+                <input type="text" class="form-control" name="card_expiry_year" id="card_expiry_year" placeholder="25" maxlength="2" required aria-required="true">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small" for="card_cvv">CVV * <span class="text-danger" id="card_cvv-error"></span></label>
+                <input type="text" class="form-control" name="card_cvv" id="card_cvv" placeholder="123" maxlength="4" required aria-required="true">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small" for="cardholder_name">Nom du titulaire * <span class="text-danger" id="cardholder_name-error"></span></label>
+                <input type="text" class="form-control" name="cardholder_name" id="cardholder_name" placeholder="JEAN KOUIDIO" required aria-required="true">
+              </div>
+            </div>
+            <div id="visa-payment-errors" class="text-danger mt-2" role="alert"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Annuler">Annuler</button>
+          <button type="submit" form="visaPaymentForm" class="btn btn-success visa-submit-btn" aria-label="Valider le paiement">Valider paiement</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<!--                      &lt;!&ndash; Taxes &ndash;&gt;-->
-<!--                      <li class="list-group-item d-flex justify-content-between align-items-center">-->
-<!--                        <span class="h6 fw-light mb-0">Taxes & frais</span>-->
-<!--                        <span class="fs-5">{{ taxes|floatformat:0 }} FCFA</span>-->
-<!--                      </li>-->
-
-<!--                      &lt;!&ndash; Total &ndash;&gt;-->
-<!--                      <li class="list-group-item d-flex justify-content-between align-items-center border-top mt-2 pt-2">-->
-<!--                        <span class="h6 fw-bold mb-0">Total</span>-->
-<!--                        <span class="fs-5 fw-bold text-primary">{{ total|floatformat:0 }} FCFA</span>-->
-<!--                      </li>-->
-<!--                    </ul>-->
-<!--                  </div>-->
-
-									<!-- Card footer -->
-									<div class="card-footer border-top">
-										<div class="d-flex justify-content-between align-items-center">
-											<span class="h5 mb-0">À payer maintenant</span>
-											<span class="h5 mb-0">{{ trip.price }} FCFA</span>
-										</div>
-									</div>
-								</div>
-								<!-- Price summary END -->
-
-								<!-- Book online START -->
-								<div class="card border">
-									<!-- card header -->
-									<div class="card-header border-bottom">
-										<h5 class="card-title mb-0">Faire une demande de voyage personalisé (Groupé)</h5>
-									</div>
-
-									<!-- Card body -->
-									<div class="card-body">
-										<div class="form-control-bg-light">
-											<label class="form-label">Email</label>
-											<input type="email" name="email_1" class="form-control form-control-lg" placeholder="Entrez votre email" value="{{ user.email }}">
-										</div>
-										<div class="mt-4 form-control-bg-light">
-											<label class="form-label">Laissez nous un message </label>
-                      <textarea class="form-control" rows="3" placeholder="Votre message ici..."></textarea>
-
-										</div>
-										<div class="d-grid mt-4">
-											<button class="btn btn-primary next-btn mb-0">Envoyer une demande</button>
-										</div>
-									</div>
-								</div>
-								<!-- Book online END -->
-							</div> <!-- Row END -->
-						</aside>
-						<!-- Right sidebar END -->
-
-					</div>
-
-				</div>
-				<!-- Step content END -->
-			</div>
-		</div>
-	</section>
-	<!-- =======================
-Steps END -->
+  <!-- Modal Paiement Mobile Money -->
+  <div class="modal fade" id="mobileMoneyModal" tabindex="-1" aria-labelledby="mobileMoneyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mobileMoneyModalLabel">Paiement Mobile Money</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="mobileMoneyForm" action="{% url 'pages:booking_process' trip.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="step" value="3">
+            <input type="hidden" name="payment_method" value="mobile_money">
+            <input type="hidden" name="reference" id="mobile-money-reference">
+            <div class="form-group">
+              <label for="mobile_money_operator">Opérateur Mobile Money</label>
+              <select name="mobile_money_operator" id="mobile_money_operator" class="form-control" required>
+                <option value="MTN Money">MTN Money</option>
+                <option value="Orange Money">Orange Money</option>
+                <option value="Moov Money">Moov Money</option>
+              </select>
+              <span id="mobile_money_operator-error" class="error"></span>
+            </div>
+            <div class="form-group">
+              <label for="mobile_money_number">Numéro Mobile Money</label>
+              <input type="text" name="mobile_money_number" id="mobile_money_number" class="form-control" required>
+              <span id="mobile_money_number-error" class="error"></span>
+            </div>
+            <div id="otp-section" style="display: none;">
+              <label for="otp_code">Code OTP</label>
+              <input type="text" name="otp_code" id="otp_code" class="form-control">
+              <span id="otp_code-error" class="error"></span>
+            </div>
+            <div id="mobile-money-errors" class="error"></div>
+            <button type="submit" class="btn mobile-money-submit-btn">Confirmer Paiement</button>
+            <button type="button" class="btn resend-otp-btn" style="display: none;">Renvoyer OTP</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
 {% include 'partials/footer.html' %}
 
+{% block extra_javascript %}
+<style>
+  .bs-stepper-header {
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 0;
+  }
+  .bs-stepper-content {
+    margin-top: 0;
+    padding-top: 0.5rem !important;
+  }
+  .bs-stepper-circle {
+    transition: all 0.3s ease;
+  }
+  .step.active .bs-stepper-circle {
+    transform: scale(1.1);
+  }
+  .card {
+    transition: transform 0.2s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  .vstack {
+    gap: 0.5rem !important;
+  }
+  .card-header, .card-body {
+    padding: 0.5rem !important;
+  }
+  .icon-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 0.875rem;
+  }
+  .alert-info {
+    margin-bottom: 0.25rem !important;
+    padding: 0.25rem 0.75rem !important;
+  }
+  .form-control-sm, .form-select-sm {
+    font-size: 0.875rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  #step-1 .row, #step-2 .row {
+    margin-bottom: 0.5rem;
+  }
+  #step-1 .mb-1, #step-2 .mb-1 {
+    margin-bottom: 0.25rem !important;
+  }
+  @media (max-width: 768px) {
+    .col-md-3, .col-md-4, .col-md-5, .col-md-6 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+</style>
+<script>
+  // Obtenir le jeton CSRF
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('Script tour-booking chargé');
+
+    // Validation de la taille du fichier
+    function checkFileSize(input) {
+      if (input.files && input.files[0]) {
+        const maxSize = 5 * 1024 * 1024; // 5 Mo
+        if (input.files[0].size > maxSize) {
+          document.getElementById('profile_photo-error').textContent = 'La photo ne doit pas dépasser 5 Mo.';
+          input.value = '';
+          return false;
+        }
+      }
+      return true;
+    }
+
+    const profilePhotoInput = document.getElementById('profile_photo');
+    if (profilePhotoInput) {
+      profilePhotoInput.addEventListener('change', function () {
+        document.getElementById('profile_photo-error').textContent = '';
+        checkFileSize(this);
+      });
+    }
+
+    // Initialisation du stepper
+    const stepperElement = document.getElementById('stepper');
+    if (!stepperElement || !window.bootstrap) {
+      console.error('Stepper ou Bootstrap non trouvé');
+      return;
+    }
+
+    const steps = stepperElement.querySelectorAll('.content');
+    const triggers = stepperElement.querySelectorAll('.step-trigger');
+    let currentStep = {{ active_step|default:1 }} - 1;
+    let step2Completed = {% if traveler %}true{% else %}false{% endif %};
+    {% if traveler %}
+    document.getElementById('step-input').value = 1;
+    {% endif %}
+
+    function showStep(index) {
+      {% if traveler %}
+      if (index === 1 && steps.length === 2) return;
+      {% else %}
+      if (index === 2 && !step2Completed) {
+        document.getElementById('payment-errors').textContent = 'Veuillez compléter les détails du voyageur.';
+        return;
+      }
+      {% endif %}
+      steps.forEach((step, i) => {
+        step.classList.toggle('active', i === index);
+        step.classList.toggle('fade', i !== index);
+        if (triggers[i]) {
+          triggers[i].parentNode.classList.toggle('active', i === index);
+          triggers[i].classList.toggle('disabled', i > index);
+          triggers[i].setAttribute('aria-selected', i === index ? 'true' : 'false');
+        }
+      });
+      currentStep = index;
+      document.getElementById('step-input').value = {% if traveler %}index === 0 ? 1 : 3{% else %}index + 1{% endif %};
+    }
+
+    triggers.forEach((trigger, index) => {
+      trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (!trigger.classList.contains('disabled')) {
+          showStep(index);
+        }
+      });
+    });
+
+    // Boutons Suivant/Précédent
+    document.querySelectorAll('.next-btn').forEach(button => {
+      button.addEventListener('click', async function () {
+        if (currentStep < steps.length - 1) {
+          const nextStep = parseInt(this.getAttribute('data-step'), 10);
+          {% if traveler %}
+          if (currentStep === 0) {
+            // Étape 1 à Étape 3 (quand voyageur existe)
+            const form = document.getElementById('traveler-form');
+            const formData = new FormData(form);
+            formData.set('step', '1'); // S'assurer que l'étape 1 est traitée
+
+            // Effacer les erreurs précédentes
+            ['title', 'first_name', 'last_name', 'email', 'date_of_birth', 'gender', 'phone_number', 'profile_photo'].forEach(field => {
+              document.getElementById(`${field}-error`).textContent = '';
+            });
+            document.getElementById('payment-errors').textContent = '';
+
+            button.disabled = true;
+            try {
+              const res = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+              });
+              const result = await res.json();
+              button.disabled = false;
+              if (result.success) {
+                showStep(nextStep - 1); // Ajuster pour l'index basé sur zéro
+              } else if (result.redirect_url) {
+                alert(result.message);
+                window.location.href = result.redirect_url;
+              } else {
+                document.getElementById(result.field ? `${result.field}-error` : 'payment-errors').textContent = result.message || 'Erreur lors de l\'enregistrement.';
+              }
+            } catch (error) {
+              button.disabled = false;
+              document.getElementById('payment-errors').textContent = 'Erreur réseau.';
+            }
+          } else {
+            showStep(nextStep - 1);
+          }
+          {% else %}
+          if (currentStep === 1) {
+            // Validation de l'étape 2 (quand voyageur n'existe pas)
+            const form = document.getElementById('traveler-form');
+            const formData = new FormData(form);
+            formData.set('step', '2');
+
+            ['title', 'first_name', 'last_name', 'email', 'date_of_birth', 'gender', 'phone_number', 'profile_photo'].forEach(field => {
+              document.getElementById(`${field}-error`).textContent = '';
+            });
+            document.getElementById('payment-errors').textContent = '';
+
+            const requiredFields = ['title', 'first_name', 'last_name', 'email', 'date_of_birth', 'gender'];
+            let hasErrors = false;
+            requiredFields.forEach(field => {
+              const value = formData.get(field);
+              if (!value || value.trim() === '') {
+                hasErrors = true;
+                document.getElementById(`${field}-error`).textContent = 'Ce champ est requis.';
+              }
+            });
+
+            const email = formData.get('email');
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+              hasErrors = true;
+              document.getElementById('email-error').textContent = 'Adresse email invalide.';
+            }
+
+            const dateOfBirth = formData.get('date_of_birth');
+            if (dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
+              hasErrors = true;
+              document.getElementById('date_of_birth-error').textContent = 'Format de date invalide (AAAA-MM-JJ).';
+            }
+
+            const phoneNumber = formData.get('phone_number');
+            if (phoneNumber && !/^\+225\d{10}$/.test(phoneNumber.trim())) {
+              hasErrors = true;
+              document.getElementById('phone_number-error').textContent = 'Numéro invalide (format +225xxxxxxxxxx, 10 chiffres requis).';
+            }
+
+            if (formData.get('profile_photo') && !checkFileSize(profilePhotoInput)) {
+              hasErrors = true;
+            }
+
+            if (hasErrors) return;
+
+            button.disabled = true;
+            try {
+              const res = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+              });
+              const result = await res.json();
+              button.disabled = false;
+              if (result.success) {
+                step2Completed = true;
+                showStep(nextStep - 1);
+              } else if (result.redirect_url) {
+                alert(result.message);
+                window.location.href = result.redirect_url;
+              } else {
+                document.getElementById(result.field ? `${result.field}-error` : 'payment-errors').textContent = result.message || 'Erreur lors de l\'enregistrement.';
+              }
+            } catch (error) {
+              button.disabled = false;
+              document.getElementById('payment-errors').textContent = 'Erreur réseau.';
+            }
+          } else {
+            showStep(nextStep - 1);
+          }
+          {% endif %}
+        }
+      });
+    });
+    document.querySelectorAll('.prev-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          if (currentStep > 0) {
+            showStep(currentStep - 1);
+          }
+        });
+      });
+
+      showStep(currentStep);
+
+      // Modals de paiement
+      const visaModal = new bootstrap.Modal(document.getElementById('visaPaymentModal'), { keyboard: true });
+      const mobileMoneyModal = new bootstrap.Modal(document.getElementById('mobileMoneyModal'), { keyboard: true });
+
+      function generateReference(prefix) {
+        return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      }
+
+      // Basculer les méthodes de paiement
+      const visaBtn = document.querySelector('.visa-btn');
+      const mobileMoneyBtn = document.querySelector('.mobile-money-btn');
+      document.querySelectorAll('input[name="payment_method"]').forEach(input => {
+        input.addEventListener('change', function () {
+          visaBtn.style.display = this.value === 'visa_card' ? 'inline-block' : 'none';
+          mobileMoneyBtn.style.display = this.value === 'mobile_money' ? 'inline-block' : 'none';
+          document.getElementById('payment-method-errors').textContent = '';
+        });
+      });
+
+      // Pré-remplir le préfixe en fonction de l'opérateur sélectionné
+      document.getElementById('mobile_money_operator').addEventListener('change', function () {
+        const operator = this.value;
+        const phoneInput = document.getElementById('mobile_money_number');
+        const prefixMap = {
+          'MTN Money': '+22505',
+          'Orange Money': '+22507',
+          'Moov Money': '+22501'
+        };
+        if (operator in prefixMap) {
+          phoneInput.value = prefixMap[operator];
+          phoneInput.placeholder = prefixMap[operator] + 'XXXXXXXX';
+          phoneInput.focus();
+        }
+      });
+
+      // Validation du numéro de téléphone pour Mobile Money - Mis à jour pour 10 chiffres
+      function validateMobileMoneyNumber(operator, phoneNumber) {
+        console.log("Validating phoneNumber:", phoneNumber); // Ajout pour débogage
+        if (!phoneNumber || !/^\+225\d{10}$/.test(phoneNumber.trim())) {
+          console.log("Regex failed for:", phoneNumber.trim()); // Dépannage
+          return 'Numéro invalide (format +225xxxxxxxxxx, 10 chiffres requis).';
+        }
+        const prefixMap = {
+          'MTN Money': '+22505',
+          'Orange Money': '+22507',
+          'Moov Money': '+22501'
+        };
+        const expectedPrefix = prefixMap[operator];
+        if (!phoneNumber.startsWith(expectedPrefix)) {
+          return `Le numéro pour ${operator} doit commencer par ${expectedPrefix}.`;
+        }
+        const numberPart = phoneNumber.slice(6); // Mis à jour : Prend les 8 derniers chiffres après +225 et préfixe opérateur (2 chiffres)
+        if (parseInt(numberPart) < 10000000 || parseInt(numberPart) > 99999999) {
+          return 'Numéro hors de la plage valide.';
+        }
+        return null;
+      }      // Paiement Visa
+      document.querySelector('.visa-btn').addEventListener('click', function (e) {
+        e.preventDefault();
+        if (!step2Completed) {
+          document.getElementById('payment-method-errors').textContent = 'Veuillez compléter les détails du voyageur.';
+          return;
+        }
+        document.getElementById('visa-reference').value = generateReference('visa');
+        ['card_number', 'card_expiry_month', 'card_expiry_year', 'card_cvv', 'cardholder_name'].forEach(field => {
+          document.getElementById(`${field}-error`).textContent = '';
+        });
+        document.getElementById('visa-payment-errors').textContent = '';
+        visaModal.show();
+      });
+
+      // Paiement Mobile Money
+      let otpGenerated = false;
+      let currentOTP = null;
+      let otpResendTimeout = null;
+
+// Dans le bloc <script> de tour-booking.html
+      document.querySelector('.mobile-money-btn').addEventListener('click', async function (e) {
+        e.preventDefault();
+        if (!step2Completed) {
+          document.getElementById('payment-method-errors').textContent = 'Veuillez compléter les détails du voyageur.';
+          return;
+        }
+        const form = document.getElementById('mobileMoneyForm');
+        const operator = form.querySelector('#mobile_money_operator').value;
+        const phoneNumber = form.querySelector('#mobile_money_number').value;
+        const referenceInput = form.querySelector('#mobile-money-reference');
+        const otpSection = document.getElementById('otp-section');
+        const resendOtpBtn = document.querySelector('.resend-otp-btn');
+        const mobileMoneyErrors = document.getElementById('mobile-money-errors');
+
+        ['mobile_money_operator', 'mobile_money_number', 'otp_code'].forEach(field => {
+          document.getElementById(`${field}-error`).textContent = '';
+        });
+        mobileMoneyErrors.textContent = '';
+
+        if (!operator || !phoneNumber) {
+          if (!operator) document.getElementById('mobile_money_operator-error').textContent = 'Ce champ est requis.';
+          if (!phoneNumber) document.getElementById('mobile_money_number-error').textContent = 'Ce champ est requis.';
+          return;
+        }
+
+        const phoneError = validateMobileMoneyNumber(operator, phoneNumber);
+        if (phoneError) {
+          document.getElementById('mobile_money_number-error').textContent = phoneError;
+          return;
+        }
+
+        // Générer la référence si absente
+        if (!referenceInput.value) {
+          referenceInput.value = generateReference('mm');
+          console.log("Référence générée au clic :", referenceInput.value);
+        }
+
+        mobileMoneyErrors.textContent = 'Envoi du code OTP en cours...';
+        const formData = new FormData(form);
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+          });
+          const result = await res.json();
+          if (result.otp_required) {
+            // Afficher la section OTP
+            otpSection.style.display = 'block';
+            resendOtpBtn.style.display = 'inline-block';
+            mobileMoneyErrors.textContent = result.message; // Affiche le message avec l'OTP
+            mobileMoneyModal.show();
+            otpGenerated = true;
+          } else if (!result.success) {
+            document.getElementById(result.field || 'mobile-money-errors').textContent = result.message;
+          } else {
+            alert(result.message);
+            window.location.href = result.redirect_url;
+            mobileMoneyModal.hide();
+            otpGenerated = false;
+            currentOTP = null;
+            otpSection.style.display = 'none';
+            resendOtpBtn.style.display = 'none';
+            document.getElementById('otp_code').value = '';
+          }
+        } catch (error) {
+          mobileMoneyErrors.textContent = 'Erreur réseau.';
+        }
+      });
+
+// Soumission du formulaire Mobile Money
+      document.getElementById('mobileMoneyForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const form = this;
+        const operator = form.querySelector('#mobile_money_operator').value;
+        const phoneNumber = form.querySelector('#mobile_money_number').value;
+        const otpEntered = form.querySelector('#otp_code').value;
+        const referenceInput = form.querySelector('#mobile-money-reference');
+        const mobileMoneyErrors = document.getElementById('mobile-money-errors');
+
+        ['mobile_money_operator', 'mobile_money_number', 'otp_code'].forEach(field => {
+          document.getElementById(`${field}-error`).textContent = '';
+        });
+        mobileMoneyErrors.textContent = '';
+
+        if (!referenceInput.value) {
+          referenceInput.value = generateReference('mm');
+          console.log("Référence forcée à la soumission :", referenceInput.value);
+        }
+
+        if (!operator || !phoneNumber) {
+          if (!operator) document.getElementById('mobile_money_operator-error').textContent = 'Ce champ est requis.';
+          if (!phoneNumber) document.getElementById('mobile_money_number-error').textContent = 'Ce champ est requis.';
+          return;
+        }
+
+        const phoneError = validateMobileMoneyNumber(operator, phoneNumber);
+        if (phoneError) {
+          document.getElementById('mobile_money_number-error').textContent = phoneError;
+          return;
+        }
+
+        if (otpGenerated && !otpEntered) {
+          document.getElementById('otp_code-error').textContent = 'Veuillez entrer le code OTP.';
+          return;
+        }
+
+        const formData = new FormData(form);
+        const submitBtn = document.querySelector('.mobile-money-submit-btn');
+        submitBtn.disabled = true;
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+          });
+          const result = await res.json();
+          submitBtn.disabled = false;
+          if (result.success) {
+            alert(result.message);
+            window.location.href = result.redirect_url;
+            mobileMoneyModal.hide();
+            otpGenerated = false;
+            currentOTP = null;
+            document.getElementById('otp-section').style.display = 'none';
+            document.querySelector('.resend-otp-btn').style.display = 'none';
+            document.getElementById('otp_code').value = '';
+          } else if (result.redirect_url) {
+            alert(result.message);
+            window.location.href = result.redirect_url;
+          } else if (result.otp_required) {
+            // Afficher à nouveau la section OTP si nécessaire
+            document.getElementById('otp-section').style.display = 'block';
+            document.querySelector('.resend-otp-btn').style.display = 'inline-block';
+            mobileMoneyErrors.textContent = result.message;
+          } else {
+            document.getElementById(result.field || 'mobile-money-errors').textContent = result.message || 'Erreur lors du paiement.';
+          }
+        } catch (error) {
+          submitBtn.disabled = false;
+          mobileMoneyErrors.textContent = 'Erreur réseau.';
+        }
+      });
+
+// Renvoyer OTP
+      document.querySelector('.resend-otp-btn').addEventListener('click', async function (e) {
+        e.preventDefault();
+        if (otpResendTimeout) return;
+
+        const operator = document.getElementById('mobile_money_operator').value;
+        const phoneNumber = document.getElementById('mobile_money_number').value;
+        if (!operator || !phoneNumber) {
+          if (!operator) document.getElementById('mobile_money_operator-error').textContent = 'Ce champ est requis.';
+          if (!phoneNumber) document.getElementById('mobile_money_number-error').textContent = 'Ce champ est requis.';
+          return;
+        }
+        const phoneError = validateMobileMoneyNumber(operator, phoneNumber);
+        if (phoneError) {
+          document.getElementById('mobile_money_number-error').textContent = phoneError;
+          return;
+        }
+
+        this.disabled = true;
+        this.textContent = 'Renvoyer dans 30s';
+        document.getElementById('mobile-money-errors').textContent = 'Envoi du nouveau code OTP en cours...';
+        const formData = new FormData(document.getElementById('mobileMoneyForm'));
+        try {
+          const res = await fetch(document.getElementById('mobileMoneyForm').action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+          });
+          const result = await res.json();
+          if (result.otp_required) {
+            document.getElementById('otp-section').style.display = 'block';
+            document.querySelector('.resend-otp-btn').style.display = 'inline-block';
+            document.getElementById('mobile-money-errors').textContent = result.message;
+          } else {
+            document.getElementById('mobile-money-errors').textContent = result.message || 'Erreur lors du renvoi.';
+          }
+        } catch (error) {
+          document.getElementById('mobile-money-errors').textContent = 'Erreur réseau.';
+        } finally {
+          this.disabled = false;
+          this.textContent = 'Renvoyer OTP';
+          otpResendTimeout = setTimeout(() => {
+            otpResendTimeout = null;
+          }, 30000);
+        }
+      });      // Soumission du formulaire Visa
+      document.getElementById('visaPaymentForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const form = this;
+        const paymentErrors = document.getElementById('visa-payment-errors');
+        ['card_number', 'card_expiry_month', 'card_expiry_year', 'card_cvv', 'cardholder_name'].forEach(field => {
+          document.getElementById(`${field}-error`).textContent = '';
+        });
+        paymentErrors.textContent = '';
+
+        const cardNumber = form.querySelector('#card_number').value.replace(/\s/g, '');
+        const cardExpiryMonth = form.querySelector('#card_expiry_month').value;
+        const cardExpiryYear = form.querySelector('#card_expiry_year').value;
+        const cardCvv = form.querySelector('#card_cvv').value;
+        const cardholderName = form.querySelector('#cardholder_name').value;
+        const reference = form.querySelector('#visa-reference').value;
+        const currentYear = new Date().getFullYear() % 100;
+
+        if (!cardNumber || !cardExpiryMonth || !cardExpiryYear || !cardCvv || !cardholderName || !reference) {
+          ['card_number', 'card_expiry_month', 'card_expiry_year', 'card_cvv', 'cardholder_name'].forEach(field => {
+            if (!form.querySelector(`#${field}`).value) {
+              document.getElementById(`${field}-error`).textContent = 'Ce champ est requis.';
+            }
+          });
+          if (!reference) paymentErrors.textContent = 'Référence manquante.';
+          return;
+        }
+
+        if (!/^\d{15,16}$/.test(cardNumber)) {
+          document.getElementById('card_number-error').textContent = 'Numéro de carte invalide (15-16 chiffres).';
+          return;
+        }
+
+        if (!/^\d{1,2}$/.test(cardExpiryMonth) || parseInt(cardExpiryMonth) < 1 || parseInt(cardExpiryMonth) > 12) {
+          document.getElementById('card_expiry_month-error').textContent = 'Mois invalide (1-12).';
+          return;
+        }
+
+        if (!/^\d{2}$/.test(cardExpiryYear) || parseInt(cardExpiryYear) < currentYear || parseInt(cardExpiryYear) > currentYear + 10) {
+          document.getElementById('card_expiry_year-error').textContent = 'Année invalide (actuelle à +10 ans).';
+          return;
+        }
+
+        if (!/^\d{3,4}$/.test(cardCvv)) {
+          document.getElementById('card_cvv-error').textContent = 'CVV invalide (3-4 chiffres).';
+          return;
+        }
+
+        if (!/^[A-Za-z\s]+$/.test(cardholderName.trim())) {
+          document.getElementById('cardholder_name-error').textContent = 'Nom du titulaire invalide (lettres uniquement).';
+          return;
+        }
+
+        const formData = new FormData(form);
+        const submitBtn = document.querySelector('.visa-submit-btn');
+        submitBtn.disabled = true;
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+          });
+          const result = await res.json();
+          submitBtn.disabled = false;
+          if (result.success) {
+            alert(result.message);
+            window.location.href = result.redirect_url;
+            visaModal.hide();
+          } else if (result.redirect_url) {
+            alert(result.message);
+            window.location.href = result.redirect_url;
+          } else {
+            document.getElementById(result.field ? `${result.field}-error` : 'visa-payment-errors').textContent = result.message || 'Erreur lors du paiement.';
+          }
+        } catch (error) {
+          submitBtn.disabled = false;
+          paymentErrors.textContent = 'Erreur réseau.';
+        }
+      });
+
+      // Soumission du formulaire Mobile Money
+// Assurez-vous que cet écouteur est le seul attaché à mobileMoneyForm
+      const mobileMoneyForm = document.getElementById('mobileMoneyForm');
+      if (mobileMoneyForm) {
+        // Supprimer tout écouteur existant pour éviter les doublons
+        mobileMoneyForm.removeEventListener('submit', handleMobileMoneySubmit);
+        mobileMoneyForm.addEventListener('submit', handleMobileMoneySubmit);
+      }
+
+      async function handleMobileMoneySubmit(e) {
+        e.preventDefault();
+        const form = this;
+        const submitBtn = form.querySelector('.mobile-money-submit-btn');
+        const mobileMoneyErrors = document.getElementById('mobile-money-errors');
+        const otpSection = document.getElementById('otp-section');
+        const resendOtpBtn = document.querySelector('.resend-otp-btn');
+        const formData = new FormData(form);
+
+        // Désactiver le bouton pour éviter les soumissions multiples
+        submitBtn.disabled = true;
+        if (mobileMoneyErrors) {
+          mobileMoneyErrors.textContent = '';
+        }
+
+        // Débogage : afficher les données envoyées
+        console.log('FormData envoyé:', Object.fromEntries(formData));
+
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRFToken': getCookie('csrftoken')
+            }
+          });
+          const result = await res.json();
+
+          // Réactiver le bouton après la réponse
+          submitBtn.disabled = false;
+
+          if (res.status >= 500) {
+            if (mobileMoneyErrors) {
+              mobileMoneyErrors.textContent = 'Erreur serveur. Veuillez réessayer plus tard.';
+            }
+            console.error('Erreur 500:', result);
+            return;
+          }
+
+          if (result.success) {
+            alert(result.message);
+            window.location.href = result.redirect_url;
+            if (window.mobileMoneyModal) {
+              mobileMoneyModal.hide();
+            }
+            if (otpSection) {
+              otpSection.style.display = 'none';
+            }
+            if (resendOtpBtn) {
+              resendOtpBtn.style.display = 'none';
+            }
+            if (submitBtn) {
+              submitBtn.style.display = 'none';
+            }
+            const otpInput = document.getElementById('otp_code');
+            if (otpInput) {
+              otpInput.value = '';
+            }
+          } else if (result.otp_required) {
+            if (otpSection) {
+              otpSection.style.display = 'block';
+            }
+            if (resendOtpBtn) {
+              resendOtpBtn.style.display = 'inline-block';
+            }
+            if (submitBtn) {
+              submitBtn.style.display = 'inline-block';
+            }
+            if (mobileMoneyErrors) {
+              mobileMoneyErrors.textContent = result.message;
+            }
+            if (window.mobileMoneyModal) {
+              mobileMoneyModal.show();
+            }
+          } else {
+            if (mobileMoneyErrors) {
+              mobileMoneyErrors.textContent = result.message || 'Erreur lors du paiement.';
+            }
+            if (result.field) {
+              const errorField = document.getElementById(`${result.field}-error`);
+              if (errorField) {
+                errorField.textContent = result.message;
+              }
+            }
+          }
+        } catch (error) {
+          submitBtn.disabled = false;
+          console.error('Erreur réseau:', error);
+          if (mobileMoneyErrors) {
+            mobileMoneyErrors.textContent = 'Erreur réseau. Veuillez vérifier votre connexion.';
+          }
+        }
+      }
+
+// Fonction pour obtenir le cookie CSRF
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+// Générer une référence unique
+      function generateReference(type) {
+        const timestamp = Date.now();
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
+        return `${type.toUpperCase()}-${timestamp}-${randomNum}`;
+      }
+      document.querySelector('.mobile-money-submit-btn').addEventListener('click', function (e) {
+        e.preventDefault();
+        document.getElementById('mobileMoneyForm').dispatchEvent(new Event('submit'));
+      });
+
+      document.querySelector('.resend-otp-btn').addEventListener('click', async function (e) {
+        e.preventDefault();
+        if (otpResendTimeout) return;
+
+        const operator = document.getElementById('mobile_money_operator').value;
+        const phoneNumber = document.getElementById('mobile_money_number').value;
+        if (!operator || !phoneNumber) {
+          if (!operator) document.getElementById('mobile_money_operator-error').textContent = 'Ce champ est requis.';
+          if (!phoneNumber) document.getElementById('mobile_money_number-error').textContent = 'Ce champ est requis.';
+          return;
+        }
+        const phoneError = validateMobileMoneyNumber(operator, phoneNumber);
+        if (phoneError) {
+          document.getElementById('mobile_money_number-error').textContent = phoneError;
+          return;
+        }
+
+        this.disabled = true;
+        this.textContent = 'Renvoyer dans 30s';
+        mobileMoneyErrors.textContent = 'Envoi du nouveau code OTP en cours...';
+        setTimeout(async () => {
+          const formData = new FormData(document.getElementById('mobileMoneyForm'));
+          try {
+            const res = await fetch(form.action, {
+              method: 'POST',
+              body: formData,
+              headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const result = await res.json();
+            if (!result.success && result.message.includes('Code OTP')) {
+              currentOTP = result.message.match(/\d{4}/)[0];
+              mobileMoneyErrors.textContent = result.message;
+            } else {
+              mobileMoneyErrors.textContent = result.message || 'Erreur lors du renvoi.';
+            }
+          } catch (error) {
+            mobileMoneyErrors.textContent = 'Erreur réseau.';
+          } finally {
+            this.disabled = false;
+            this.textContent = 'Renvoyer OTP';
+            otpResendTimeout = setTimeout(() => {
+              otpResendTimeout = null;
+            }, 30000);
+          }
+        }, 2000);
+      });
+    });
+</script>
+{% endblock extra_javascript %}
 {% endblock content %}

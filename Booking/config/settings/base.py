@@ -3,37 +3,40 @@
 import os
 from pathlib import Path
 import environ
-import ssl
-import certifi
+import mimetypes
 
+# Initialisation des types MIME pour les polices
+mimetypes.add_type("application/font-woff", ".woff")
+mimetypes.add_type("application/font-woff2", ".woff2")
+mimetypes.add_type("application/x-font-ttf", ".ttf")
+mimetypes.add_type("application/x-font-otf", ".otf")
 
-
-
+# Configuration de l'environnement
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = BASE_DIR / "booking"
 env = environ.Env()
-env.read_env(str(BASE_DIR / ".env"))  # Assure-toi que cette ligne est présente
+env.read_env(str(BASE_DIR / ".env"))
 
 # GENERAL
 # ------------------------------------------------------------------------------
 DEBUG = env.bool("DJANGO_DEBUG", False)
 TIME_ZONE = "UTC"
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "fr-fr"  # Changé en français pour correspondre à votre application
+SITE_ID = 1
 USE_I18N = True
 USE_TZ = True
 LOCALE_PATHS = [str(BASE_DIR / "locale")]
-SITE_ID = 1  # Correct, mais assurez-vous que la table django_site a une entrée pour id=1
 
 # DATABASES
 # ------------------------------------------------------------------------------
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'assienian_db',
-        'USER': 'postgres',
-        'PASSWORD': 'ella',  # Remplacez par le mot de passe de l'utilisateur postgres
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "assienian_db",
+        "USER": "postgres",
+        "PASSWORD": env("DB_PASSWORD", default="ella"),
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
@@ -68,17 +71,13 @@ THIRD_PARTY_APPS = [
     "fontawesomefree",
     "widget_tweaks",
     "django_ckeditor_5",
-
-
 ]
 
 LOCAL_APPS = [
-    'rest_framework',
+    "rest_framework",
     "booking.users",
-    'backoffice',
+    "backoffice",
 ]
-
-
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -94,11 +93,28 @@ AUTHENTICATION_BACKENDS = [
 ]
 AUTH_USER_MODEL = "users.User"
 LOGIN_REDIRECT_URL = "pages:dashboard"
-from django.urls import reverse_lazy
-LOGIN_URL = reverse_lazy('pages:dashboard')  # Redirige vers index-tour.html
-ACCOUNT_LOGIN_REDIRECT_URL = '/'
-ACCOUNT_SIGNUP_REDIRECT_URL = '/?login_required=true'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = "account_login"  # Utilise la vue de connexion d'allauth
+ACCOUNT_LOGOUT_REDIRECT_URL = "/"
+ACCOUNT_SIGNUP_REDIRECT_URL = "/?login_required=true"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)  # Restauré
+ACCOUNT_ADAPTER = "booking.users.adapters.AccountAdapter"
+ACCOUNT_FORMS = {"signup": "booking.users.forms.CustomSignupForm"}
+SOCIALACCOUNT_ADAPTER = "booking.users.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_FORMS = {"signup": "booking.users.forms.UserSocialSignupForm"}
+
+# SOCIALACCOUNT_PROVIDERS
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+    },
+    "facebook": {
+        "METHOD": "oauth2",
+        "SCOPE": ["email", "public_profile"],
+        "AUTH_PARAMS": {"auth_type": "reauthenticate"},
+    },
+}
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
@@ -132,27 +148,20 @@ MIDDLEWARE = [
 
 # STATIC
 # ------------------------------------------------------------------------------
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [str(APPS_DIR / "static")]
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # MEDIA
 # ------------------------------------------------------------------------------
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = str(BASE_DIR / "media")
 
-TINYMCE_DEFAULT_CONFIG = {
-    'height': 360,
-    'width': 800,
-    'menubar': True,
-    'plugins': 'advlist autolink lists link image charmap print preview anchor',
-    'toolbar': 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image',
-    'content_css': '//www.tinymce.com/css/codepen.min.css',  # Optionnel
-}
 # TEMPLATES
 # ------------------------------------------------------------------------------
 TEMPLATES = [
@@ -180,88 +189,73 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS
+# ------------------------------------------------------------------------------
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
 # FIXTURES
 # ------------------------------------------------------------------------------
-FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
+FIXTURE_DIRS = [str(APPS_DIR / "fixtures")]
 
 # SECURITY
 # ------------------------------------------------------------------------------
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 X_FRAME_OPTIONS = "DENY"
+SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", False)
+SECURE_HSTS_SECONDS = 0
 
 # EMAIL
 # ------------------------------------------------------------------------------
-
-
-
-EMAIL_BACKEND = "booking.users.email_backend.TLSCertifiEmailBackend"
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST", default="smtp.sendgrid.net")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="apikey")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="asieniantour@gmail.com")
 EMAIL_TIMEOUT = 5
-
-
-print("EMAIL_HOST_USER:", env("EMAIL_HOST_USER"))
-print("EMAIL_HOST_PASSWORD:", env("EMAIL_HOST_PASSWORD"))
-
 
 # ADMIN
 # ------------------------------------------------------------------------------
 ADMIN_URL = "admin/"
 ADMINS = [("""ella""", "ahou.405@gmail.com")]
 MANAGERS = ADMINS
-DJANGO_ADMIN_FORCE_ALLAUTH = env.bool("DJANGO_ADMIN_FORCE_ALLAUTH", default=False)
+DJANGO_ADMIN_FORCE_ALLAUTH = env.bool("DJANGO_ADMIN_FORCE_ALLAUTH", False)
 
 # LOGGING
 # ------------------------------------------------------------------------------
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
     },
-    'loggers': {
-        '': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
+    "loggers": {
+        "": {
+            "handlers": ["console"],
+            "level": "DEBUG",
         },
     },
 }
-# django-allauth
-# ------------------------------------------------------------------------------
-ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)
-ACCOUNT_LOGIN_METHODS = {'username', 'email'}  # Remplace ACCOUNT_AUTHENTICATION_METHOD
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']  # Remplace ACCOUNT_EMAIL_REQUIRED
-ACCOUNT_EMAIL_VERIFICATION = "none"
-ACCOUNT_ADAPTER = "booking.users.adapters.AccountAdapter"
-ACCOUNT_FORMS = {
-    "signup": "booking.users.forms.CustomSignupForm",
-}
-SOCIALACCOUNT_ADAPTER = "booking.users.adapters.SocialAccountAdapter"
-SOCIALACCOUNT_FORMS = {"signup": "booking.users.forms.UserSocialSignupForm"}
 
-# SOCIALACCOUNT_PROVIDERS
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {"access_type": "online"},
+# CKEditor 5 Configuration
+# ------------------------------------------------------------------------------
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "heading", "|",
+            "bold", "italic", "link", "bulletedList", "numberedList", "blockQuote", "imageUpload",
+        ],
+        "height": 300,
+        "width": "auto",
     },
-    "facebook": {
-        "METHOD": "oauth2",
-        "SCOPE": ["email", "public_profile"],
-        "AUTH_PARAMS": {"auth_type": "reauthenticate"},
-    }
 }
-AUTH_USER_MODEL = 'users.User'
-AUTHENTICATION_BACKENDS = [
-'django.contrib.auth.backends.ModelBackend',
-'allauth.account.auth_backends.AuthenticationBackend',
-]
+
+# Paystack Configuration
+# ------------------------------------------------------------------------------
+PAYSTACK_PUBLIC_KEY = env("PAYSTACK_PUBLIC_KEY", default="pk_test_ebe6f55be8b232118dfe69070aae2b879f97aac9")
+PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY", default="sk_test_a65f398fe7d3193d595a951efc176b5041031fc3")

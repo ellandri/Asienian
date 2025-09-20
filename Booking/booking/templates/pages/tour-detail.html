@@ -407,7 +407,7 @@ Tabs-content START -->
 
 								<!-- Button -->
 								<div class="d-grid gap-2">
-                  <a href="{% url 'pages:tour_booking' id=trip.id %}" class="btn btn-primary">Book Now</a>
+                  <a href="{% url 'pages:tour_booking' trip_id=trip.id %}" class="btn btn-primary">Book Now</a>
                   <button class="btn btn-outline-primary mb-0" type="button" data-bs-toggle="modal"
 										data-bs-target="#inquiryForm">
 										<i class="bi bi-eye fa-fw me-2"></i>Send Inquiry

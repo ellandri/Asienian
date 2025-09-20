@@ -1,42 +1,36 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include
-from django.urls import path
+from django.urls import include, path
 from django.views import defaults as default_views
-from django.views.generic import TemplateView
-from allauth.account.views import LoginView
-from booking.pages.views import ModalLoginView
-from backoffice.views import BackofficeView, admin_booking_list_view
-
-
+from booking.pages.views import ModalLoginView, tour_booking_view, booking_process
+from backoffice.views import admin_booking_list_view
 
 urlpatterns = [
-
-    # Django Admin, use {% url 'admin:index' %}
+    # Django Admin
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("booking.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
-    # Your stuff: custom urls includes go here
-    path('accounts/login/', ModalLoginView.as_view(), name='account_login'),
-    path('backoffice/', include('backoffice.urls', namespace='backoffice')),
+    # Custom login view
+    path("accounts/login/", ModalLoginView.as_view(), name="account_login"),
+    # Backoffice URLs
+    path("backoffice/", include("backoffice.urls", namespace="backoffice")),
+    # Pages URLs
     path("", include("booking.pages.urls", namespace="pages")),
-    path('admin-booking-list/', admin_booking_list_view, name='admin_booking_list_root'),
-    path("ckeditor5/", include('django_ckeditor_5.urls')),  # ⚡ Ajoute ceci
-
-
-
-    # ...
-    # Media files
-    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
-
+    # Admin booking list
+    path("admin-booking-list/", admin_booking_list_view, name="admin_booking_list_root"),
+    # CKEditor URLs
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
+    # API URLs
+    path("api/", include("rest_framework.urls")),
+    # Booking URLs
+    path("tour-booking/<int:trip_id>/", tour_booking_view, name="tour_booking"),
+    path("booking-process/<int:trip_id>/", booking_process, name="bookinga_process"),
 ]
 
-
 if settings.DEBUG:
-    # This allows the error pages to be debugged during development, just visit
-    # these url in browser to see how these error pages look like.
+    # Error pages for debugging
     urlpatterns += [
         path(
             "400/",
@@ -55,10 +49,15 @@ if settings.DEBUG:
         ),
         path("500/", default_views.server_error),
     ]
+
+    # Debug Toolbar
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
-
         urlpatterns = [
             path("__debug__/", include(debug_toolbar.urls)),
             *urlpatterns,
         ]
+
+    # Static and media files in DEBUG mode
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

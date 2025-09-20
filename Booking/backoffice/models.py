@@ -1,110 +1,126 @@
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 from booking.users.models import User
-from django.core.validators import FileExtensionValidator, RegexValidator
+from django.core.validators import FileExtensionValidator, RegexValidator, URLValidator
 
 class Trip(models.Model):
-    departure_city = models.CharField(max_length=100)
-    arrival_city = models.CharField(max_length=100)
-    vehicle_type = models.CharField(max_length=50)
-    duration = models.CharField(max_length=20)
-    price = models.IntegerField()
-    rating = models.FloatField(default=0.0)
-    image = models.URLField(max_length=500, blank=True, null=True)
-    departure_time = models.CharField(max_length=10)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_best_trip = models.BooleanField(default=False)
+    title = models.CharField(max_length=200)
+    destination = models.CharField(max_length=100)
+    departure_date = models.DateField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = CKEditor5Field('Description', config_name='extends')
+    image = models.URLField(
+        blank=True,
+        null=True,
+        validators=[URLValidator()],
+        help_text="URL d'une image (jpg, jpeg, png, gif)."
+    )
+    departure_city = models.CharField(max_length=100, blank=True, null=True)
+    arrival_city = models.CharField(max_length=100, blank=True, null=True)
+    vehicle_type = models.CharField(max_length=50, blank=True, null=True)
+    duration = models.CharField(max_length=50, blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
+    departure_time = models.TimeField(blank=True, null=True)
     lieux_couverts = CKEditor5Field(blank=True, null=True)
-    point_depart = CKEditor5Field(blank=True, null=True)
-    point_arrivee = CKEditor5Field(blank=True, null=True)
+    point_depart = models.CharField(max_length=100, blank=True, null=True)
+    point_arrivee = models.CharField(max_length=100, blank=True, null=True)
+    is_best_trip = models.BooleanField(default=False)
     points_forts = CKEditor5Field(blank=True, null=True)
     inclusions = CKEditor5Field(blank=True, null=True)
-    exclusions = CKEditor5Field(default="Aucune exclusion", blank=True)
+    exclusions = CKEditor5Field(blank=True, null=True)
     politique = CKEditor5Field(blank=True, null=True)
-    description = CKEditor5Field(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.departure_city} à {self.arrival_city}"
+        return f"{self.title} - {self.destination}"
 
     class Meta:
         verbose_name = "Voyage"
         verbose_name_plural = "Voyages"
 
 class Traveler(models.Model):
-    TITLE_CHOICES = [
+    GENDER_CHOICES = [
+        ('M', 'Masculin'),
+        ('F', 'Féminin'),
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="traveler")  # Changé en OneToOneField
+    title = models.CharField(max_length=10, choices=[
         ('Mr', 'Monsieur'),
         ('Mrs', 'Madame'),
-        ('Ms', 'Mademoiselle'),
-    ]
-
-    GENDER_CHOICES = [
-        ('male', 'Homme'),
-        ('female', 'Femme'),
-        ('other', 'Autre'),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="travelers")
-    trip = models.ForeignKey(
-        'Trip',  # Utilisez une chaîne pour éviter les importations circulaires
-        on_delete=models.CASCADE,
-        related_name="travelers",
-        null=True,
-        blank=True
-    )
-    title = models.CharField(max_length=10, choices=TITLE_CHOICES, blank=True, null=True)
-    first_name = models.CharField(max_length=100, blank=False, null=False, default="Inconnu")
-    last_name = models.CharField(max_length=100, blank=False, null=False, default="Inconnu")
-    date_of_birth = models.DateField(blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+        ('Miss', 'Mademoiselle')
+    ])
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField()
+    date_of_birth = models.DateField()
     phone_number = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        validators=[RegexValidator(
-            regex=r'^\+?1?\d{9,15}$',
-            message="Le numéro de téléphone doit être au format international, par exemple +1234567890."
-        )]
+        max_length=15,
+        blank=True, null=True,
+        validators=[RegexValidator(r'^\+225\d{8,10}$', 'Numéro de téléphone invalide (format +225xxxxxxxx).')]
     )
-    nationality = models.CharField(max_length=100, blank=True, null=True)
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
+    nationality = models.CharField(max_length=50, blank=True, null=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     address = models.TextField(blank=True, null=True)
     profile_photo = models.ImageField(
-        upload_to='profile_photos/',
-        blank=True,
-        null=True,
-        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])]
+        upload_to='travelers/',
+        blank=True, null=True,
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])]
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.title or ''} {self.first_name} {self.last_name} - {self.trip if self.trip else 'Aucun voyage'}"
+        return f"{self.title} {self.first_name} {self.last_name}"
 
     class Meta:
         verbose_name = "Voyageur"
         verbose_name_plural = "Voyageurs"
 
-
 class Booking(models.Model):
-    PAYMENT_METHODS = [
-        ('card', 'Credit/Debit Card'),
+    PAYMENT_METHOD_CHOICES = [
+        ('visa_card', 'Carte Visa'),
+        ('mobile_money', 'Mobile Money'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('paid', 'Payé'),
+        ('canceled', 'Annulé'),
     ]
 
-    traveler = models.ForeignKey('Traveler', on_delete=models.CASCADE, related_name="bookings")
-    trip = models.ForeignKey('Trip', on_delete=models.CASCADE, related_name="bookings")
-    status = models.CharField(max_length=20, choices=[
-        ('pending', 'Pending'),
-        ('paid', 'Paid'),
-        ('canceled', 'Canceled'),
-    ], default='pending')
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, blank=True, null=True)
-    card_number = models.CharField(max_length=16, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
+    traveler = models.ForeignKey(Traveler, on_delete=models.CASCADE, related_name="bookings")
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="bookings")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, blank=True, null=True)
+    payment_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    transaction_id = models.CharField(max_length=100, blank=True, null=True, unique=True)  # Ajout de unique=True
+    card_number = models.CharField(max_length=20, blank=True, null=True)
     card_expiry_month = models.CharField(max_length=2, blank=True, null=True)
     card_expiry_year = models.CharField(max_length=4, blank=True, null=True)
-    card_cvv = models.CharField(max_length=3, blank=True, null=True)
+    card_cvv = models.CharField(max_length=4, blank=True, null=True)
     cardholder_name = models.CharField(max_length=100, blank=True, null=True)
+    mobile_money_operator = models.CharField(max_length=50, blank=True, null=True)
+    mobile_money_number = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Booking {self.traveler} - {self.trip} ({self.status})"
+        return f"Réservation {self.id} pour {self.traveler} - {self.trip}"
+
+    class Meta:
+        verbose_name = "Réservation"
+        verbose_name_plural = "Réservations"
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="reviews")
+    rating = models.FloatField()
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Avis de {self.user} sur {self.trip}"
+
+    class Meta:
+        verbose_name = "Avis"
+        verbose_name_plural = "Avis"

@@ -3,10 +3,8 @@
 {% load static i18n %}
 
 {% block page_content %}
-
-<!-- CKEditor 5 CDN -->
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
+<!-- Script pour la gestion des fichiers XLSX -->
 <script type="text/javascript">
   var gk_isXlsx = false;
   var gk_xlsxFileLookup = {};
@@ -23,20 +21,19 @@
 
         // Convert sheet to JSON to filter blank rows
         var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-        // Filter out blank rows (rows where all cells are empty, null, or undefined)
+        // Filter out blank rows
         var filteredData = jsonData.filter(row => row.some(filledCell));
 
-        // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+        // Heuristic to find the header row
         var headerRowIndex = filteredData.findIndex((row, index) =>
           row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
         );
-        // Fallback
         if (headerRowIndex === -1 || headerRowIndex > 25) {
           headerRowIndex = 0;
         }
 
         // Convert filtered JSON back to CSV
-        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
         csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
         return csv;
       } catch (e) {
@@ -48,281 +45,330 @@
   }
 </script>
 
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.18);
+  }
 
-  <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      --glass-bg: rgba(255, 255, 255, 0.25);
-      --glass-border: rgba(255, 255, 255, 0.18);
-    }
+  body {
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
 
-    body {
-      min-height: 100vh;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+  .page-content-wrapper {
+    background-color: #dce3fb;
+    backdrop-filter: blur(10px);
+  }
 
-    .page-content-wrapper {
-      background-color: #dce3fb;
+  .main-title {
+    background: #333337;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
 
-      backdrop-filter: blur(10px);
+  .modern-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .modern-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .card-header-modern {
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding: 1.5rem 2rem;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .card-title-modern {
+    color: #333337;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  .card-body-modern {
+    padding: 2.5rem;
+    background-color: #dce3fb;
+    border-radius: 0 0 24px 24px;
+  }
+
+  .form-group-modern {
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .form-label-modern {
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-control-modern {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+  }
+
+  .form-control-modern:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(255, 255, 255, 1);
+    box-shadow:
+      0 0 0 4px rgba(102, 126, 234, 0.1),
+      0 8px 20px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .form-control-modern:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .textarea-modern {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .btn-primary-modern {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 16px;
+    padding: 1rem 2.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-primary-modern:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary-modern:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-secondary-modern {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 1rem 2rem;
+    color: #6b7280;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .btn-secondary-modern:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #374151;
+    transform: translateY(-2px);
+  }
+
+  .error-text {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+
+  .help-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+
+  .input-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    transition: color 0.3s ease;
+  }
+
+  .form-group-modern:focus-within .input-icon {
+    color: #667eea;
+  }
+
+  .floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .floating-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .floating-circle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .floating-circle:nth-child(2) {
+    width: 120px;
+    height: 120px;
+    top: 20%;
+    right: 15%;
+    animation-delay: 2s;
+  }
+
+  .floating-circle:nth-child(3) {
+    width: 60px;
+    height: 60px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
     }
 
     .main-title {
-      background: #333337;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      font-weight: 800;
-      font-size: 2.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .modern-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      border-radius: 24px;
-      box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .modern-card:hover {
-      transform: translateY(-5px);
-      box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    .card-header-modern {
-      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-      padding: 1.5rem 2rem;
-      border-radius: 24px 24px 0 0;
-    }
-
-    .card-title-modern {
-      color: #333337;
-      font-weight: 700;
-      font-size: 1.4rem;
-      margin: 0;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      font-size: 2rem;
     }
 
     .card-body-modern {
-      padding: 2.5rem;
-      background-color: #dce3fb;
-
-      border-radius: 0 0 24px 24px;
+      padding: 1.5rem;
     }
+  }
 
-    .form-group-modern {
-      margin-bottom: 2rem;
-      position: relative;
-    }
+  .gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-    .form-label-modern {
-      color: #2d3748;
-      font-weight: 600;
-      font-size: 0.95rem;
-      margin-bottom: 0.75rem;
-      display: block;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+  /* Ajuster le positionnement des icônes pour les champs CKEditor */
+  .form-group-modern .ck-editor__editable {
+    min-height: 120px;
+    border-radius: 16px;
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+  }
 
-    .form-control-modern {
-      background: rgba(255, 255, 255, 0.9);
-      border: 2px solid rgba(102, 126, 234, 0.1);
-      border-radius: 16px;
-      padding: 1rem 1.25rem;
-      font-size: 1rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(10px);
-    }
+  .form-group-modern .ck-editor__editable:focus {
+    border-color: #667eea;
+    box-shadow:
+      0 0 0 4px rgba(102, 126, 234, 0.1),
+      0 8px 20px rgba(102, 126, 234, 0.15);
+  }
 
-    .form-control-modern:focus {
-      outline: none;
-      border-color: #667eea;
-      background: rgba(255, 255, 255, 1);
-      box-shadow:
-        0 0 0 4px rgba(102, 126, 234, 0.1),
-        0 8px 20px rgba(102, 126, 234, 0.15);
-      transform: translateY(-2px);
-    }
+  /* Déplacer l'icône pour éviter le chevauchement avec l'éditeur */
+  .form-group-modern .input-icon-ckeditor {
+    top: 20px;
+    right: 10px;
+  }
+  .form-check-input {
+    cursor: pointer;
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-    .form-control-modern:hover {
-      border-color: rgba(102, 126, 234, 0.3);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-    }
+  .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
 
-    .textarea-modern {
-      min-height: 120px;
-      resize: vertical;
-    }
+  .form-check-input:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+  }
 
-    .btn-primary-modern {
-      background: var(--primary-gradient);
-      border: none;
-      border-radius: 16px;
-      padding: 1rem 2.5rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
+  .form-check-label {
+    font-size: 1rem;
+    transition: color 0.3s ease;
+  }
 
-    .btn-primary-modern::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
+  .form-group-modern:hover .form-check-input + .form-check-label {
+    color: #667eea;
+  }
 
-    .btn-primary-modern:hover::before {
-      left: 100%;
-    }
+  .form-group-modern:hover .input-icon {
+    color: #667eea;
+  }
+</style>
 
-    .btn-primary-modern:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-secondary-modern {
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 1rem 2rem;
-      color: #6b7280;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-secondary-modern:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.3);
-      color: #374151;
-      transform: translateY(-2px);
-    }
-
-    .error-text {
-      color: #ef4444;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-      font-weight: 500;
-    }
-
-    .help-text {
-      color: #6b7280;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-      font-style: italic;
-    }
-
-    .input-icon {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      transition: color 0.3s ease;
-    }
-
-    .form-group-modern:focus-within .input-icon {
-      color: #667eea;
-    }
-
-    .floating-elements {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .floating-circle {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      animation: float 6s ease-in-out infinite;
-    }
-
-    .floating-circle:nth-child(1) {
-      width: 80px;
-      height: 80px;
-      top: 10%;
-      left: 10%;
-      animation-delay: 0s;
-    }
-
-    .floating-circle:nth-child(2) {
-      width: 120px;
-      height: 120px;
-      top: 20%;
-      right: 15%;
-      animation-delay: 2s;
-    }
-
-    .floating-circle:nth-child(3) {
-      width: 60px;
-      height: 60px;
-      bottom: 20%;
-      left: 20%;
-      animation-delay: 4s;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(180deg); }
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    @media (max-width: 768px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-
-      .main-title {
-        font-size: 2rem;
-      }
-
-      .card-body-modern {
-        padding: 1.5rem;
-      }
-    }
-
-    .gradient-text {
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-  </style>
-</head>
 <body>
 <div class="floating-elements">
   <div class="floating-circle"></div>
@@ -352,8 +398,56 @@
           </h5>
         </div>
         <div class="card-body-modern">
-          <form method="post">
+          <form method="post" novalidate>
             {% csrf_token %}
+            <!-- Title -->
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="fas fa-heading me-2 gradient-text"></i>
+                Titre du voyage
+              </label>
+              <div style="position: relative;">
+                {{ form.title|add_class:"form-control form-control-modern" }}
+                <i class="fas fa-pen input-icon"></i>
+              </div>
+              {% if form.title.errors %}
+              <div class="error-text">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Destination -->
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="fas fa-map-marked-alt me-2 gradient-text"></i>
+                Destination
+              </label>
+              <div style="position: relative;">
+                {{ form.destination|add_class:"form-control form-control-modern" }}
+                <i class="fas fa-globe input-icon"></i>
+              </div>
+              {% if form.destination.errors %}
+              <div class="error-text">{{ form.destination.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Departure Date -->
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="fas fa-calendar-alt me-2 gradient-text"></i>
+                Date de départ
+              </label>
+              <div style="position: relative;">
+                {{ form.departure_date|add_class:"form-control form-control-modern" }}
+                <i class="fas fa-calendar input-icon"></i>
+              </div>
+              {% if form.departure_date.errors %}
+              <div class="error-text">{{ form.departure_date.errors }}</div>
+              {% endif %}
+              <div class="help-text">
+                <i class="fas fa-info-circle me-1"></i>
+                Format attendu : JJ/MM/AAAA
+              </div>
+            </div>
 
             <!-- Row 1: Departure and Arrival cities -->
             <div class="form-row">
@@ -448,25 +542,38 @@
               </div>
             </div>
 
-            <!-- Image URL -->
+            <!-- Image -->
             <div class="form-group-modern">
               <label class="form-label-modern">
                 <i class="fas fa-image me-2 gradient-text"></i>
-                URL de l'image
+                URL de l’image
               </label>
               <div style="position: relative;">
                 {{ form.image|add_class:"form-control form-control-modern" }}
                 <i class="fas fa-link input-icon"></i>
               </div>
-              {% if form.image.errors %}
-              <div class="error-text">{{ form.image.errors }}</div>
-              {% endif %}
               <div class="help-text">
                 <i class="fas fa-info-circle me-1"></i>
-                Entrez une URL pointant vers une image (par exemple, https://via.placeholder.com/400x300).
+                Entrez l’URL d’une image (jpg, jpeg, png, gif).
               </div>
+              <img id="image-preview" src="" alt="Aperçu de l'image" class="img-fluid mt-2" style="max-height:200px; display:none;">
             </div>
 
+            <script>
+              const imageInput = document.querySelector('input[name="image"]');
+              const imagePreview = document.getElementById('image-preview');
+
+              imageInput.addEventListener('input', () => {
+                const url = imageInput.value;
+                if(url.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                  imagePreview.src = url;
+                  imagePreview.style.display = 'block';
+                } else {
+                  imagePreview.style.display = 'none';
+                  imagePreview.src = '';
+                }
+              });
+            </script>
             <!-- Departure time -->
             <div class="form-group-modern">
               <label class="form-label-modern">
@@ -482,9 +589,30 @@
               {% endif %}
               <div class="help-text">
                 <i class="fas fa-info-circle me-1"></i>
-                Format attendu : HH:MM AM/PM (par exemple, 07:00 AM).
+                Format attendu : HH:MM (par exemple, 07:00).
               </div>
             </div>
+
+            <!-- Is Best Trip -->
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="fas fa-award me-2 gradient-text"></i>
+                Meilleur voyage
+              </label>
+              <div style="position: relative; display: flex; align-items: center; padding: 1rem; background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(102, 126, 234, 0.1); border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                {{ form.is_best_trip|add_class:"form-check-input me-2" }}
+                <span class="form-check-label" style="color: #2d3748;">Cocher pour marquer comme meilleur voyage</span>
+                <i class="fas fa-award input-icon" style="color: #9ca3af;"></i>
+              </div>
+              {% if form.is_best_trip.errors %}
+              <div class="error-text">{{ form.is_best_trip.errors }}</div>
+              {% endif %}
+              <div class="help-text">
+                <i class="fas fa-info-circle me-1"></i>
+                Cochez cette case pour mettre en avant ce voyage comme une offre spéciale.
+              </div>
+            </div>
+
 
             <!-- Row 4: Points de départ et d'arrivée -->
             <div class="form-row">
@@ -524,8 +652,8 @@
                 Lieux couverts
               </label>
               <div style="position: relative;">
-                {{ form.lieux_couverts|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
-                <i class="fas fa-globe input-icon"></i>
+                {{ form.lieux_couverts|add_class:"form-control form-control-modern textarea-modern django-ckeditor-widget" }}
+                <i class="fas fa-globe input-icon input-icon-ckeditor"></i>
               </div>
               {% if form.lieux_couverts.errors %}
               <div class="error-text">{{ form.lieux_couverts.errors }}</div>
@@ -539,44 +667,42 @@
                 Points forts du voyage
               </label>
               <div style="position: relative;">
-                {{ form.points_forts|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
-                <i class="fas fa-trophy input-icon"></i>
+                {{ form.points_forts|add_class:"form-control form-control-modern textarea-modern django-ckeditor-widget" }}
+                <i class="fas fa-trophy input-icon input-icon-ckeditor"></i>
               </div>
               {% if form.points_forts.errors %}
               <div class="error-text">{{ form.points_forts.errors }}</div>
               {% endif %}
             </div>
 
-            <!-- Row 5: Inclusions and Exclusions -->
-            <div class="form-row">
-              <div class="form-group-modern">
-                <label class="form-label-modern">
-                  <i class="fas fa-check-circle me-2 gradient-text"></i>
-                  Inclusions
-                </label>
-                <div style="position: relative;">
-                  {{ form.inclusions|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
-                  <i class="fas fa-plus-circle input-icon"></i>
-                </div>
-                {% if form.inclusions.errors %}
-                <div class="error-text">{{ form.inclusions.errors }}</div>
-                {% endif %}
-                <div class="form-group-modern">
-                  <label class="form-label-modern">
-                    <i class="fas fa-times-circle me-2 gradient-text"></i>
-                    Exclusions
-                  </label>
-                  <div style="position: relative;">
-                    {{ form.exclusions|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
-                    <i class="fas fa-minus-circle input-icon"></i>
-                  </div>
-                  {% if form.exclusions.errors %}
-                  <div class="error-text">{{ form.exclusions.errors }}</div>
-                  {% endif %}
-                </div>
-
+            <!-- Inclusions -->
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="fas fa-check-circle me-2 gradient-text"></i>
+                Inclusions
+              </label>
+              <div style="position: relative;">
+                {{ form.inclusions|add_class:"form-control form-control-modern textarea-modern django-ckeditor-widget" }}
+                <i class="fas fa-plus-circle input-icon input-icon-ckeditor"></i>
               </div>
+              {% if form.inclusions.errors %}
+              <div class="error-text">{{ form.inclusions.errors }}</div>
+              {% endif %}
+            </div>
 
+            <!-- Exclusions -->
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="fas fa-times-circle me-2 gradient-text"></i>
+                Exclusions
+              </label>
+              <div style="position: relative;">
+                {{ form.exclusions|add_class:"form-control form-control-modern textarea-modern django-ckeditor-widget" }}
+                <i class="fas fa-minus-circle input-icon input-icon-ckeditor"></i>
+              </div>
+              {% if form.exclusions.errors %}
+              <div class="error-text">{{ form.exclusions.errors }}</div>
+              {% endif %}
             </div>
 
             <!-- Politique -->
@@ -586,8 +712,8 @@
                 Politique
               </label>
               <div style="position: relative;">
-                {{ form.politique|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
-                <i class="fas fa-scroll input-icon"></i>
+                {{ form.politique|add_class:"form-control form-control-modern textarea-modern django-ckeditor-widget" }}
+                <i class="fas fa-scroll input-icon input-icon-ckeditor"></i>
               </div>
               {% if form.politique.errors %}
               <div class="error-text">{{ form.politique.errors }}</div>
@@ -601,8 +727,8 @@
                 Description
               </label>
               <div style="position: relative;">
-                {{ form.description|add_class:"form-control form-control-modern textarea-modern ckeditor" }}
-                <i class="fas fa-pen input-icon"></i>
+                {{ form.description|add_class:"form-control form-control-modern textarea-modern django-ckeditor-widget" }}
+                <i class="fas fa-pen input-icon input-icon-ckeditor"></i>
               </div>
               {% if form.description.errors %}
               <div class="error-text">{{ form.description.errors }}</div>
@@ -626,41 +752,130 @@
     </div>
   </div> <!-- Row END -->
 </div>
-
 <script>
-  // Effet de parallaxe léger pour les éléments flottants
-  document.addEventListener('mousemove', function(e) {
-    const circles = document.querySelectorAll('.floating-circle');
-    const x = e.clientX / window.innerWidth;
-    const y = e.clientY / window.innerHeight;
-
-    circles.forEach((circle, index) => {
-      const speed = (index + 1) * 0.5;
-      const xOffset = (x - 0.5) * speed * 20;
-      const yOffset = (y - 0.5) * speed * 20;
-      circle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-    });
-  });
-
-  // Animation d'entrée pour les éléments du formulaire
   document.addEventListener('DOMContentLoaded', function() {
+    // Stocker les instances de CKEditor pour éviter la duplication
+    const editors = new Map();
+
+    // Initialisation de CKEditor 5 sur les textarea avec la classe django-ckeditor-widget
+    document.querySelectorAll('.django-ckeditor-widget').forEach(function(el) {
+      if (!editors.has(el)) {
+        ClassicEditor
+          .create(el, {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
+            language: 'fr'
+          })
+          .then(editor => {
+            editors.set(el, editor);
+            // Synchroniser les données de CKEditor avec le textarea avant soumission
+            const form = el.closest('form');
+            form.addEventListener('submit', function(event) {
+              // Mettre à jour la valeur du textarea avec les données de l'éditeur
+              editors.forEach((editor, element) => {
+                element.value = editor.getData();
+              });
+            });
+          })
+          .catch(error => {
+            console.error('Erreur CKEditor:', error);
+          });
+      }
+    });
+
+    // Validation côté client pour title, destination, departure_date, et image
+    const titleInput = document.querySelector('input[name="title"]');
+    const destinationInput = document.querySelector('input[name="destination"]');
+    const departureDateInput = document.querySelector('input[name="departure_date"]');
+    const imageInput = document.querySelector('input[name="image"]');
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+      let hasError = false;
+
+      // Validation pour title
+      if (!titleInput.value) {
+        hasError = true;
+        const errorDiv = titleInput.closest('.form-group-modern').querySelector('.error-text') || document.createElement('div');
+        errorDiv.className = 'error-text';
+        errorDiv.textContent = 'Le titre du voyage est requis.';
+        titleInput.closest('.form-group-modern').appendChild(errorDiv);
+        titleInput.focus();
+      }
+
+      // Validation pour destination
+      if (!destinationInput.value) {
+        hasError = true;
+        const errorDiv = destinationInput.closest('.form-group-modern').querySelector('.error-text') || document.createElement('div');
+        errorDiv.className = 'error-text';
+        errorDiv.textContent = 'La destination est requise.';
+        destinationInput.closest('.form-group-modern').appendChild(errorDiv);
+        if (!hasError) destinationInput.focus();
+      }
+
+      // Validation pour departure_date
+      if (!departureDateInput.value) {
+        hasError = true;
+        const errorDiv = departureDateInput.closest('.form-group-modern').querySelector('.error-text') || document.createElement('div');
+        errorDiv.className = 'error-text';
+        errorDiv.textContent = 'La date de départ est requise.';
+        departureDateInput.closest('.form-group-modern').appendChild(errorDiv);
+        if (!hasError) departureDateInput.focus();
+      }
+
+      // Validation pour image (optionnel, mais doit être une URL d'image valide si rempli)
+      if (imageInput.value) {
+        const validImageExtensions = /\.(jpg|jpeg|png|gif)$/i;
+        if (!validImageExtensions.test(imageInput.value)) {
+          hasError = true;
+          const errorDiv = imageInput.closest('.form-group-modern').querySelector('.error-text') || document.createElement('div');
+          errorDiv.className = 'error-text';
+          errorDiv.textContent = 'L’URL de l’image doit se terminer par .jpg, .jpeg, .png ou .gif.';
+          imageInput.closest('.form-group-modern').appendChild(errorDiv);
+          if (!hasError) imageInput.focus();
+        }
+      }
+
+      // Gestion de l'effet visuel pour is_best_trip
+      const isBestTripCheckbox = document.querySelector('input[name="is_best_trip"]');
+      isBestTripCheckbox.addEventListener('change', function() {
+        const container = this.closest('.form-group-modern div');
+        if (this.checked) {
+          container.style.borderColor = '#667eea';
+          container.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1), 0 8px 20px rgba(102, 126, 234, 0.15)';
+        } else {
+          container.style.borderColor = 'rgba(102, 126, 234, 0.1)';
+          container.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)';
+        }
+      });
+
+      if (hasError) {
+        event.preventDefault();
+      }
+    });
+
+    // Effet de parallaxe pour les éléments flottants
+    document.addEventListener('mousemove', function(e) {
+      const circles = document.querySelectorAll('.floating-circle');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+
+      circles.forEach((circle, index) => {
+        const speed = (index + 1) * 0.5;
+        const xOffset = (x - 0.5) * speed * 20;
+        const yOffset = (y - 0.5) * speed * 20;
+        circle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+      });
+    });
+
+    // Animation d'entrée pour les éléments du formulaire
     const formGroups = document.querySelectorAll('.form-group-modern');
     formGroups.forEach((group, index) => {
       group.style.opacity = '0';
       group.style.transform = 'translateY(30px)';
       group.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-
       setTimeout(() => {
         group.style.opacity = '1';
         group.style.transform = 'translateY(0)';
       }, index * 100);
-    });
-  });
-
-  // Initialisation CKEditor 5 sur tous les textarea avec la classe ckeditor
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('textarea.ckeditor').forEach(function(el) {
-      ClassicEditor.create(el).catch(error => { console.error(error); });
     });
   });
 </script>
