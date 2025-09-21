@@ -528,11 +528,11 @@
 						<li>
 							<hr class="dropdown-divider">
 						</li>
-						<li><a class="dropdown-item" href="{% url 'pages:account_profile' %}"><i class="bi bi-bookmark-check fa-fw me-2"></i>My Profil</a></li>
-						<li><a class="dropdown-item" href="{% url 'pages:my_bookings' %}"><i class="bi bi-bookmark-check fa-fw me-2"></i>My Bookings</a></li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Settings</a></li>
-						<li><a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='help-center' %}"><i class="bi bi-info-circle fa-fw me-2"></i>Help
-								Center</a></li>
+            <li><a class="dropdown-item" href="{% url 'pages:account_profile' %}"><i class="bi bi-bookmark-check fa-fw me-2"></i>Mon Profil</a></li>
+            <li><a class="dropdown-item" href="{% url 'pages:my_bookings' %}"><i class="bi bi-bookmark-check fa-fw me-2"></i>Mes Réservations</a></li>
+<!--						<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Settings</a></li>-->
+<!--						<li><a class="dropdown-item" href="{% url 'pages:dynamic_pages' template_name='help-center' %}"><i class="bi bi-info-circle fa-fw me-2"></i>Help-->
+<!--								Center</a></li>-->
 						<li><form method="post" action="{% url 'account_logout' %}">
               {% csrf_token %}
               <button type="submit" class="btn btn-link">Déconnexion</button>
@@ -793,29 +793,47 @@ Packages START -->
 					<h2 class="mb-0">Nos Meilleurs voyages</h2>
 				</div>
 			</div>
-
-			<div class="row g-4">
-				{% for trip in best_trips %}
-
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for trip in best_trips %}
         <div class="col">
-          <div class="card border-primary shadow h-100">
-            <img src="{{ trip.image|default:'https://via.placeholder.com/400x300' }}" class="card-img-top" alt="{{ trip.departure_city }} à {{ trip.arrival_city }}">
-            <div class="card-body">
-              <h5 class="card-title">{{ trip.departure_city }} à {{ trip.arrival_city }}</h5>
-              <p class="card-text">Type: {{ trip.vehicle_type }}<br>Durée: {{ trip.duration }}<br>Prix: <span class="text-success">{{ trip.price }} FCFA</span></p>
-              <div class="mb-2">
+          <div class="card border-0 shadow-lg h-100 rounded-4 overflow-hidden">
+            <div class="position-relative">
+              <img src="{{ trip.image|default:'https://via.placeholder.com/400x300' }}"
+                   class="card-img-top"
+                   alt="{{ trip.departure_city }} à {{ trip.arrival_city }}"
+                   style="object-fit: cover; height: 220px;">
+              <span class="badge bg-primary position-absolute top-0 end-0 m-2 px-3 py-2 rounded-pill">
+          {{ trip.vehicle_type }}
+        </span>
+            </div>
+            <div class="card-body p-4">
+              <h5 class="card-title fw-bold mb-2">{{ trip.departure_city }} ➜ {{ trip.arrival_city }}</h5>
+              <p class="card-text mb-3 text-secondary">
+                <span class="d-block mb-1">Durée: <strong>{{ trip.duration }}</strong></span>
+                <span>Prix: <strong class="text-success">{{ trip.price }} FCFA</strong></span>
+              </p>
+              <div class="mb-3">
                 {% for i in "12345" %}
                 <i class="fas fa-star {% if forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
                 {% endfor %}
               </div>
-              <a href="{% url 'pages:trip_detail' trip.id %}" class="btn btn-sm btn-primary">Voir détails</a>
+              <a href="{% url 'pages:trip_detail' trip.id %}"
+                 class="btn btn-gradient-primary w-100 py-2 fw-semibold"
+                 style="background: linear-gradient(90deg,#4e73df,#224abe); color:white; border:none;">
+                Voir détails
+              </a>
             </div>
           </div>
         </div>
-				{% empty %}
-				<div class="col-12"><div class="alert alert-warning">Aucun meilleur voyage disponible.</div></div>
-				{% endfor %}
-			</div> <!-- Row END -->
+        {% empty %}
+        <div class="col-12">
+          <div class="alert alert-warning text-center rounded-4 shadow-sm py-3">
+            Aucun meilleur voyage disponible.
+          </div>
+        </div>
+        {% endfor %}
+      </div> <!-- Row END -->
+
 		</div>
 	</section>
 	<!-- =======================
@@ -973,6 +991,139 @@ Top category START -->
 	<!-- =======================
 Top category END -->
 
+  <!-- =======================
+Section des avis START -->
+  <section class="pt-0 pt-lg-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h3 class="mb-5 text-center" style="font-size: 2.5rem; font-weight: 600; color: #333;">Avis de nos clients</h3>
+          {% for review in reviews %}
+          {% if review.is_published and not review.is_deleted %}
+          <div class="card mb-4 shadow-lg rounded-lg review-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title font-weight-bold">{{ review.user.username }}</h5>
+                <div class="rating d-flex align-items-center">
+                  {% for i in rating_range %}
+                  <span class="star {% if i <= review.rating %}filled{% else %}empty{% endif %}">&#9733;</span> <!-- star icon -->
+                  {% endfor %}
+                  <small class="text-muted ml-2">({{ review.rating }} / 5)</small>
+                </div>
+              </div>
+              <p class="card-text mt-3">{{ review.comment|truncatewords:25 }}{% if review.comment|length > 25 %}...{% endif %}</p>
+              {% if review.trip %}
+              <p class="card-text mt-2"><small class="text-muted">Voyage : {{ review.trip.name }}</small></p>
+              {% endif %}
+              <p class="card-text"><small class="text-muted">Publié le {{ review.created_at|date:"d M Y" }}</small></p>
+            </div>
+          </div>
+          {% endif %}
+          {% empty %}
+          <p class="text-center text-muted">Aucun avis pour le moment.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+  <style>
+    /* Styles généraux pour la section des avis */
+    .card {
+      background-color: #fff;
+      border: none;
+      border-radius: 15px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      color: #333;
+    }
+
+    .card-text {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    .rating {
+      display: flex;
+      align-items: center;
+    }
+
+    .star {
+      font-size: 1.5rem;
+      color: #d1d1d1;
+      transition: color 0.3s ease;
+    }
+
+    .star.filled {
+      color: #ff9f00; /* Orange color for filled stars */
+    }
+
+    .star.empty {
+      color: #d1d1d1; /* Lighter grey for empty stars */
+    }
+
+    .star:hover {
+      color: #fbb03b; /* Hover effect */
+    }
+
+    small.text-muted {
+      font-size: 0.875rem;
+      color: #888;
+    }
+
+    .card-text.mt-3 {
+      margin-top: 1.25rem;
+    }
+
+    /* Styles pour la section d'avis */
+    section {
+      background-color: #f7f7f7;
+      padding-top: 60px;
+      padding-bottom: 60px;
+    }
+
+    h3 {
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+    }
+
+    .review-card {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    /* Animation de fadeIn pour les cartes */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Style de la ligne vide si aucun avis */
+    .text-center {
+      font-style: italic;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+
+  </style>
+  <!-- =======================
+  Section des avis END -->
+
+
 	<!-- =======================
 Stories START-->
 	<section class="pt-0 pt-md-5">
@@ -1115,80 +1266,144 @@ Stories END-->
 
 </main>
 
-<footer>
-	<div class="container">
-		<div class="bg-light rounded-top p-4 pb-0">
-			<div class="row g-4 justify-content-between">
+<footer class="bg-light py-5">
+  <div class="container">
+    <div class="row g-4 justify-content-between align-items-start">
+      <!-- Widget 1: Logo and Newsletter -->
+      <div class="col-md-5 col-lg-4">
+        <a class="d-block mb-4" href="/">
+          <img class="footer-logo" src="{% static 'images/bg/logo (1).png' %}" alt="Asieniantour Logo" style="width: 150px; filter: drop-shadow(0 5px 15px rgba(102, 126, 234, 0.3));">
+        </a>
+        <p class="text-muted mb-3">Restez informé des dernières offres et destinations en vous abonnant à notre newsletter.</p>
 
-				<!-- Widget 1 START -->
-				<div class="col-md-5 col-lg-4">
-					<!-- logo -->
-					<a class="me-0" href="/">
-						<img class="light-mode-item h-40px" src="{% static 'images/bg/logo (1).png' %}" alt="logo">
-						<img class="dark-mode-item h-40px" src="{% static 'images/bg/logo (1).png' %}" alt="logo">
-					</a>
+      </div>
 
-					<p class="text-reset mt-4 mb-2">Abonnez-vous à notre newsletter</p>
-					<!-- Newsletter -->
-					<form class="bg-body rounded-2 p-2">
-						<div class="input-group">
-							<input class="form-control border-0 me-1" type="email" placeholder="Enter your email">
-							<button type="button" class="btn btn-dark rounded-2 mb-0"><i
-									class="bi bi-send"></i></button>
-						</div>
-					</form>
-				</div>
-				<!-- Widget 1 END -->
+      <!-- Widget 2: Navigation Links -->
+      <div class="col-md-7 col-lg-4">
+        <div class="row g-4">
+          <!-- Page Links -->
+          <div class="col-6">
+            <h5 class="mb-3 fw-bold">Pages</h5>
+            <ul class="nav flex-column">
+              <li class="nav-item"><a class="nav-link text-muted" href="{% url 'pages:dynamic_pages' template_name='about' %}">A propos de nous</a></li>
+              <li class="nav-item"><a class="nav-link text-muted" href="{% url 'pages:dynamic_pages' template_name='team' %}">Notre équipe</a></li>
+              <li class="nav-item"><a class="nav-link text-muted" href="{% url 'pages:dynamic_pages' template_name='blog' %}">Blogs</a></li>
+              <li class="nav-item"><a class="nav-link text-muted" href="{% url 'pages:dynamic_pages' template_name='contact' %}">Contactez-nous</a></li>
+            </ul>
+          </div>
+          <!-- Other Links -->
+          <div class="col-6">
+            <h5 class="mb-3 fw-bold">Liens</h5>
+            <ul class="nav flex-column">
+              <li class="nav-item"><a class="nav-link text-muted" href="{% url 'pages:dynamic_pages' template_name='privacy-policy' %}">Politique</a></li>
+              <li class="nav-item"><a class="nav-link text-muted" href="{% url 'pages:dynamic_pages' template_name='terms-of-service' %}">Conditions</a></li>
+              <li class="nav-item"><a class="nav-link text-muted" href="{% url 'pages:dynamic_pages' template_name='faq' %}">FAQ</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
 
-				<!-- Widget 2 START -->
-				<div class="col-md-7 col-lg-4">
-					<div class="row g-4 g-lg-5">
-						<!-- Link block -->
-						<div class="col-6">
-							<h5 class="mb-2 mb-md-4">Page</h5>
-							<ul class="nav flex-column">
-                <li class="nav-item dropdown">
-                  <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='about' %}" >A propos de nous</a>
-                </li>
-                <li class="nav-item dropdown">
-                  <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='team' %}" >Notre équipe</a>
-                </li>
-                <li class="nav-item dropdown">
-                  <a class="nav-link " href="{% url 'pages:dynamic_pages' template_name='blog' %}" >Blogs</a>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='contact' %}">Contactez nous</a></li>
-<!--                <li class="nav-item"><a class="nav-link" href="#">Services</a></li>-->
-							</ul>
-						</div>
+    <!-- Divider -->
+    <hr class="my-4" style="border-color: rgba(102, 126, 234, 0.2);">
 
-						<!-- Link block -->
-						<div class="col-6">
-							<h5 class="mb-2 mb-md-4">Liens</h5>
-							<ul class="nav flex-column">
-								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='privacy-policy' %}">Politique</a></li>
-								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='terms-of-service' %}">Terms</a></li>
-								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='faq' %}">FAQ</a></li>
-								<li class="nav-item"><a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='help-center' %}">Aide</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-				<!-- Widget 2 END -->
-			</div>
-
-			<!-- Divider -->
-			<hr class="mt-4 mb-0">
-
-			<!-- Bottom footer -->
-			<div class="container py-3 px-0">
-				<div class="d-md-flex justify-content-between align-items-center text-center text-md-left">
-					<!-- copyright text -->
-					<div class="text-primary-hover text-body"> Copyrights ©2025 Asieniantour. </div>
-					<!-- copyright links-->
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- Bottom Footer -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center text-center">
+      <div class="text-muted mb-2 mb-md-0">
+        Copyright © 2025
+        <span style="background: linear-gradient(135deg, #0b5917, #37ac09); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 600;">
+                    Asieniantour
+                </span>
+      </div>
+      <!-- Social Media Links -->
+      <div class="social-links">
+        <a href="#" class="text-muted mx-2"><i class="bi bi-facebook fs-5"></i></a>
+        <a href="#" class="text-muted mx-2"><i class="bi bi-twitter fs-5"></i></a>
+        <a href="#" class="text-muted mx-2"><i class="bi bi-instagram fs-5"></i></a>
+        <a href="#" class="text-muted mx-2"><i class="bi bi-linkedin fs-5"></i></a>
+      </div>
+    </div>
+  </div>
 </footer>
+<style>
+  footer {
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 3rem 0;
+    border-top: 1px solid rgba(102, 126, 234, 0.1);
+  }
+
+  .footer-logo {
+    transition: transform 0.3s ease, filter 0.3s ease;
+  }
+
+  .footer-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 8px 20px rgba(102, 126, 234, 0.4));
+  }
+
+  .nav-link {
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+  }
+
+  .nav-link:hover {
+    color: #0b5917 !important;
+    background: linear-gradient(135deg, #0b5917, #37ac09);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .input-group .form-control {
+    border-radius: 50px 0 0 50px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .input-group .btn-gradient {
+    border-radius: 0 50px 50px 0;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .input-group .btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(11, 89, 23, 0.4);
+  }
+
+  .social-links a {
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+
+  .social-links a:hover {
+    color: #0b5917 !important;
+    transform: translateY(-2px);
+  }
+
+  hr {
+    border-top: 1px solid rgba(102, 126, 234, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    footer {
+      padding: 2rem 0;
+    }
+
+    .footer-logo {
+      width: 120px;
+    }
+
+    .input-group .form-control {
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .input-group .btn-gradient {
+      padding: 0.5rem 1rem;
+    }
+  }
+</style>
 
 {% endblock content %}

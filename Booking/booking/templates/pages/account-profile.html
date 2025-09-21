@@ -1,24 +1,34 @@
-{% extends 'base.html' %}
+{% extends 'account.html' %}
 {% load static i18n %}
 
-{% block content %}
-<main>
-  <section class="py-0">
+{% block body_attribute %}class="dashboard"{% endblock body_attribute %}
+
+{% block page_content %}
+  <div class="col-lg-8 col-xl-9">
+  <!-- Offcanvas menu button (mobile) -->
+  <div class="d-grid mb-3 d-lg-none w-100">
+    <button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+      <i class="fas fa-sliders-h me-1"></i> Menu
+    </button>
+  </div>
+
+    <div class="card border">
+
+  <!-- Page Header -->
+  <section class="card-header border-bottom py-3">
     <div class="container">
-      <div class="row mt-4 align-items-center">
+      <div class="row align-items-center g-3">
         <div class="col-12">
-          <div class="card bg-light overflow-hidden px-sm-5">
-            <div class="row align-items-center g-4">
-              <div class="col-sm-9">
-                <div class="card-body">
-                  <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb breadcrumb-dots mb-0">
-                      <li class="breadcrumb-item"><a href="{% url 'pages:dashboard' %}"><i class="bi bi-house me-1"></i>Accueil</a></li>
-                      <li class="breadcrumb-item active">Mon Profil</li>
-                    </ol>
-                  </nav>
-                  <h1 class="m-0 h2 card-title">Mon Profil</h1>
-                </div>
+          <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+              <div>
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb breadcrumb-dots mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'pages:dashboard' %}"><i class="bi bi-house me-1"></i>Accueil</a></li>
+                    <li class="breadcrumb-item active">Mon Profil</li>
+                  </ol>
+                </nav>
+                <h1 class="h3 m-0">Mon Profil</h1>
               </div>
             </div>
           </div>
@@ -27,13 +37,14 @@
     </div>
   </section>
 
-  <section>
+  <section class="card-body vstack gap-4">
     <div class="container">
+
       <!-- Messages -->
       {% if messages %}
-      <ul class="list-unstyled">
+      <ul class="list-unstyled mb-4">
         {% for message in messages %}
-        <li class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <li class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
           {{ message }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </li>
@@ -42,83 +53,72 @@
       {% endif %}
 
       <div class="row">
+        <!-- Main content -->
         <div class="col-lg-8 col-xl-9">
           <div class="vstack gap-4">
-            <!-- Profile completion -->
+
+            <!-- Profile Completion Card -->
             {% if traveler %}
-            <div class="bg-light rounded p-3">
-              <div class="overflow-hidden">
-                <h6>Complétez votre profil</h6>
-                <div class="progress progress-sm bg-success bg-opacity-10">
-                  <div class="progress-bar bg-success aos" role="progressbar" data-aos="slide-right"
-                       data-aos-delay="200" data-aos-duration="1000" data-aos-easing="ease-in-out"
-                       style="width: {{ profile_completion }}%"
-                       aria-valuenow="{{ profile_completion }}" aria-valuemin="0" aria-valuemax="100">
-                    <span class="progress-percent-simple h6 fw-light ms-auto">{{ profile_completion }}%</span>
-                  </div>
+            <div class="card shadow-sm rounded-3 border-0 p-3">
+              <div class="mb-2">
+                <h6 class="fw-semibold mb-2">Complétez votre profil</h6>
+                <div class="progress bg-light rounded-pill" style="height: 10px;">
+                  <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: {{ profile_completion }}%" aria-valuenow="{{ profile_completion }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                <p class="mb-0">Optimisez votre expérience en ajoutant les informations manquantes !</p>
+                <p class="small mt-2 mb-0">Optimisez votre expérience en ajoutant les informations manquantes !</p>
               </div>
-              <div class="bg-body rounded p-3 mt-3">
-                <ul class="list-inline hstack flex-wrap gap-2 justify-content-between mb-0">
-                  <li class="list-inline-item h6 fw-normal mb-0">
+              <div class="bg-white rounded-3 p-3 shadow-sm mt-3">
+                <ul class="list-inline d-flex flex-wrap gap-3 mb-0">
+                  <li class="list-inline-item h6 mb-0">
                     {% if user.email %}
-                    <a href="#"><i class="bi bi-check-circle-fill text-success me-2"></i>Email vérifié</a>
+                    <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Email vérifié</span>
                     {% else %}
-                    <a href="#update-email" class="text-primary"><i class="bi bi-plus-circle-fill me-2"></i>Ajouter un email</a>
+                    <a href="#update-email" class="text-primary"><i class="bi bi-plus-circle-fill me-1"></i>Ajouter un email</a>
                     {% endif %}
                   </li>
-                  <li class="list-inline-item h6 fw-normal mb-0">
+                  <li class="list-inline-item h6 mb-0">
                     {% if traveler.phone_number %}
-                    <a href="#"><i class="bi bi-check-circle-fill text-success me-2"></i>Numéro de téléphone vérifié</a>
+                    <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Numéro de téléphone vérifié</span>
                     {% else %}
-                    <a href="#personal-info" class="text-primary"><i class="bi bi-plus-circle-fill me-2"></i>Ajouter un numéro de téléphone</a>
+                    <a href="#personal-info" class="text-primary"><i class="bi bi-plus-circle-fill me-1"></i>Ajouter un numéro</a>
                     {% endif %}
                   </li>
-                  <li class="list-inline-item h6 fw-normal mb-0">
+                  <li class="list-inline-item h6 mb-0">
                     {% if traveler.title and traveler.first_name != 'Inconnu' and traveler.last_name != 'Inconnu' and traveler.nationality and traveler.date_of_birth and traveler.gender %}
-                    <a href="#"><i class="bi bi-check-circle-fill text-success me-2"></i>Informations de base complètes</a>
+                    <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Infos complètes</span>
                     {% else %}
-                    <a href="#personal-info" class="text-primary"><i class="bi bi-plus-circle-fill me-2"></i>Compléter les informations de base</a>
+                    <a href="#personal-info" class="text-primary"><i class="bi bi-plus-circle-fill me-1"></i>Compléter les informations</a>
                     {% endif %}
                   </li>
                 </ul>
               </div>
             </div>
-            {% else %}
-            <div class="alert alert-info">
-              {{ message|default:"Aucun profil voyageur trouvé. Veuillez compléter vos informations lors de votre prochaine réservation." }}
-            </div>
             {% endif %}
 
-            <!-- Personal info -->
-            <div class="card border" id="personal-info">
-              <div class="card-header border-bottom">
-                <h4 class="card-header-title">Informations personnelles</h4>
+            <!-- Personal Info Card -->
+            <div class="card shadow-sm border-0 rounded-3" id="personal-info">
+              <div class="card-header border-bottom bg-white">
+                <h5 class="mb-0">Informations personnelles</h5>
               </div>
               <div class="card-body">
                 <form class="row g-3" method="post" action="{% url 'pages:account_profile' %}" enctype="multipart/form-data">
                   {% csrf_token %}
                   <input type="hidden" name="form_type" value="profile">
+
                   <!-- Profile photo -->
-                  <div class="col-12">
-                    <label class="form-label">Photo de profil</label>
-                    <div class="d-flex align-items-center">
-                      <label class="position-relative me-4" for="uploadfile-1" title="Remplacer cette photo">
-                        <span class="avatar avatar-xl">
-                          <img id="uploadfile-1-preview"
-                               class="avatar-img rounded-circle border border-white border-3 shadow"
-                               src="{% if traveler.profile_photo %}{{ traveler.profile_photo.url }}{% else %}{% static 'images/avatar/01.jpg' %}{% endif %}"
-                               alt="Photo de profil">
-                        </span>
-                      </label>
-                      <label class="btn btn-sm btn-primary-soft mb-0" for="uploadfile-1">Changer</label>
-                      <input id="uploadfile-1" name="profile_photo" class="form-control d-none" type="file" accept="image/*">
-                    </div>
+                  <div class="col-12 d-flex align-items-center gap-3">
+                    <label class="position-relative" for="uploadfile-1">
+                      <span class="avatar avatar-xl">
+                        <img id="uploadfile-1-preview" class="avatar-img rounded-circle border border-white shadow-sm" src="{% if traveler.profile_photo %}{{ traveler.profile_photo.url }}{% else %}{% static 'images/avatar/01.jpg' %}{% endif %}" alt="Photo de profil">
+                      </span>
+                    </label>
+                    <label class="btn btn-sm btn-outline-primary mb-0" for="uploadfile-1">Changer</label>
+                    <input id="uploadfile-1" name="profile_photo" class="form-control d-none" type="file" accept="image/*">
                   </div>
-                  <!-- Title -->
+
+                  <!-- Name & Title -->
                   <div class="col-md-6">
-                    <label class="form-label">Titre<span class="text-danger">*</span></label>
+                    <label class="form-label">Titre <span class="text-danger">*</span></label>
                     <select class="form-select js-choice" name="title" required>
                       <option value="">Sélectionner un titre</option>
                       {% for value, label in title_choices %}
@@ -126,27 +126,23 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <!-- Name -->
                   <div class="col-md-6">
-                    <label class="form-label">Nom complet<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="first_name" value="{{ traveler.first_name|default_if_none:'' }}"
-                           placeholder="Entrez votre prénom" required>
-                    <input type="text" class="form-control mt-2" name="last_name" value="{{ traveler.last_name|default_if_none:'' }}"
-                           placeholder="Entrez votre nom" required>
+                    <label class="form-label">Nom complet <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control mb-2" name="first_name" value="{{ traveler.first_name|default_if_none:'' }}" placeholder="Prénom" required>
+                    <input type="text" class="form-control" name="last_name" value="{{ traveler.last_name|default_if_none:'' }}" placeholder="Nom" required>
                   </div>
-                  <!-- Email -->
+
+                  <!-- Email & Phone -->
                   <div class="col-md-6">
-                    <label class="form-label">Adresse email<span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" name="email" value="{{ traveler.email|default_if_none:'' }}"
-                           placeholder="Entrez votre email" required>
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" name="email" value="{{ traveler.email|default_if_none:'' }}" required>
                   </div>
-                  <!-- Mobile -->
                   <div class="col-md-6">
-                    <label class="form-label">Numéro de téléphone</label>
-                    <input type="text" class="form-control" name="phone_number" value="{{ traveler.phone_number|default_if_none:'' }}"
-                           placeholder="Entrez votre numéro de téléphone">
+                    <label class="form-label">Téléphone</label>
+                    <input type="text" class="form-control" name="phone_number" value="{{ traveler.phone_number|default_if_none:'' }}">
                   </div>
-                  <!-- Nationality -->
+
+                  <!-- Nationality & Birth -->
                   <div class="col-md-6">
                     <label class="form-label">Nationalité</label>
                     <select class="form-select js-choice" name="nationality">
@@ -156,173 +152,150 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <!-- Date of birth -->
                   <div class="col-md-6">
-                    <label class="form-label">Date de naissance<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control flatpickr" name="date_of_birth"
-                           value="{% if traveler.date_of_birth %}{{ traveler.date_of_birth|date:'d M Y' }}{% endif %}"
-                           placeholder="Entrez votre date de naissance" data-date-format="d M Y" required>
+                    <label class="form-label">Date de naissance <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control flatpickr" name="date_of_birth" value="{% if traveler.date_of_birth %}{{ traveler.date_of_birth|date:'d M Y' }}{% endif %}" required>
                   </div>
+
                   <!-- Gender -->
-                  <div class="col-md-6">
-                    <label class="form-label">Genre<span class="text-danger">*</span></label>
-                    <div class="d-flex gap-4">
-                      {% for value, label in gender_choices %}
-                      <div class="form-check radio-bg-light">
-                        <input class="form-check-input" type="radio" name="gender" value="{{ value }}"
-                               id="gender{{ value|capfirst }}" {% if traveler.gender == value %}checked{% endif %} required>
-                        <label class="form-check-label" for="gender{{ value|capfirst }}">{{ label }}</label>
-                      </div>
-                      {% endfor %}
+                  <div class="col-12 d-flex gap-4 align-items-center">
+                    <label class="form-label mb-0">Genre <span class="text-danger">*</span></label>
+                    {% for value, label in gender_choices %}
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="gender" value="{{ value }}" id="gender{{ value|capfirst }}" {% if traveler.gender == value %}checked{% endif %} required>
+                      <label class="form-check-label" for="gender{{ value|capfirst }}">{{ label }}</label>
                     </div>
+                    {% endfor %}
                   </div>
+
                   <!-- Address -->
                   <div class="col-12">
                     <label class="form-label">Adresse</label>
-                    <textarea class="form-control" name="address" rows="3"
-                              spellcheck="false">{{ traveler.address|default_if_none:'' }}</textarea>
+                    <textarea class="form-control" name="address" rows="3">{{ traveler.address|default_if_none:'' }}</textarea>
                   </div>
-                  <!-- Button -->
+
                   <div class="col-12 text-end">
-                    <button type="submit" class="btn btn-primary mb-0">Enregistrer les modifications</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                   </div>
                 </form>
               </div>
             </div>
 
-            <!-- Update email -->
-            <div class="card border" id="update-email">
-              <div class="card-header border-bottom">
-                <h4 class="card-header-title">Mettre à jour l'email</h4>
-                <p class="mb-0">Votre adresse email actuelle est <span class="text-primary">{{ user.email|default:"Non défini" }}</span></p>
+            <!-- Email Update Card -->
+            <div class="card shadow-sm border-0 rounded-3" id="update-email">
+              <div class="card-header bg-white border-bottom">
+                <h5>Mettre à jour l'email</h5>
+                <p class="mb-0 small">Adresse actuelle: <span class="text-primary">{{ user.email|default:"Non défini" }}</span></p>
               </div>
               <div class="card-body">
                 <form method="post" action="{% url 'pages:account_profile' %}">
                   {% csrf_token %}
                   <input type="hidden" name="form_type" value="email">
-                  <label class="form-label">Entrez votre nouvel email<span class="text-danger">*</span></label>
-                  <input type="email" class="form-control" name="email" placeholder="Entrez votre email" required>
-                  <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-primary mb-0">Enregistrer l'email</button>
+                  <input type="email" class="form-control mb-3" name="email" placeholder="Nouvel email" required>
+                  <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                   </div>
                 </form>
               </div>
             </div>
 
-            <!-- Update Password -->
-            <div class="card border">
-              <div class="card-header border-bottom">
-                <h4 class="card-header-title">Mettre à jour le mot de passe</h4>
-                <p class="mb-0">Votre adresse email actuelle est <span class="text-primary">{{ user.email|default:"Non défini" }}</span></p>
+            <!-- Password Update Card -->
+            <div class="card shadow-sm border-0 rounded-3">
+              <div class="card-header bg-white border-bottom">
+                <h5>Mettre à jour le mot de passe</h5>
               </div>
-              <form class="card-body" method="post" action="{% url 'pages:account_profile' %}">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="password">
-                <div class="mb-3">
-                  <label class="form-label">Mot de passe actuel</label>
-                  <input class="form-control" type="password" name="old_password" placeholder="Entrez le mot de passe actuel" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Nouveau mot de passe</label>
-                  <div class="input-group">
-                    <input class="form-control fakepassword" name="new_password1" placeholder="Entrez le nouveau mot de passe" type="password"
-                           id="psw-input" required>
-                    <span class="input-group-text p-0 bg-transparent">
-                      <i class="fakepasswordicon fas fa-eye-slash cursor-pointer p-2"></i>
-                    </span>
+              <div class="card-body">
+                <form method="post" action="{% url 'pages:account_profile' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="form_type" value="password">
+                  <div class="mb-3">
+                    <label class="form-label">Mot de passe actuel</label>
+                    <input class="form-control" type="password" name="old_password" required>
                   </div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Confirmez le nouveau mot de passe</label>
-                  <input class="form-control" type="password" name="new_password2" placeholder="Confirmez le nouveau mot de passe" required>
-                </div>
-                <div class="text-end">
-                  <button type="submit" class="btn btn-primary mb-0">Changer le mot de passe</button>
-                </div>
-              </form>
+                  <div class="mb-3">
+                    <label class="form-label">Nouveau mot de passe</label>
+                    <div class="input-group">
+                      <input class="form-control" name="new_password1" type="password" id="psw-input" required>
+                      <span class="input-group-text p-0 bg-transparent">
+                        <i class="fas fa-eye-slash cursor-pointer p-2 fakepasswordicon"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Confirmer le nouveau mot de passe</label>
+                    <input class="form-control" type="password" name="new_password2" required>
+                  </div>
+                  <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
+                  </div>
+                </form>
+              </div>
             </div>
 
-            <!-- Bookings -->
-            <div class="card border">
-              <div class="card-header border-bottom">
-                <h4 class="card-header-title">Mes réservations</h4>
+            <!-- Bookings Card -->
+            <div class="card shadow-sm border-0 rounded-3">
+              <div class="card-header bg-white border-bottom">
+                <h5>Mes réservations</h5>
               </div>
               <div class="card-body">
                 {% if bookings %}
-                <ul class="list-group">
+                <div class="row g-3">
                   {% for booking in bookings %}
-                  <li class="list-group-item">
-                    <p><strong>Réservation #{{ booking.id }}</strong></p>
-                    <p><strong>Voyage :</strong> {{ booking.trip.title }}</p>
-                    <p><strong>Montant :</strong> {{ booking.amount }} XOF</p>
-                    <p><strong>Méthode de paiement :</strong> {{ booking.payment_method }}</p>
-                    <p><strong>Statut :</strong> {{ booking.payment_status }}</p>
-                    <p><strong>Date :</strong> {{ booking.created_at|date:'d M Y H:i' }}</p>
-                  </li>
+                  <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <h6 class="mb-0">Réservation #{{ booking.id }}</h6>
+                          <span class="badge bg-primary">{{ booking.payment_status }}</span>
+                        </div>
+                        <ul class="list-unstyled small mb-0">
+                          <li><strong>Voyage:</strong> {{ booking.trip.title }}</li>
+                          <li><strong>Montant:</strong> {{ booking.amount }} XOF</li>
+                          <li><strong>Méthode de paiement:</strong> {{ booking.payment_method }}</li>
+                          <li><strong>Date:</strong> {{ booking.created_at|date:'d M Y H:i' }}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                   {% endfor %}
-                </ul>
+                </div>
                 {% else %}
-                <p>Aucune réservation trouvée.</p>
+                <p class="mb-0">Aucune réservation trouvée.</p>
                 {% endif %}
               </div>
             </div>
+
           </div>
         </div>
       </div>
     </div>
   </section>
-</main>
+    </div>
+  </div>
+
 
 {% block extra_javascript %}
 <script>
   // Profile photo preview
   document.getElementById('uploadfile-1').addEventListener('change', function(event) {
     const file = event.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('La photo de profil ne doit pas dépasser 5 Mo.');
-        this.value = '';
-        return;
-      }
+    if(file){
+      if(file.size > 5*1024*1024){ alert('Photo max 5 Mo'); this.value=''; return; }
       const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('uploadfile-1-preview').src = e.target.result;
-      };
+      reader.onload = e => document.getElementById('uploadfile-1-preview').src = e.target.result;
       reader.readAsDataURL(file);
     }
   });
 
-  // Password visibility toggle
-  document.querySelector('.fakepasswordicon').addEventListener('click', function() {
+  // Password toggle
+  document.querySelector('.fakepasswordicon').addEventListener('click', function(){
     const input = document.getElementById('psw-input');
-    const icon = this;
-    if (input.type === 'password') {
-      input.type = 'text';
-      icon.classList.remove('fa-eye-slash');
-      icon.classList.add('fa-eye');
-    } else {
-      input.type = 'password';
-      icon.classList.remove('fa-eye');
-      icon.classList.add('fa-eye-slash');
-    }
+    if(input.type==='password'){ input.type='text'; this.classList.replace('fa-eye-slash','fa-eye'); }
+    else { input.type='password'; this.classList.replace('fa-eye','fa-eye-slash'); }
   });
 
-  // Initialize flatpickr for date of birth
-  flatpickr(".flatpickr", {
-    dateFormat: "d M Y",
-    maxDate: "today",
-    locale: {
-      firstDayOfWeek: 1,
-      weekdays: {
-        shorthand: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
-        longhand: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
-      },
-      months: {
-        shorthand: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
-        longhand: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
-      }
-    }
-  });
+  // Flatpickr initialization
+  flatpickr(".flatpickr",{dateFormat:"d M Y",maxDate:"today",locale:{firstDayOfWeek:1,weekdays:{shorthand:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],longhand:['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi']},months:{shorthand:['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'],longhand:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']}}});
 </script>
 {% endblock extra_javascript %}
-{% endblock content %}
+{% endblock page_content %}

@@ -1,7 +1,8 @@
 from django.urls import path, include
 from .views import dynamic_pages_view
 from rest_framework.routers import DefaultRouter
-from .views import login_admin_view, backoffice_view, logout_view
+from .views import login_admin_view, backoffice_view, logout_view,reply_to_review,backoffice_reviews,delete_review,direct_message,unpublish_review,publish_review,toggle_trip_status
+
 from .views import admin_trips_view, add_trip_form_view, TripViewSet, admin_booking_list_view,trip_detail_view,trip_edit_view,admin_earnings_view,download_invoice,edit_card
 from . import views
 
@@ -25,13 +26,22 @@ urlpatterns = [
     path('admin-earnings/', admin_earnings_view, name='admin_earnings'),
     path('download-invoice/<int:booking_id>/', download_invoice, name='download_invoice'),
     path('edit-card/<int:booking_id>/', edit_card, name='edit_card'),
-    path('<str:template_name>/', dynamic_pages_view, name='dynamic_pages'),
     path('trips/', views.dynamic_pages_view, {'template_name': 'admin-trip-list'}, name='trip-list'),
     path('trip-detail/<int:trip_id>/', trip_detail_view, name='admin-trip-detail'),
+
     path('logout/', logout_view, name='backoffice_logout'),
     path('admin-agent-detail/<int:user_id>/', views.admin_agent_detail_view, name='admin_agent_detail'),
     path('toggle-best-trip/<int:trip_id>/', views.toggle_best_trip, name='toggle_best_trip'),
-
+    # Review management URLs
+    path('reviews/', backoffice_reviews, name='reviews'),
+    path('toggle-trip-status/<int:trip_id>/', toggle_trip_status, name='toggle_trip_status'),
+    path('reply-to-review/<int:review_id>/', reply_to_review, name='reply_to_review'),
+    path('direct-message/<int:user_id>/', direct_message, name='direct_message'),
+    path('unpublish-review/<int:review_id>/', unpublish_review, name='unpublish_review'),
+    path('publish-review/<int:review_id>/', publish_review, name='publish_review'),
+    path('delete-review/<int:review_id>/', delete_review, name='delete_review'),
+    # Catch-all route (must be last)
+    path('<str:template_name>/', dynamic_pages_view, name='dynamic_pages'),
 
 
 ]

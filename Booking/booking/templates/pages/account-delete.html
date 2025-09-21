@@ -1,5 +1,4 @@
 {% extends 'account.html' %}
-
 {% load static i18n %}
 
 {% block body_attribute %}
@@ -7,41 +6,80 @@ class="dashboard"
 {% endblock body_attribute %}
 
 {% block page_content %}
-
 <div class="col-lg-8 col-xl-9">
-	<!-- Offcanvas menu button -->
-	<div class="d-grid mb-0 d-lg-none w-100">
-		<button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
-			aria-controls="offcanvasSidebar">
-			<i class="fas fa-sliders-h"></i> Menu
-		</button>
-	</div>
+  <!-- Offcanvas menu button -->
+  <div class="d-grid mb-0 d-lg-none w-100">
+    <button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
+            aria-controls="offcanvasSidebar">
+      <i class="fas fa-sliders-h"></i> {% trans "Menu" %}
+    </button>
+  </div>
 
-	<!-- Card START -->
-	<div class="card border">
-		<!-- Card header -->
-		<div class="card-header border-bottom">
-			<h4 class="card-header-title">Delete Account</h4>
-		</div>
+  <!-- Card START -->
+  <div class="card border">
+    <!-- Card header -->
+    <div class="card-header border-bottom">
+      <h4 class="card-header-title">{% trans "Supprimer le compte" %}</h4>
+    </div>
 
-		<!-- Card body START -->
-		<div class="card-body">
-			<h6>Before you go...</h6>
-			<ul>
-				<li>Take a backup of your data <a href="#">Here</a> </li>
-				<li>If you delete your account, you will lose your all data.</li>
-			</ul>
-			<div class="form-check form-check-md my-4">
-				<input class="form-check-input" type="checkbox" value="" id="deleteaccountCheck">
-				<label class="form-check-label" for="deleteaccountCheck">Yes, I'd like to delete my
-					account</label>
-			</div>
-			<a href="#" class="btn btn-success-soft btn-sm mb-2 mb-sm-0">Keep my account</a>
-			<a href="#" class="btn btn-danger btn-sm mb-0">Delete my account</a>
-		</div>
-		<!-- Card body END -->
-	</div>
-	<!-- Card END -->
+    <!-- Card body START -->
+    <div class="card-body">
+      <h6>{% trans "Avant de partir..." %}</h6>
+      <ul>
+        <li>{% trans "Sauvegardez vos données" %} <a href="{% url 'backup_data' %}">{% trans "Ici" %}</a></li>
+        <li>{% trans "Si vous supprimez votre compte, toutes vos données seront perdues." %}</li>
+      </ul>
+      <form id="deleteAccountForm" method="POST" action="{% url 'delete_account' %}">
+        {% csrf_token %}
+        <div class="form-check form-check-md my-4">
+          <input class="form-check-input" type="checkbox" value="" id="deleteaccountCheck" required>
+          <label class="form-check-label" for="deleteaccountCheck">
+            {% trans "Oui, je souhaite désactiver mon compte" %}
+          </label>
+        </div>
+        <a href="{% url 'dashboard' %}" class="btn btn-success-soft btn-sm mb-2 mb-sm-0">{% trans "Conserver mon compte" %}</a>
+        <button type="submit" class="btn btn-danger btn-sm mb-0" id="deleteButton" disabled>{% trans "Désactiver mon compte" %}</button>
+      </form>
+    </div>
+    <!-- Card body END -->
+  </div>
+  <!-- Card END -->
 </div>
 
+<!-- Toast container for success/error messages -->
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11;">
+  {% for message in messages %}
+  <div class="toast align-items-center text-white {% if message.tags == 'success' %}bg-success{% else %}bg-danger{% endif %} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">{{ message|safe }}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Enable/disable delete button based on checkbox
+    const checkbox = document.getElementById('deleteaccountCheck');
+    const deleteButton = document.getElementById('deleteButton');
+
+    checkbox.addEventListener('change', function() {
+      deleteButton.disabled = !this.checked;
+    });
+
+    // Show toasts if present
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+      const bsToast = new bootstrap.Toast(toast);
+      bsToast.show();
+      toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+      });
+    });
+  });
+</script>
 {% endblock page_content %}

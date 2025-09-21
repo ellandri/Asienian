@@ -1,260 +1,216 @@
 {% extends 'admin.html' %}
-
 {% load static i18n %}
 
 {% block page_content %}
 
 <!-- Counter START -->
 <div class="row g-4 mb-4">
-	<!-- Counter item -->
-	<div class="col-lg-4">
-		<div class="card card-body border border-primary bg-primary bg-opacity-10 border-opacity-25 p-4 h-100">
-			<div class="d-flex justify-content-between align-items-center">
-				<!-- Digit -->
-				<div>
-					<h3 class="mb-0 fw-bold">{{ trips|length }}</h3>
-					<span class="mb-0 h6 fw-light">Total Voyages</span>
-				</div>
-				<!-- Icon -->
-				<div class="icon-lg rounded-circle flex-shrink-0 bg-primary text-white mb-0"><i class="fa-solid fa-hotel fa-fw"></i></div>
-			</div>
-		</div>
-	</div>
+  <div class="col-lg-4">
+    <div class="card card-body border border-primary bg-primary bg-opacity-10 border-opacity-25 p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="mb-0 fw-bold">{{ trips.count }}</h3>
+          <span class="mb-0 h6 fw-light">Total Voyages</span>
+        </div>
+        <div class="icon-lg rounded-circle flex-shrink-0 bg-primary text-white mb-0">
+          <i class="fa-solid fa-hotel fa-fw"></i>
+        </div>
+      </div>
+    </div>
+  </div>
 
-	<!-- Counter item -->
-	<div class="col-lg-4">
-		<div class="card card-body border border-warning bg-warning bg-opacity-10 border-opacity-25 p-4 h-100">
-			<div class="d-flex justify-content-between align-items-center">
-				<!-- Digit -->
-				<div>
-					<h3 class="mb-0 fw-bold">56</h3>
-					<span class="mb-0 h6 fw-light">Booking this month</span>
-				</div>
-				<!-- Icon -->
-				<div class="icon-lg rounded-circle flex-shrink-0 bg-warning text-white mb-0"><i
-						class="fa-regular fa-calendar-days fa-fw"></i></div>
-			</div>
-		</div>
-	</div>
+  <div class="col-lg-4">
+    <div class="card card-body border border-warning bg-warning bg-opacity-10 border-opacity-25 p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="mb-0 fw-bold">{{ booking_count }}</h3>
+          <span class="mb-0 h6 fw-light">Réservations</span>
+        </div>
+        <div class="icon-lg rounded-circle flex-shrink-0 bg-warning text-white mb-0">
+          <i class="fa-regular fa-calendar-days fa-fw"></i>
+        </div>
+      </div>
+    </div>
+  </div>
 
-	<!-- Counter item -->
-	<div class="col-lg-4">
-		<div class="card card-body border border-success bg-success bg-opacity-10 border-opacity-25 p-4 h-100">
-			<div class="d-flex justify-content-between align-items-center">
-				<!-- Digit -->
-				<div>
-					<h3 class="mb-0 fw-bold">$2486.95</h3>
-					<span class="mb-0 h6 fw-light">Earning this month</span>
-				</div>
-				<!-- Icon -->
-				<div class="icon-lg rounded-circle flex-shrink-0 bg-success text-white mb-0"><i
-						class="fa-solid fa-money-bill-trend-up fa-fw"></i></div>
-			</div>
-		</div>
-	</div>
+  <div class="col-lg-4">
+    <div class="card card-body border border-success bg-success bg-opacity-10 border-opacity-25 p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="mb-0 fw-bold">{{ total_earning|floatformat:0 }} FCFA</h3>
+          <span class="mb-0 h6 fw-light">Gains</span>
+        </div>
+        <div class="icon-lg rounded-circle flex-shrink-0 bg-success text-white mb-0">
+          <i class="fa-solid fa-money-bill-trend-up fa-fw"></i>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <!-- Counter END -->
 
 <div class="row g-4 mb-5">
-	<!-- Agent info START -->
-	<div class="col-md-4 col-xxl-3">
-		<div class="card bg-light">
-			<!-- Dropdown button -->
-			<div class="dropdown position-absolute top-0 end-0 m-3">
-				<a href="#" class="btn btn-sm btn-white btn-round lh-lg mb-0" role="button" id="dropdownShare1"
-					data-bs-toggle="dropdown" aria-expanded="false">
-					<i class="bi bi-three-dots fa-fw"></i>
-				</a>
-				<!-- dropdown button -->
-				<ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
-					aria-labelledby="dropdownShare1">
-					<li><a class="dropdown-item" href="#"><i class="bi bi-pencil-square fa-fw me-2"></i>Edit</a></li>
-					<li><a class="dropdown-item" href="#"><i class="bi bi-trash fa-fw me-2"></i>Remove</a></li>
-				</ul>
-			</div>
-			<!-- Card body -->
-			<div class="card-body text-center">
-				<!-- Avatar Image -->
-				<div class="avatar avatar-xl flex-shrink-0 mb-3">
-					<img class="avatar-img rounded-circle" src="{% static 'images/avatar/default.jpg' %}" alt="avatar">
-				</div>
-				<!-- Title -->
-				<h5 class="mb-2">{{ user.name|default:user.username }}</h5>
-				<ul class="list-inline small mb-0">
-					<li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
-					<li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
-					<li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
-					<li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
-					<li class="list-inline-item"><i class="fa-solid fa-star-half-alt text-warning"></i></li>
-				</ul>
-			</div>
-			<!-- Card footer -->
-			<div class="card-footer bg-light border-top">
-				<h6 class="mb-3">Contact Details</h6>
-				<!-- Email id -->
-				<div class="d-flex align-items-center mb-3">
-					<div class="icon-md bg-mode h6 mb-0 rounded-circle flex-shrink-0"><i class="bi bi-envelope-fill"></i></div>
-					<div class="ms-2">
-						<small>Email</small>
-						<h6 class="fw-normal small mb-0"><a href="#">{{ user.email }}</a></h6>
-					</div>
-				</div>
+  <!-- Agent info START -->
+  <div class="col-md-4 col-xxl-3">
+    <div class="card bg-light">
+      <div class="card-body text-center">
+        <div class="avatar avatar-xl flex-shrink-0 mb-3">
+          <img class="avatar-img rounded-circle"
+               src="{% if traveler and traveler.profile_photo %}{{ traveler.profile_photo.url }}{% else %}{% static 'images/avatar/default.jpg' %}{% endif %}"
+               alt="avatar">
+        </div>
+        <h5 class="mb-2">
+          {% if traveler %}
+          {{ traveler.first_name }} {{ traveler.last_name }}
+          {% else %}
+          {{ user.username }}
+          {% endif %}
+        </h5>
+        <ul class="list-inline small mb-0">
+          <li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
+          <li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
+          <li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
+          <li class="list-inline-item me-0"><i class="fa-solid fa-star text-warning"></i></li>
+          <li class="list-inline-item"><i class="fa-solid fa-star-half-alt text-warning"></i></li>
+        </ul>
+      </div>
+      <div class="card-footer bg-light border-top">
+        <h6 class="mb-3">Contact</h6>
+        <div class="d-flex align-items-center mb-3">
+          <div class="icon-md bg-mode h6 mb-0 rounded-circle flex-shrink-0"><i class="bi bi-envelope-fill"></i></div>
+          <div class="ms-2">
+            <small>Email</small>
+            <h6 class="fw-normal small mb-0"><a href="mailto:{{ user.email }}">{{ user.email }}</a></h6>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mb-3">
+          <div class="icon-md bg-mode h6 mb-0 rounded-circle flex-shrink-0"><i class="bi bi-telephone-fill"></i></div>
+          <div class="ms-2">
+            <small>Téléphone</small>
+            <h6 class="fw-normal small mb-0">{{ traveler.phone_number|default:"N/A" }}</h6>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="icon-md bg-mode h6 mb-0 rounded-circle flex-shrink-0"><i class="bi bi-geo-alt-fill"></i></div>
+          <div class="ms-2">
+            <small>Adresse</small>
+            <h6 class="fw-normal small mb-0">{{ traveler.address|default:"N/A" }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Agent info END -->
 
-				<!-- Phone -->
-				<div class="d-flex align-items-center mb-3">
-					<div class="icon-md bg-mode h6 mb-0 rounded-circle flex-shrink-0"><i class="bi bi-telephone-fill"></i></div>
-					<div class="ms-2">
-						<small>Phone</small>
-						<h6 class="fw-normal small mb-0"><a href="#">N/A</a></h6>
-					</div>
-				</div>
+  <div class="col-md-8 col-xxl-9">
+    <div class="card shadow">
+      <div class="card-header border-bottom">
+        <h5 class="mb-0">Informations Utilisateur</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <ul class="list-group list-group-borderless">
+              <li class="list-group-item mb-3">
+                <span>Nom complet:</span>
+                <span class="h6 fw-normal ms-1 mb-0">
+                                    {% if traveler %}{{ traveler.first_name }} {{ traveler.last_name }}{% else %}N/A{% endif %}
+                                </span>
+              </li>
+              <li class="list-group-item mb-3">
+                <span>Nom d'utilisateur:</span>
+                <span class="h6 fw-normal ms-1 mb-0">{{ user.username }}</span>
+              </li>
+              <li class="list-group-item mb-3">
+                <span>Date d'inscription:</span>
+                <span class="h6 fw-normal ms-1 mb-0">{{ user.date_joined|date:'d/m/Y' }}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <ul class="list-group list-group-borderless">
+              <li class="list-group-item mb-3">
+                <span>Email:</span>
+                <span class="h6 fw-normal ms-1 mb-0">{{ user.email }}</span>
+              </li>
+              <li class="list-group-item mb-3">
+                <span>Genre:</span>
+                <span class="h6 fw-normal ms-1 mb-0">{{ traveler.get_gender_display|default:"N/A" }}</span>
+              </li>
+              <li class="list-group-item mb-3">
+                <span>Nationalité:</span>
+                <span class="h6 fw-normal ms-1 mb-0">{{ traveler.nationality|default:"N/A" }}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12">
+            <ul class="list-group list-group-borderless">
+              <li class="list-group-item">
+                <span>Description: </span>
+                <p class="h6 fw-normal mb-0">{{ traveler.bio|default:"N/A" }}</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
 
-				<!-- Address -->
-				<div class="d-flex align-items-center mb-3">
-					<div class="icon-md bg-mode h6 mb-0 rounded-circle flex-shrink-0"><i class="bi bi-geo-alt-fill"></i></div>
-					<div class="ms-2">
-						<small>Address</small>
-						<h6 class="fw-normal small mb-0">N/A</h6>
-					</div>
-				</div>
+    <!-- Liste voyages -->
+    <div class="card mt-4">
+      <div class="card-header border-bottom">
+        <h5 class="mb-0">Liste des voyages</h5>
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>Départ</th>
+            <th>Arrivée</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Prix</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for trip in trips %}
+          <tr>
+            <td>{{ trip.departure_city }}</td>
+            <td>{{ trip.arrival_city }}</td>
+            <td>{{ trip.departure_date }}</td>
+            <td>{{ trip.vehicle_type }}</td>
+            <td>{{ trip.price }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5">Aucun voyage trouvé.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-				<!-- Skype -->
-				<div class="d-flex align-items-center">
-					<div class="icon-md bg-mode h6 mb-0 rounded-circle flex-shrink-0"><i class="bi bi-skype"></i></div>
-					<div class="ms-2">
-						<small>Skype</small>
-						<h6 class="fw-normal small mb-0">N/A</h6>
-					</div>
-				</div>
-
-			</div>
-		</div>
-	</div>
-	<!-- Agent info END -->
-
-	<div class="col-md-8 col-xxl-9">
-		<!-- Personal info START -->
-		<div class="card shadow">
-			<!-- Card header -->
-			<div class="card-header border-bottom">
-				<h5 class="mb-0">Information Réservation</h5>
-			</div>
-			<!-- Card body -->
-			<div class="card-body">
-				<div class="row">
-					<!-- Information item -->
-					<div class="col-md-6">
-						<ul class="list-group list-group-borderless">
-							<li class="list-group-item mb-3">
-								<span>Full Name:</span>
-								<span class="h6 fw-normal ms-1 mb-0">{{ user.name|default:user.username }}</span>
-							</li>
-
-							<li class="list-group-item mb-3">
-								<span>User Name:</span>
-								<span class="h6 fw-normal ms-1 mb-0">{{ user.username }}</span>
-							</li>
-
-							<li class="list-group-item mb-3">
-								<span>Mobile Number:</span>
-								<span class="h6 fw-normal ms-1 mb-0">N/A</span>
-							</li>
-
-							<li class="list-group-item mb-3">
-								<span>Agent License:</span>
-								<span class="h6 fw-normal ms-1 mb-0">N/A</span>
-							</li>
-
-							<li class="list-group-item mb-3">
-								<span>Tax Number:</span>
-								<span class="h6 fw-normal ms-1 mb-0">N/A</span>
-							</li>
-						</ul>
-					</div>
-
-					<!-- Information item -->
-					<div class="col-md-6">
-						<ul class="list-group list-group-borderless">
-							<li class="list-group-item mb-3">
-								<span>Email ID:</span>
-								<span class="h6 fw-normal ms-1 mb-0">{{ user.email }}</span>
-							</li>
-
-							<li class="list-group-item mb-3">
-								<span>Gender:</span>
-								<span class="h6 fw-normal ms-1 mb-0">N/A</span>
-							</li>
-
-							<li class="list-group-item mb-3">
-								<span>Location:</span>
-								<span class="h6 fw-normal ms-1 mb-0">N/A</span>
-							</li>
-
-							<li class="list-group-item mb-3">
-								<span>Joining Date:</span>
-								<span class="h6 fw-normal ms-1 mb-0">{{ user.date_joined|date:'d/m/Y' }}</span>
-							</li>
-						</ul>
-					</div>
-
-					<!-- Information item -->
-					<div class="col-12">
-						<ul class="list-group list-group-borderless">
-							<li class="list-group-item">
-								<span>Description: </span>
-								<p class="h6 fw-normal mb-0">N/A</p>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- Personal info END -->
-
-		<!-- Hotel list START -->
-		<div class="card mt-4">
-			<div class="card-header border-bottom">
-				<h5 class="mb-0">Liste des voyages</h5>
-			</div>
-			<div class="card-body">
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Départ</th>
-							<th>Arrivée</th>
-							<th>Date</th>
-							<th>Type</th>
-							<th>Prix</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for trip in trips %}
-						<tr>
-							<td>{{ trip.departure_city }}</td>
-							<td>{{ trip.arrival_city }}</td>
-							<td>{{ trip.departure_time }}</td>
-							<td>{{ trip.vehicle_type }}</td>
-							<td>{{ trip.price }}</td>
-						</tr>
-						{% empty %}
-						<tr><td colspan="5">Aucun voyage trouvé.</td></tr>
-						{% endfor %}
-					</tbody>
-				</table>
-			</div>
-		</div>
-		<!-- Hotel list END -->
-	</div>
-</div> <!-- Row END -->
-
-<!-- Hotel list START -->
-
-<!-- Hotel list END -->
+    <!-- Avis -->
+    <div class="card mt-4">
+      <div class="card-header border-bottom">
+        <h5 class="mb-0">Mes Avis</h5>
+      </div>
+      <div class="card-body">
+        {% if reviews %}
+        <ul class="list-group">
+          {% for review in reviews %}
+          <li class="list-group-item">
+            <strong>{{ review.trip.title }}</strong> - Note: {{ review.rating }}/5
+            <p>{{ review.comment|default:"Pas de commentaire" }}</p>
+            <small class="text-muted">{{ review.created_at|date:"d/m/Y H:i" }}</small>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>Aucun avis disponible.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
-<!-- Page main content END -->
-</div>
-<!-- Page content END -->
-
 {% endblock page_content %}
 
 {% block extra_javascript %}{% endblock extra_javascript %}

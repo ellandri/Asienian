@@ -74,7 +74,7 @@
                   </div>
                   <div class="detail-content">
                     <span class="detail-label">{% trans "Passager" %}</span>
-                    <span class="detail-value">{{ booked_by }}</span>
+                    <span class="detail-value">{{ booked_by|safe }}</span>
                   </div>
                 </div>
 
@@ -87,7 +87,6 @@
                     <span class="detail-value">{{ tour_date }}</span>
                   </div>
                 </div>
-
 
                 <div class="detail-item">
                   <div class="detail-icon">
@@ -110,9 +109,6 @@
                 </div>
 
                 <div class="detail-item price-item">
-                  <div class="detail-icon">
-                    <i class="bi bi-currency-dollar"></i>
-                  </div>
                   <div class="detail-content">
                     <span class="detail-label">{% trans "Total" %}</span>
                     <span class="detail-value price">CFA {{ total_price|floatformat:0 }}</span>
@@ -124,10 +120,7 @@
               <div class="action-buttons">
                 <!-- Share dropdown -->
                 <div class="dropdown">
-                  <button class="btn btn-modern btn-outline" type="button" id="dropdownShare"
-                          data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-share me-2"></i>{% trans "Partager" %}
-                  </button>
+
                   <ul class="dropdown-menu dropdown-menu-modern" aria-labelledby="dropdownShare">
                     <li><a class="dropdown-item" href="https://twitter.com/intent/tweet?text={% trans 'Je viens de réserver un voyage de' %} {{ trip.departure_city }} {% trans 'à' %} {{ trip.arrival_city }}!&url={{ request.build_absolute_uri }}"
                            target="_blank"><i class="fab fa-twitter me-2"></i>{% trans "Twitter" %}</a></li>
@@ -201,48 +194,122 @@
 
   function downloadPDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
 
-    // Header
-    doc.setFillColor(102, 126, 234);
-    doc.rect(0, 0, 210, 40, 'F');
+    // 🎨 Palette moderne
+    const primaryColor = '#667eea';
+    const secondaryColor = '#667eea';
+    const textColor = '#2d3436';
+    const accentColor = '#ff8f00';
+    const lightGray = '#f8f9fa';
 
-    // Title
+    doc.setFont('Helvetica', 'normal');
+
+    // 🔹 Header avec bandeau dégradé simulé
+    const gradientHeight = 55;
+
+// Couleurs de départ et d’arrivée (du bleu lavande vers un bleu vif)
+    const startColor = { r: 102, g: 126, b: 234 };  // #667eea
+    const endColor   = { r: 59, g: 130, b: 246 };   // #3b82f6
+
+    for (let i = 0; i < gradientHeight; i++) {
+      const ratio = i / gradientHeight;
+      const r = startColor.r + (endColor.r - startColor.r) * ratio;
+      const g = startColor.g + (endColor.g - startColor.g) * ratio;
+      const b = startColor.b + (endColor.b - startColor.b) * ratio;
+      doc.setFillColor(r, g, b);
+      doc.rect(0, i, 210, 1, 'F');
+    }
+
+
+    // 🔹 Titre
     doc.setFontSize(22);
     doc.setTextColor(255, 255, 255);
-    doc.text('{% trans "CONFIRMATION DE RÉSERVATION" %}', 20, 25);
+    doc.setFont('Helvetica', 'bold');
+    doc.text('{% trans "CONFIRMATION DE RÉSERVATION" %}', 105, 30, { align: 'center' });
 
-    // Booking Details
-    doc.setFontSize(12);
-    doc.setTextColor(0);
+    // Ligne décorative
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.5);
+    doc.line(60, 38, 150, 38);
 
-    let y = 60;
-    const lineHeight = 10;
+    // 🔹 Section détails
+    doc.setFontSize(14);
+    doc.setTextColor(primaryColor);
+    doc.setFont('Helvetica', 'bold');
+    doc.text('{% trans "Détails de la réservation" %}', 15, 65);
 
+    // Cadre moderne arrondi
+    doc.setDrawColor(primaryColor);
+    doc.setFillColor(lightGray);
+    doc.roundedRect(10, 70, 190, 130, 5, 5, 'FD');
+
+    // Helpers
+    let y = 80;
+    const lineHeight = 12;
+    const bulletRadius = 2;
+
+    function addBullet(x, y) {
+      doc.setFillColor(primaryColor);
+      doc.circle(x, y, bulletRadius, 'F');
+    }
+
+    function decodeHtml(html) {
+      var txt = document.createElement("textarea");
+      txt.innerHTML = html;
+      return txt.value;
+    }
+
+    // 🔹 Détails avec puces
+    addBullet(15, y + 3);
+    doc.setFontSize(11);
+    doc.setTextColor(textColor);
     doc.text('{% trans "Référence" %}: {{ booking_id }}', 20, y);
     y += lineHeight;
-    doc.text('{% trans "Passager" %}: {{ booked_by }}', 20, y);
+
+    addBullet(15, y + 3);
+    doc.text('{% trans "Passager" %}: ' + decodeHtml('{{ booked_by }}'), 20, y);
     y += lineHeight;
+
+    addBullet(15, y + 3);
     doc.text('{% trans "Voyage" %}: {{ trip.departure_city }} {% trans "vers" %} {{ trip.arrival_city }}', 20, y);
     y += lineHeight;
+
+    addBullet(15, y + 3);
     doc.text('{% trans "Date du voyage" %}: {{ tour_date }}', 20, y);
     y += lineHeight;
-    doc.text('{% trans "Nombre de voyageurs" %}: {{ guests }}', 20, y);
-    y += lineHeight;
+
+    addBullet(15, y + 3);
     doc.text('{% trans "Méthode de paiement" %}: {{ payment_method|default:"N/A" }}', 20, y);
     y += lineHeight;
-    doc.text('{% trans "Total" %}: CFA {{ total_price|floatformat:0 }}', 20, y);
+
+    // ✅ Total en couleur accent
+    addBullet(15, y + 3);
+    doc.setTextColor(accentColor);
+    doc.setFont('Helvetica', 'bold');
+    doc.text('{% trans "Total" %}: {{ total_price|floatformat:0 }} FCFA', 20, y);
     y += lineHeight;
+
+    addBullet(15, y + 3);
+    doc.setTextColor(textColor);
+    doc.setFont('Helvetica', 'normal');
     doc.text('{% trans "Date de réservation" %}: {{ booking_date }}', 20, y);
 
-    // Footer
-    doc.setFontSize(10);
-    doc.setTextColor(128);
-    doc.text('{% trans "Merci de voyager avec nous!" %}', 20, 250);
+    // 🔹 Footer moderne
+    doc.setFillColor(secondaryColor);
+    doc.rect(0, 270, 210, 27, 'F');
 
-    // Save PDF
+    doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('Helvetica', 'italic');
+    doc.text('{% trans "Merci de voyager avec nous!" %}', 105, 285, { align: 'center' });
+
+    // ✅ Export
     doc.save('confirmation-voyage-{{ booking_id }}.pdf');
-
     showToast('{% trans "PDF téléchargé avec succès!" %}', 'success');
   }
 
@@ -265,7 +332,7 @@
 <style>
   :root {
     --primary-color: #667eea;
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #667eea 100%);
     --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
     --card-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     --border-radius: 24px;

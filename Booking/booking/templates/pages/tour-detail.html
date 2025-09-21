@@ -4,67 +4,40 @@
 
 {% block content %}
 
-{% include 'partials/navbar.html' %}
+{% include 'partials/navbar2.html' %}
 
 <main>
 
-	<!-- =======================
+  <!-- =======================
 Main Banner START -->
-	<section class="pt-4 pt-lg-5">
-		<div class="container position-relative">
+  <section class="pt-4 pt-lg-5">
+    <div class="container position-relative">
 
-			<!-- Title and button START -->
-			<div class="row">
-				<div class="col-12">
+      <!-- Title and button START -->
+      <div class="row">
+        <div class="col-12">
 
-					<!-- Meta -->
-					<div class="d-md-flex justify-content-md-between">
-						<!-- Title -->
-						<div>
-							<h1 class="fs-2">{{ trip.departure_city }} à {{ trip.arrival_city }}</h1>
-							<ul class="nav nav-divider h6 text-body mb-0">
-								<li class="nav-item">Durée : {{ trip.duration }}</li>
-								<li class="nav-item">Type de véhicule : {{ trip.vehicle_type }}</li>
-								<li class="nav-item">Heure de départ : {{ trip.departure_time }}</li>
-							</ul>
-						</div>
+          <!-- Meta -->
+          <div class="d-md-flex justify-content-md-between">
+            <!-- Title -->
+            <div>
+              <h1 class="fs-2">{{ trip.departure_city }} à {{ trip.arrival_city }}</h1>
+              <ul class="nav nav-divider h6 text-body mb-0">
+                <li class="nav-item">Durée : {{ trip.duration }}</li>
+                <li class="nav-item">Type de véhicule : {{ trip.vehicle_type }}</li>
+                <li class="nav-item">Heure de départ : {{ trip.departure_time }}</li>
+              </ul>
+            </div>
 
-						<!-- Buttons -->
-						<ul class="list-inline text-end">
-							<!-- Heart icon -->
-							<li class="list-inline-item">
-								<a href="#" class="btn btn-sm btn-light px-2"><i
-										class="fa-solid fa-fw fa-heart"></i></a>
-							</li>
-							<!-- Share icon -->
-							<li class="list-inline-item dropdown">
-								<!-- Share button -->
-								<a href="#" class="btn btn-sm btn-light px-2" role="button" id="dropdownShare"
-									data-bs-toggle="dropdown" aria-expanded="false">
-									<i class="fa-solid fa-fw fa-share-alt"></i>
-								</a>
-								<!-- dropdown button -->
-								<ul class="dropdown-menu dropdown-menu-end min-w-auto shadow rounded"
-									aria-labelledby="dropdownShare">
-									<li><a class="dropdown-item" href="#"><i
-												class="fab fa-twitter-square me-2"></i>Twitter</a></li>
-									<li><a class="dropdown-item" href="#"><i
-												class="fab fa-facebook-square me-2"></i>Facebook</a></li>
-									<li><a class="dropdown-item" href="#"><i
-												class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
-									<li><a class="dropdown-item" href="#"><i class="fa-solid fa-copy me-2"></i>Copy
-											link</a></li>
-								</ul>
-							</li>
-						</ul>
-					</div>
+            <!-- Buttons -->
+          </div>
 
-				</div>
-			</div>
-			<!-- Title and button END -->
+        </div>
+      </div>
+      <!-- Title and button END -->
 
-			<!-- Image gallery START -->
-			<div class="row mt-md-5">
+      <!-- Image gallery START -->
+      <div class="row mt-md-5">
         {% load static %}
 
         <div class="col-12">
@@ -78,12 +51,12 @@ Main Banner START -->
                   <!-- Glightbox image -->
                   <a href="{{ trip.image }}" class="stretched-link"
                      data-glightbox="" data-gallery="banner">
-                    <img src="{{ trip.image }}" alt="{{ trip.departure_city }} to {{ trip.arrival_city }}" class="w-100 h-100 object-fit-cover">
+                    <img src="{{ trip.image }}" alt="{{ trip.departure_city }} à {{ trip.arrival_city }}" class="w-100 h-100 object-fit-cover">
                   </a>
                 </li>
                 {% else %}
                 <li class="splide__slide rounded">
-                  <img src="{% static 'images/gallery/placeholder.jpg' %}" alt="Placeholder image" class="w-100 h-100 object-fit-cover">
+                  <img src="{% static 'images/gallery/placeholder.jpg' %}" alt="Image par défaut" class="w-100 h-100 object-fit-cover">
                 </li>
                 {% endif %}
               </ul>
@@ -99,10 +72,6 @@ Main Banner START -->
                 {% else %}
                 <li class="splide__slide"><img src="{% static 'images/gallery/placeholder.jpg' %}" alt=""></li>
                 {% endif %}
-                <!-- Ajouter des images supplémentaires si nécessaire -->
-<!--                <li class="splide__slide"><img src="{% static 'images/gallery/08.jpg' %}" alt=""></li>-->
-<!--                <li class="splide__slide"><img src="{% static 'images/gallery/09.jpg' %}" alt=""></li>-->
-<!--                <li class="splide__slide"><img src="{% static 'images/gallery/10.jpg' %}" alt=""></li>-->
               </ul>
             </div>
             <!-- Arrows -->
@@ -115,230 +84,223 @@ Main Banner START -->
               </button>
             </div>
           </div>
-        </div>			</div>
-			<!-- Image gallery END -->
+        </div>
+      </div>
+      <!-- Image gallery END -->
 
-		</div>
-	</section>
-	<!-- =======================
+    </div>
+  </section>
+  <!-- =======================
 Main Banner END -->
 
-	<!-- =======================
+  <!-- =======================
 Tabs START -->
-	<section class="py-0">
-		<div class="container">
+  <section class="py-0">
+    <div class="container">
 
-			<!-- Tabs START -->
-			<div class="row">
-				<div class="col-12">
-					<!-- Outer tabs START -->
-					<ul class="nav nav-pills nav-justified nav-responsive bg-primary bg-opacity-10 rounded p-2"
-						id="tour-pills-tab" role="tablist">
-						<!-- Tab item -->
-						<li class="nav-item" role="presentation">
-							<button class="nav-link active mb-0" id="tour-pills-tab-1" data-bs-toggle="pill"
-								data-bs-target="#tour-pills-tab1" type="button" role="tab"
-								aria-controls="tour-pills-tab1" aria-selected="true">Overview</button>
-						</li>
-						<!-- Tab item -->
-						<li class="nav-item" role="presentation">
-							<button class="nav-link mb-0" id="tour-pills-tab-2" data-bs-toggle="pill"
-								data-bs-target="#tour-pills-tab2" type="button" role="tab"
-								aria-controls="tour-pills-tab2" aria-selected="false">Itinerary</button>
-						</li>
-						<!-- Tab item -->
-						<li class="nav-item" role="presentation">
-							<button class="nav-link mb-0" id="tour-pills-tab-3" data-bs-toggle="pill"
-								data-bs-target="#tour-pills-tab3" type="button" role="tab"
-								aria-controls="tour-pills-tab3" aria-selected="false">Inclusions & Exclusion</button>
-						</li>
-						<!-- Tab item -->
-						<li class="nav-item" role="presentation">
-							<button class="nav-link mb-0" id="tour-pills-tab-4" data-bs-toggle="pill"
-								data-bs-target="#tour-pills-tab4" type="button" role="tab"
-								aria-controls="tour-pills-tab4" aria-selected="false">Tour Policy</button>
-						</li>
-					</ul>
-					<!-- Outer tabs END -->
-				</div>
-			</div>
-			<!-- Tabs END -->
-		</div>
-	</section>
-	<!-- =======================
+      <!-- Tabs START -->
+      <div class="row">
+        <div class="col-12">
+          <!-- Outer tabs START -->
+          <ul class="nav nav-pills nav-justified nav-responsive bg-primary bg-opacity-10 rounded p-2"
+              id="tour-pills-tab" role="tablist">
+            <!-- Tab item -->
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active mb-0" id="tour-pills-tab-1" data-bs-toggle="pill"
+                      data-bs-target="#tour-pills-tab1" type="button" role="tab"
+                      aria-controls="tour-pills-tab1" aria-selected="true">Aperçu</button>
+            </li>
+            <!-- Tab item -->
+            <li class="nav-item" role="presentation">
+              <button class="nav-link mb-0" id="tour-pills-tab-2" data-bs-toggle="pill"
+                      data-bs-target="#tour-pills-tab2" type="button" role="tab"
+                      aria-controls="tour-pills-tab2" aria-selected="false">Itinéraire</button>
+            </li>
+            <!-- Tab item -->
+            <li class="nav-item" role="presentation">
+              <button class="nav-link mb-0" id="tour-pills-tab-3" data-bs-toggle="pill"
+                      data-bs-target="#tour-pills-tab3" type="button" role="tab"
+                      aria-controls="tour-pills-tab3" aria-selected="false">Inclus & Exclus</button>
+            </li>
+            <!-- Tab item -->
+            <li class="nav-item" role="presentation">
+              <button class="nav-link mb-0" id="tour-pills-tab-4" data-bs-toggle="pill"
+                      data-bs-target="#tour-pills-tab4" type="button" role="tab"
+                      aria-controls="tour-pills-tab4" aria-selected="false">Politique du voyage</button>
+            </li>
+          </ul>
+          <!-- Outer tabs END -->
+        </div>
+      </div>
+      <!-- Tabs END -->
+    </div>
+  </section>
+  <!-- =======================
 Tabs END -->
 
-	<!-- =======================
+  <!-- =======================
 Tabs-content START -->
-	<section class="pt-4 pt-md-5">
-		<div class="container">
+  <section class="pt-4 pt-md-5">
+    <div class="container">
 
-			<div class="row g-4 g-md-5">
-				<!-- Tabs Content START -->
-				<div class="col-xl-8">
-					<!-- Outer tabs contents START -->
-					<div class="tab-content mb-0" id="tour-pills-tabContent">
+      <div class="row g-4 g-md-5">
+        <!-- Tabs Content START -->
+        <div class="col-xl-8">
+          <!-- Outer tabs contents START -->
+          <div class="tab-content mb-0" id="tour-pills-tabContent">
 
-						<!-- Content item START -->
-						<div class="tab-pane fade show active" id="tour-pills-tab1" role="tabpanel"
-							aria-labelledby="tour-pills-tab-1">
-							<div class="card bg-transparent p-0">
-								<!-- Card header -->
-								<div class="card-header bg-transparent border-bottom p-0 pb-3">
-									<h3 class="mb-0">Description</h3>
-								</div>
-								<!-- Card body START -->
-								<div class="card-body p-0 pt-3">
-                  <p></p>
-
+            <!-- Content item START -->
+            <div class="tab-pane fade show active" id="tour-pills-tab1" role="tabpanel"
+                 aria-labelledby="tour-pills-tab-1">
+              <div class="card bg-transparent p-0">
+                <!-- Card header -->
+                <div class="card-header bg-transparent border-bottom p-0 pb-3">
+                  <h3 class="mb-0">Description</h3>
+                </div>
+                <!-- Card body START -->
+                <div class="card-body p-0 pt-3">
                   <p class="mb-4">{{ trip.description|safe }}</p>
 
-									<!-- List -->
-									<h5>Informations sur le voyage</h5>
-									<ul class="list-group list-group-borderless mb-4">
-										<li class="list-group-item">
-											<span class="h6 mb-0 me-1">Lieux couverts :</span>
-											<span class="h6 fw-light mb-0">{{ trip.lieux_couverts|safe }}</span>
-										</li>
-										<li class="list-group-item">
-											<span class="h6 mb-0 me-1">Durée :</span>
-											<span class="h6 fw-light mb-0">{{ trip.duration |safe}}</span>
-										</li>
-										<li class="list-group-item">
-											<span class="h6 mb-0 me-1">Point de départ :</span>
-											<span class="h6 fw-light mb-0">{{ trip.point_depart |safe}}</span>
-										</li>
-										<li class="list-group-item">
-											<span class="h6 mb-0 me-1">Point d'arrivée :</span>
-											<span class="h6 fw-light mb-0">{{ trip.point_arrivee }}</span>
-										</li>
-									</ul>
+                  <!-- List -->
+                  <h5>Informations sur le voyage</h5>
+                  <ul class="list-group list-group-borderless mb-4">
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Lieux couverts :</span>
+                      <span class="h6 fw-light mb-0">{{ trip.lieux_couverts|safe }}</span>
+                    </li>
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Durée :</span>
+                      <span class="h6 fw-light mb-0">{{ trip.duration |safe}}</span>
+                    </li>
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Point de départ :</span>
+                      <span class="h6 fw-light mb-0">{{ trip.point_depart |safe}}</span>
+                    </li>
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Point d'arrivée :</span>
+                      <span class="h6 fw-light mb-0">{{ trip.point_arrivee }}</span>
+                    </li>
+                  </ul>
 
-									<!-- List -->
-									<h5>Points forts du voyage</h5>
-									<ul class="list-group list-group-borderless mb-4">
-										{% for point in points_forts_list %}
-										<li class="list-group-item h6 fw-light d-flex mb-0">
-											<i class="bi bi-arrow-right me-2"></i>{{ point|safe }}
-										</li>
-										{% endfor %}
-									</ul>
+                  <!-- List -->
+                  <h5>Points forts du voyage</h5>
+                  <ul class="list-group list-group-borderless mb-4">
+                    {% for point in points_forts_list %}
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-arrow-right me-2"></i>{{ point|safe }}
+                    </li>
+                    {% endfor %}
+                  </ul>
 
-									<!-- List -->
+                </div>
+                <!-- Card body END -->
+              </div>
+            </div>
+            <!-- Content item END -->
 
+            <!-- Content item START -->
+            <div class="tab-pane fade" id="tour-pills-tab2" role="tabpanel"
+                 aria-labelledby="tour-pills-tab-2">
+              <div class="card bg-transparent p-0">
+                <!-- Card header -->
+                <div class="card-header bg-transparent border-bottom p-0 pb-3">
+                  <h3 class="mb-0">Itinéraire</h3>
+                </div>
 
+                <!-- Card body START -->
+                <div class="card-body p-0 pt-3">
+                  <div class="accordion accordion-icon accordion-bg-light" id="accordionExample2">
+                    <!-- Item -->
+                    <div class="accordion-item mb-3">
 
+                      <!-- Body -->
+                      <div id="collapse-1" class="accordion-collapse collapse show"
+                           aria-labelledby="heading-1" data-bs-parent="#accordionExample2">
+                        <div class="accordion-body mt-3">
+                          <div class="vstack gap-4">
 
-								</div>
-								<!-- Card body END -->
-							</div>
-						</div>
-						<!-- Content item END -->
-
-						<!-- Content item START -->
-						<div class="tab-pane fade" id="tour-pills-tab2" role="tabpanel"
-							aria-labelledby="tour-pills-tab-2">
-							<div class="card bg-transparent p-0">
-								<!-- Card header -->
-								<div class="card-header bg-transparent border-bottom p-0 pb-3">
-									<h3 class="mb-0">Itinerary</h3>
-								</div>
-
-								<!-- Card body START -->
-								<div class="card-body p-0 pt-3">
-									<div class="accordion accordion-icon accordion-bg-light" id="accordionExample2">
-										<!-- Item -->
-										<div class="accordion-item mb-3">
-
-											<!-- Body -->
-											<div id="collapse-1" class="accordion-collapse collapse show"
-												aria-labelledby="heading-1" data-bs-parent="#accordionExample2">
-												<div class="accordion-body mt-3">
-													<div class="vstack gap-4">
-
-														<!-- Flight list START -->
-														<div class="card bg-transparent p-0">
-															<!-- Card header -->
-															<div class="card-header bg-transparent p-0">
+                            <!-- Flight list START -->
+                            <div class="card bg-transparent p-0">
+                              <!-- Card header -->
+                              <div class="card-header bg-transparent p-0">
 																<span class="text-body"><i
-																		class="fa-solid fa-check-circle me-2"></i>Détails du trajet</span>
-																<div
-																	class="p-3 bg-light rounded-2 d-sm-flex justify-content-sm-between align-items-center mb-4 mt-2">
-																	<!-- Trajet -->
-																	<h6 class="mb-0">{{ trip.departure_city }} - {{ trip.arrival_city }}</h6>
-																	<h6 class="fw-normal mb-0"><span
-																			class="text-body">Date :</span> {{ trip.date }}</h6>
-																</div>
-															</div>
+                                  class="fa-solid fa-check-circle me-2"></i>Détails du trajet</span>
+                                <div
+                                  class="p-3 bg-light rounded-2 d-sm-flex justify-content-sm-between align-items-center mb-4 mt-2">
+                                  <!-- Trajet -->
+                                  <h6 class="mb-0">{{ trip.departure_city }} - {{ trip.arrival_city }}</h6>
+                                  <h6 class="fw-normal mb-0"><span
+                                    class="text-body">Date :</span> {{ trip.date }}</h6>
+                                </div>
+                              </div>
 
-															<!-- Card body START -->
-															<div class="card-body p-0">
-																<div class="row g-4">
-																	<!-- Type de véhicule -->
-																	<div class="col-md-3">
-																		<!-- Image -->
-																		<img src="{% static 'images/element/09.svg' %}"
-																			class="w-80px mb-3" alt="">
-																		<!-- Title -->
-																		<h6 class="fw-normal small mb-0">{{ trip.vehicle_type }}</h6>
-																	</div>
+                              <!-- Card body START -->
+                              <div class="card-body p-0">
+                                <div class="row g-4">
+                                  <!-- Type de véhicule -->
+                                  <div class="col-md-3">
+                                    <!-- Image -->
+                                    <img src="{% static 'images/element/09.svg' %}"
+                                         class="w-80px mb-3" alt="">
+                                    <!-- Title -->
+                                    <h6 class="fw-normal small mb-0">{{ trip.vehicle_type }}</h6>
+                                  </div>
 
-																	<!-- Départ -->
-																	<div class="col-4 col-md-3">
-																		<h5>{{ trip.departure_city }}</h5>
-																		<h6 class="mb-0">{{ trip.departure_time }}</h6>
-																	</div>
+                                  <!-- Départ -->
+                                  <div class="col-4 col-md-3">
+                                    <h5>{{ trip.departure_city }}</h5>
+                                    <h6 class="mb-0">{{ trip.departure_time }}</h6>
+                                  </div>
 
-																	<!-- Durée -->
-																	<div class="col-4 col-md-3 text-center">
-																		<h6>{{ trip.duration }}</h6>
-																		<div class="position-relative my-4">
-																			<hr class="bg-primary opacity-5 position-relative">
-																			<div class="icon-md bg-primary text-white rounded-circle position-absolute top-50 start-50 translate-middle">
-																				<i class="fa-solid fa-fw fa-plane"></i>
-																			</div>
-																		</div>
-																	</div>
+                                  <!-- Durée -->
+                                  <div class="col-4 col-md-3 text-center">
+                                    <h6>{{ trip.duration }}</h6>
+                                    <div class="position-relative my-4">
+                                      <hr class="bg-primary opacity-5 position-relative">
+                                      <div class="icon-md bg-primary text-white rounded-circle position-absolute top-50 start-50 translate-middle">
+                                        <i class="fa-solid fa-fw fa-plane"></i>
+                                      </div>
+                                    </div>
+                                  </div>
 
-																	<!-- Arrivée -->
-																	<div class="col-4 col-md-3 text-end">
-																		<h5>{{ trip.arrival_city }}</h5>
-																		<h6 class="mb-0">{{ trip.arrival_time }}</h6>
-																	</div>
-																</div>
-															</div>
-															<!-- Card body END -->
-														</div>
-														<!-- Flight list END -->
+                                  <!-- Arrivée -->
+                                  <div class="col-4 col-md-3 text-end">
+                                    <h5>{{ trip.arrival_city }}</h5>
+                                    <h6 class="mb-0">{{ trip.arrival_time }}</h6>
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- Card body END -->
+                            </div>
+                            <!-- Flight list END -->
 
-														<hr class="my-0"> <!-- Divider -->
+                            <hr class="my-0"> <!-- Divider -->
 
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-													</div>
-												</div>
-											</div>
-										</div>
+                  </div>
+                </div>
+                <!-- Card body END -->
+              </div>
+            </div>
+            <!-- Content item END -->
 
-									</div>
-								</div>
-								<!-- Card body END -->
-							</div>
-						</div>
-						<!-- Content item END -->
+            <!-- Content item START -->
+            <div class="tab-pane fade" id="tour-pills-tab3" role="tabpanel"
+                 aria-labelledby="tour-pills-tab-3">
+              <div class="card bg-transparent p-0">
+                <!-- Card header -->
+                <div class="card-header bg-transparent border-bottom p-0 pb-3">
+                  <h3 class="mb-0">Inclus & Exclus</h3>
+                </div>
 
-						<!-- Content item START -->
-						<div class="tab-pane fade" id="tour-pills-tab3" role="tabpanel"
-							aria-labelledby="tour-pills-tab-3">
-							<div class="card bg-transparent p-0">
-								<!-- Card header -->
-								<div class="card-header bg-transparent border-bottom p-0 pb-3">
-									<h3 class="mb-0">Inclusions & Exclusions</h3>
-								</div>
-
-								<!-- Card body START -->
-								<div class="card-body p-0 pt-3">
-									<!-- List -->
-                  <h5>Inclusions</h5>
+                <!-- Card body START -->
+                <div class="card-body p-0 pt-3">
+                  <!-- List -->
+                  <h5>Inclus</h5>
                   <ul class="list-group list-group-borderless mb-3">
                     {% for inclusion in inclusions_list %}
                     <li class="list-group-item d-flex mb-0"><i class="fa-solid fa-check text-success me-2"></i>
@@ -346,7 +308,7 @@ Tabs-content START -->
                     </li>
                     {% endfor %}
                   </ul>
-                  <h5>Exclusions</h5>
+                  <h5>Exclus</h5>
                   <ul class="list-group list-group-borderless mb-3">
                     {% for exclusion in exclusions_list %}
                     <li class="list-group-item d-flex mb-0"><i class="fa-solid fa-times text-danger me-2"></i>
@@ -355,186 +317,184 @@ Tabs-content START -->
                     {% endfor %}
                   </ul>
 
-								</div>
-								<!-- Card body END -->
-							</div>
-						</div>
-						<!-- Content item END -->
-
-						<!-- Content item START -->
-						<div class="tab-pane fade" id="tour-pills-tab4" role="tabpanel"
-							aria-labelledby="tour-pills-tab-4">
-							<div class="card bg-transparent p-0">
-								<!-- Card header -->
-								<div class="card-header bg-transparent border-bottom p-0 pb-3">
-                  <h5 class="mb-0">Politique</h5>
                 </div>
-								<!-- Card body START -->
+                <!-- Card body END -->
+              </div>
+            </div>
+            <!-- Content item END -->
+
+            <!-- Content item START -->
+            <div class="tab-pane fade" id="tour-pills-tab4" role="tabpanel"
+                 aria-labelledby="tour-pills-tab-4">
+              <div class="card bg-transparent p-0">
+                <!-- Card header -->
+                <div class="card-header bg-transparent border-bottom p-0 pb-3">
+                  <h5 class="mb-0">Politique du voyage</h5>
+                </div>
+                <!-- Card body START -->
                 <p>{{ trip.politique|safe }}</p>
-								<!-- Card body END -->
-							</div>
-						</div>
-						<!-- Content item END -->
+                <!-- Card body END -->
+              </div>
+            </div>
+            <!-- Content item END -->
 
-					</div>
-				</div>
-				<!-- Tabs Content END -->
+          </div>
+        </div>
+        <!-- Tabs Content END -->
 
-				<!-- Right side content START -->
-				<aside class="col-xl-4">
-					<div class="row g-4">
-						<!-- Book now item START -->
-						<div class="col-md-6 col-xl-12">
-							<div class="card card-body border bg-transparent">
-								<!-- Title -->
-								<div class="hstack gap-2 mb-1">
-									<h3 class="card-title mb-0">{{ trip.price }} FCFA</h3>
-									<span class="fs-5">/personne</span>
-								</div>
+        <!-- Right side content START -->
+        <aside class="col-xl-4">
+          <div class="row g-4">
+            <!-- Book now item START -->
+            <div class="col-md-6 col-xl-12">
+              <div class="card card-body border bg-transparent">
+                <!-- Title -->
+                <div class="hstack gap-2 mb-1">
+                  <h3 class="card-title mb-0">{{ trip.price|floatformat:0}}Fcfa</h3>
+                  <span class="fs-5">/personne</span>
+                </div>
 
-								<div class="d-flex justify-content-between mb-4">
-									<!-- Rating -->
-									<ul class="list-inline mb-0">
-										<li class="list-inline-item me-1 h6 mb-0">{{ trip.rating }}</li>
-										{% for i in "12345" %}
-										<li class="list-inline-item me-0 small">
-											<i class="fa-solid fa-star {% if forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
-										</li>
-										{% endfor %}
-									</ul>
-									<a href="#" class="mb-0 m-0 text-reset text-primary-hover">(365 reviews)</a>
-								</div>
+                <div class="d-flex justify-content-between mb-4">
+                  <!-- Rating -->
+                  <ul class="list-inline mb-0">
+                    <li class="list-inline-item me-1 h6 mb-0">{{ trip.rating }}</li>
+                    {% for i in "12345" %}
+                    <li class="list-inline-item me-0 small">
+                      <i class="fa-solid fa-star {% if forloop.counter <= trip.rating|floatformat:0 %}text-warning{% else %}text-muted{% endif %}"></i>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                  <a href="#" class="mb-0 m-0 text-reset text-primary-hover">(365 avis)</a>
+                </div>
 
-								<!-- Button -->
-								<div class="d-grid gap-2">
-                  <a href="{% url 'pages:tour_booking' trip_id=trip.id %}" class="btn btn-primary">Book Now</a>
+                <!-- Button -->
+                <div class="d-grid gap-2">
+                  <a href="{% url 'pages:tour_booking' trip_id=trip.id %}" class="btn btn-primary">Réserver</a>
                   <button class="btn btn-outline-primary mb-0" type="button" data-bs-toggle="modal"
-										data-bs-target="#inquiryForm">
-										<i class="bi bi-eye fa-fw me-2"></i>Send Inquiry
-									</button>
-								</div>
+                          data-bs-target="#inquiryForm">
+                    <i class="bi bi-eye fa-fw me-2"></i>Envoyer une demande
+                  </button>
+                </div>
 
-							</div>
-						</div>
-						<!-- Book now item END -->
+              </div>
+            </div>
+            <!-- Book now item END -->
 
-						<!-- Help item START -->
-						<div class="col-md-6 col-xl-12">
-							<div class="card card-body bg-light p-4">
-								<!-- Title -->
-								<h4 class="card-title">Need Help?</h4>
+            <!-- Help item START -->
+            <div class="col-md-6 col-xl-12">
+              <div class="card card-body bg-light p-4">
+                <!-- Title -->
+                <h4 class="card-title">Besoin d'aide ?</h4>
 
-								<!-- List -->
-								<ul class="list-group list-group-borderless">
-									<li class="list-group-item py-3">
-										<a href="#" class="h6 mb-0">
-											<i class="bi fa-fw bi-telephone-forward text-primary fs-5 me-2"></i>
-											<span class="fw-light me-1">Call us on:</span>+31 123 456 789
-										</a>
-									</li>
+                <!-- List -->
+                <ul class="list-group list-group-borderless">
+                  <li class="list-group-item py-3">
+                    <a href="#" class="h6 mb-0">
+                      <i class="bi fa-fw bi-telephone-forward text-primary fs-5 me-2"></i>
+                      <span class="fw-light me-1">Appelez-nous au :</span>+31 123 456 789
+                    </a>
+                  </li>
 
-									<li class="list-group-item py-0">
-										<hr class="my-0">
-									</li><!-- Divider -->
+                  <li class="list-item py-0">
+                    <hr class="my-0">
+                  </li><!-- Divider -->
 
-									<li class="list-group-item py-3">
-										<h6 class="mb-0">
-											<i class="bi fa-fw bi-alarm text-primary fs-5 me-2"></i>
-											<span class="h6 fw-light me-1 mb-0">Timing:</span>10AM to 7PM
-										</h6>
-									</li>
+                  <li class="list-group-item py-3">
+                    <h6 class="mb-0">
+                      <i class="bi fa-fw bi-alarm text-primary fs-5 me-2"></i>
+                      <span class="h6 fw-light me-1 mb-0">Horaires :</span>10h à 19h
+                    </h6>
+                  </li>
 
-									<li class="list-group-item py-0">
-										<hr class="my-0">
-									</li><!-- Divider -->
+                  <li class="list-group-item py-0">
+                    <hr class="my-0">
+                  </li><!-- Divider -->
 
-									<li class="list-group-item py-3">
-										<a href="#" class="h6 mb-0">
-											<i class="bi fa-fw bi-headset text-primary fs-5 me-2"></i>Let Us Call You
-										</a>
-									</li>
+                  <li class="list-group-item py-3">
+                    <a href="#" class="h6 mb-0">
+                      <i class="bi fa-fw bi-headset text-primary fs-5 me-2"></i>Laissez-nous vous appeler
+                    </a>
+                  </li>
 
-									<li class="list-group-item py-0">
-										<hr class="my-0">
-									</li><!-- Divider -->
+                  <li class="list-group-item py-0">
+                    <hr class="my-0">
+                  </li><!-- Divider -->
 
-									<li class="list-group-item pt-3 pb-0">
-										<a href="{% url 'pages:dynamic_pages' template_name='contact' %}" class="h6 mb-0">
-											<i class="bi fa-fw bi-calendar-check text-primary fs-5 me-2"></i>Book
-											Appointments
-										</a>
-									</li>
-								</ul>
-							</div>
-						</div>
-						<!-- Help item END -->
-					</div>
-				</aside>
-				<!-- Right side content END -->
+                  <li class="list-group-item pt-3 pb-0">
+                    <a href="{% url 'pages:dynamic_pages' template_name='contact' %}" class="h6 mb-0">
+                      <i class="bi fa-fw bi-calendar-check text-primary fs-5 me-2"></i>Prendre rendez-vous
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <!-- Help item END -->
+          </div>
+        </aside>
+        <!-- Right side content END -->
 
-			</div> <!-- Row END -->
-		</div>
-	</section>
-	<!-- =======================
+      </div> <!-- Row END -->
+    </div>
+  </section>
+  <!-- =======================
 Tabs-content END -->
 
 </main>
 
 <div class="modal fade" id="inquiryForm" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<!-- Title -->
-			<div class="modal-header">
-				<h5 class="modal-title" id="inquiryFormlabel">Get Inquiry</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Title -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="inquiryFormlabel">Demande d'information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
 
-			<!-- Body -->
-			<div class="modal-body p-3">
-				<div class="card bg-transparent">
-					<!-- Card header -->
-					<div class="card-header bg-transparent">
-						<!-- Title -->
-						<h6 class="card-title mb-0">Our expert will get in touch with you shortly</h6>
-					</div>
+      <!-- Body -->
+      <div class="modal-body p-3">
+        <div class="card bg-transparent">
+          <!-- Card header -->
+          <div class="card-header bg-transparent">
+            <!-- Title -->
+            <h6 class="card-title mb-0">Notre expert vous contactera sous peu</h6>
+          </div>
 
-					<!-- Card body -->
-					<div class="card-body pt-0">
+          <!-- Card body -->
+          <div class="card-body pt-0">
 
-						<form>
-							<!-- Name -->
-							<div class="mb-3">
-								<label class="form-label">Name</label>
-								<input type="text" class="form-control" placeholder="Enter Your name">
-							</div>
-							<!-- Email -->
-							<div class="mb-3">
-								<label class="form-label">Email id</label>
-								<input type="email" class="form-control" placeholder="Enter Your emil id">
-							</div>
-							<!-- Phone number -->
-							<div class="mb-3">
-								<label class="form-label">Phone number</label>
-								<input type="text" class="form-control" placeholder="Enter Your phone number">
-							</div>
+            <form>
+              <!-- Name -->
+              <div class="mb-3">
+                <label class="form-label">Nom</label>
+                <input type="text" class="form-control" placeholder="Entrez votre nom">
+              </div>
+              <!-- Email -->
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" placeholder="Entrez votre email">
+              </div>
+              <!-- Phone number -->
+              <div class="mb-3">
+                <label class="form-label">Numéro de téléphone</label>
+                <input type="text" class="form-control" placeholder="Entrez votre numéro de téléphone">
+              </div>
 
-							<div class="mb-3 ms-2 form-check">
-								<input type="checkbox" class="form-check-input" id="inquiryCheck">
-								<label class="form-check-label" for="inquiryCheck">I agree to receive updates and
-									offers</label>
-							</div>
+              <div class="mb-3 ms-2 form-check">
+                <input type="checkbox" class="form-check-input" id="inquiryCheck">
+                <label class="form-check-label" for="inquiryCheck">J'accepte de recevoir des mises à jour et des offres</label>
+              </div>
 
-							<!-- Buttons -->
-							<div class="d-grid gap-2 d-md-block">
-								<button class="btn btn-dark mb-0" type="button">Send Inquiry</button>
-								<button class="btn btn-link mb-0" type="button">Call on: +123 456 89</button>
-							</div>
-						</form> <!-- Form END -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+              <!-- Buttons -->
+              <div class="d-grid gap-2 d-md-block">
+                <button class="btn btn-dark mb-0" type="button">Envoyer la demande</button>
+                <button class="btn btn-link mb-0" type="button">Appeler : +225 0574328739</button>
+              </div>
+            </form> <!-- Form END -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 {% include 'partials/footer.html' %}

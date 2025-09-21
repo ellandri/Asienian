@@ -29,6 +29,8 @@ class Trip(models.Model):
     inclusions = CKEditor5Field(blank=True, null=True)
     exclusions = CKEditor5Field(blank=True, null=True)
     politique = CKEditor5Field(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    available_seats = models.PositiveIntegerField(default=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -112,11 +114,13 @@ class Booking(models.Model):
         verbose_name_plural = "Réservations"
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="reviews")
+    trip = models.ForeignKey('Trip', on_delete=models.CASCADE, related_name="reviews", null=True, blank=True)
     rating = models.FloatField()
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=True)  # Ajout du champ
+    is_deleted = models.BooleanField(default=False)   # Ajout du champ
 
     def __str__(self):
         return f"Avis de {self.user} sur {self.trip}"
@@ -124,3 +128,5 @@ class Review(models.Model):
     class Meta:
         verbose_name = "Avis"
         verbose_name_plural = "Avis"
+
+

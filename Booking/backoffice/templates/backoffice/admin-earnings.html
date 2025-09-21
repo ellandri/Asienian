@@ -17,7 +17,7 @@
     <div class="col-sm-6 col-xxl-3">
       <div class="card card-body bg-light p-4 h-100">
         <h6 class="mb-0">Revenu quotidien moyen</h6>
-        <h3 class="mb-2 mt-2">${{ daily_earnings }}</h3>
+        <h3 class="mb-2 mt-2">{{ daily_earnings|floatformat:0 }} FCFA</h3>
         <p class="mt-auto mb-0">Augmentation <span class="badge bg-success bg-opacity-10 text-success">10% <i class="bi bi-graph-up"></i></span></p>
       </div>
     </div>
@@ -26,7 +26,7 @@
     <div class="col-sm-6 col-xxl-3">
       <div class="card card-body bg-light p-4 h-100">
         <h6 class="mb-0">Revenu ce mois-ci</h6>
-        <h3 class="mb-2 mt-2">${{ monthly_revenue }}</h3>
+        <h3 class="mb-2 mt-2">{{ monthly_revenue|floatformat:0 }} FCFA</h3>
         <p class="mt-auto mb-0">Augmentation par rapport au mois dernier <span class="badge bg-success bg-opacity-10 text-success">21% <i class="bi bi-graph-up"></i></span></p>
       </div>
     </div>
@@ -39,7 +39,7 @@
             <i class="bi bi-info-circle-fill small"></i>
           </a>
         </h6>
-        <h3>${{ on_hold }}</h3>
+        <h3>{{ on_hold|floatformat:0 }} FCFA</h3>
         <p class="mb-0 mt-auto">Paiement attendu le {% now "d/m/Y" %}</p>
       </div>
     </div>
@@ -59,7 +59,8 @@
               </svg>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="creditcardDropdown">
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="editCard({{ bookings.first.id|default:0 }})"><i class="bi bi-credit-card-2-front-fill me-2 fw-icon"></i>Modifier la carte</a></li>              <li><a class="dropdown-item" href="#"><i class="bi bi-credit-card me-2 fw-icon"></i>Ajouter une nouvelle carte</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" onclick="editCard({{ bookings.first.id|default:0 }})"><i class="bi bi-credit-card-2-front-fill me-2 fw-icon"></i>Modifier la carte</a></li>
+              <li><a class="dropdown-item" href="#"><i class="bi bi-credit-card me-2 fw-icon"></i>Ajouter une nouvelle carte</a></li>
               <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-bar-down me-2 fw-icon"></i>Retirer de l'argent</a></li>
               <li><a class="dropdown-item" href="#"><i class="bi bi-calculator me-2 fw-icon"></i>Convertisseur de devises</a></li>
             </ul>
@@ -68,7 +69,7 @@
         </div>
         <div class="mt-4 text-white">
           <span>Solde total</span>
-          <h3 class="text-white mb-0">${{ total_balance }}</h3>
+          <h3 class="text-white mb-0">{{ total_balance|floatformat:0 }} FCFA</h3>
         </div>
         <h5 class="text-white mt-4">**** **** **** {{ card_number }}</h5>
         <div class="d-flex justify-content-between text-white">
@@ -79,6 +80,7 @@
     </div>
   </div>
   <!-- Earning block END -->
+
   <!-- Payment history START -->
   <div class="card shadow mt-5">
     <!-- Card header -->
@@ -118,7 +120,7 @@
         <div class="col position-relative">
           <small class="d-block d-sm-none">Montant :</small>
           <div class="d-flex">
-            <h6 class="mb-0 me-1">${{ booking.trip.price }}</h6>
+            <h6 class="mb-0 me-1">{{ booking.trip.price|floatformat:0 }} FCFA</h6>
             <a href="#" class="h6 mb-0" role="button" id="dropdownShare{{ booking.id }}" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="bi bi-info-circle-fill"></i>
             </a>
@@ -126,21 +128,21 @@
               <li>
                 <div class="d-flex justify-content-between">
                   <span class="small">Commission</span>
-                  <span class="h6 mb-0 small ms-2">$86</span> <!-- À calculer dynamiquement si nécessaire -->
+                  <span class="h6 mb-0 small ms-2">{{ booking.get_commission|floatformat:0 }} FCFA</span>
                 </div>
                 <hr class="my-1">
               </li>
               <li>
                 <div class="d-flex justify-content-between">
                   <span class="me-4 small">Taxe</span>
-                  <span class="text-danger small ms-2">-$0.00</span>
+                  <span class="text-danger small ms-2">{{ booking.get_tax|floatformat:0 }} FCFA</span>
                 </div>
                 <hr class="my-1">
               </li>
               <li>
                 <div class="d-flex justify-content-between">
                   <span class="small">Gains</span>
-                  <span class="h6 mb-0 small ms-2">$86</span>
+                  <span class="h6 mb-0 small ms-2">{{ booking.get_earnings|floatformat:0 }} FCFA</span>
                 </div>
               </li>
             </ul>
@@ -150,8 +152,8 @@
         <!-- Data item -->
         <div class="col">
           <small class="d-block d-sm-none">Statut :</small>
-          <div class="badge bg-{% if booking.status == 'paid' %}success{% elif booking.status == 'pending' %}orange{% else %}danger{% endif %} bg-opacity-10 text-{% if booking.status == 'paid' %}success{% elif booking.status == 'pending' %}orange{% else %}danger{% endif %}">
-            {{ booking.get_status_display }}
+          <div class="badge bg-{% if booking.payment_status == 'paid' %}success{% elif booking.payment_status == 'pending' %}warning{% else %}danger{% endif %} bg-opacity-10 text-{% if booking.payment_status == 'paid' %}success{% elif booking.payment_status == 'pending' %}warning{% else %}danger{% endif %}">
+            {{ booking.get_payment_status_display }}
           </div>
         </div>
 
@@ -229,7 +231,6 @@
         .then(data => {
           if (data.success) {
             alert(data.message);
-            // Mettre à jour l'affichage de la carte
             document.querySelector('.card-number').textContent = `**** **** **** ${data.card_number}`;
             document.querySelector('.card-expiry').textContent = `Valide jusqu'au : ${data.card_expiry}`;
           } else {
@@ -240,5 +241,4 @@
   </script>
   {% endblock %}
 </div>
-
 {% endblock page_content %}

@@ -3,15 +3,17 @@
 
 {% block page_content %}
 <!-- Title -->
+<form style="display: none;" id="csrf-form">
+  {% csrf_token %}
+</form>
 <div class="row">
   <div class="col-12 mb-4 mb-sm-5">
-    <h1 class="h3 mb-0">Gestion des avis</h1>
+    <h1 class="h3 mb-0">Gestion des avis sur l'entreprise</h1>
   </div>
 </div>
 
 <!-- Review box START -->
 <div class="row g-4 g-xl-5 mb-5">
-  <!-- Total Reviews -->
   <div class="col-md-6 col-lg-4">
     <div class="bg-light p-4 rounded text-center">
       <h6 class="fw-normal">Total des avis</h6>
@@ -36,9 +38,9 @@
       <li class="nav-item" role="presentation">
         <a class="nav-link mb-0 me-sm-2 {% if selected_status == 'published' %}active{% endif %}" href="?status=published" role="tab">Publiés</a>
       </li>
-      <li class="nav-item" role="presentation">
-        <a class="nav-link mb-0 {% if selected_status == 'deleted' %}active{% endif %}" href="?status=deleted" role="tab">Supprimés</a>
-      </li>
+<!--      <li class="nav-item" role="presentation">-->
+<!--        <a class="nav-link mb-0 {% if selected_status == 'deleted' %}active{% endif %}" href="?status=deleted" role="tab">Supprimés</a>-->
+<!--      </li>-->
     </ul>
   </div>
 
@@ -46,7 +48,7 @@
   <div class="col-md-6 col-lg-3">
     <form>
       <select class="form-select js-choice" name="trip_id" onchange="this.form.submit()">
-        <option value="">Trier par voyage</option>
+        <option value="">Tous les voyages</option>
         {% for trip in trips %}
         <option value="{{ trip.id }}" {% if selected_trip_id == trip.id|stringformat:"s" %}selected{% endif %}>{{ trip.departure_city }} à {{ trip.arrival_city }}</option>
         {% endfor %}
@@ -69,30 +71,34 @@
         </div>
         <!-- Info -->
         <div class="ms-2">
-          <h5 class="mb-1">{{ review.traveler.first_name }} {{ review.traveler.last_name }}</h5>
-          <p class="mb-0">Séjour le {{ review.created_at|date:"d M Y" }}</p>
+          <h5 class="mb-1">{{ review.user.first_name }} {{ review.user.last_name }}</h5>
+          <p class="mb-0">Avis publié le {{ review.created_at|date:"d M Y" }}</p>
         </div>
       </div>
     </div>
 
     <div class="col-md-8 col-xxl-9">
-      <h6><span class="text-body fw-light">Avis sur :</span> {{ review.trip.departure_city }} à {{ review.trip.arrival_city }}</h6>
+      <h6><span class="text-body fw-light">Avis sur l'entreprise</span> {% if review.trip %}(lié au voyage : {{ review.trip.departure_city }} à {{ review.trip.arrival_city }}){% else %}(Avis général){% endif %}</h6>
       <p>{{ review.comment|truncatechars:200 }}</p>
-
-      <!-- Button -->
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <a href="{% url 'backoffice:direct_message' review.traveler.id %}" class="btn btn-sm btn-primary-soft mb-0">Message direct</a>
-          <a class="btn btn-sm btn-light mb-0" data-bs-toggle="collapse" href="#collapseComment-{{ review.id }}" role="button" aria-expanded="false" aria-controls="collapseComment-{{ review.id }}">Répondre</a>
-        </div>
-        <a href="#" class="text-primary-hover delete-review" data-id="{{ review.id }}"><i class="bi bi-trash3 me-1"></i>Supprimer</a>
+      <div class="d-flex align-items-center mb-2">
+        <span class="text-warning">
+          {% for i in "12345" %}
+            <i class="bi bi-star-fill {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+          {% endfor %}
+        </span>
+        <span class="ms-2">({{ review.rating }}/5)</span>
       </div>
-      <!-- Collapse textarea -->
-      <div class="collapse" id="collapseComment-{{ review.id }}">
-        <div class="d-flex mt-3">
-          <textarea class="form-control mb-0 reply-textarea" placeholder="Ajouter une réponse..." rows="2" spellcheck="false"></textarea>
-          <button class="btn btn-sm btn-primary ms-2 px-4 mb-0 flex-shrink-0 reply-submit" data-id="{{ review.id }}"><i class="fas fa-paper-plane fs-5"></i></button>
-        </div>
+
+      <!-- Buttons -->
+      <div class="d-flex justify-content-end align-items-center">
+        {% if review.is_published %}
+        <a href="#" class="text-primary-hover unpublish-review me-2" data-id="{{ review.id }}"><i class="bi bi-eye-slash me-1"></i>Dépublier</a>
+        {% else %}
+        <a href="#" class="text-primary-hover publish-review me-2" data-id="{{ review.id }}"><i class="bi bi-eye me-1"></i>Publier</a>
+        {% endif %}
+<!--        {% if not review.is_deleted %}-->
+<!--        <a href="#" class="text-primary-hover delete-review" data-id="{{ review.id }}"><i class="bi bi-trash3 me-1"></i>Supprimer</a>-->
+<!--        {% endif %}-->
       </div>
     </div>
   </div>
@@ -139,43 +145,17 @@
   <!-- Pagination END -->
 </div>
 <!-- Reviews END -->
-
 {% endblock page_content %}
 
 {% block extra_javascript %}
 <script>
-  document.querySelectorAll('.reply-submit').forEach(button => {
-    button.addEventListener('click', async () => {
-      const reviewId = button.dataset.id;
-      const textarea = button.previousElementSibling;
-      const replyText = textarea.value;
-      if (replyText) {
-        const response = await fetch(`/backoffice/reply-to-review/${reviewId}/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: `reply_text=${encodeURIComponent(replyText)}`
-        });
-        const data = await response.json();
-        alert(data.message);
-        if (data.success) {
-          textarea.value = ''; // Réinitialiser le textarea
-          window.location.reload();
-        }
-      } else {
-        alert('Veuillez entrer une réponse.');
-      }
-    });
-  });
-
-  document.querySelectorAll('.delete-review').forEach(button => {
+  // Handle publish action
+  document.querySelectorAll('.publish-review').forEach(button => {
     button.addEventListener('click', async (event) => {
       event.preventDefault();
-      if (confirm('Voulez-vous vraiment marquer cet avis comme supprimé ?')) {
+      if (confirm('Voulez-vous vraiment publier cet avis ?')) {
         const reviewId = button.dataset.id;
-        const response = await fetch(`/backoffice/delete-review/${reviewId}/`, {
+        const response = await fetch(`/backoffice/publish-review/${reviewId}/`, {
           method: 'POST',
           headers: {
             'X-CSRFToken': '{{ csrf_token }}',
@@ -186,6 +166,66 @@
         alert(data.message);
         if (data.success) window.location.reload();
       }
+    });
+  });
+
+  // Handle unpublish action
+  document.querySelectorAll('.unpublish-review').forEach(button => {
+    button.addEventListener('click', async (event) => {
+      event.preventDefault();
+      if (confirm('Voulez-vous vraiment dépublier cet avis ?')) {
+        const reviewId = button.dataset.id;
+        const response = await fetch(`/backoffice/unpublish-review/${reviewId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        });
+        const data = await response.json();
+        alert(data.message);
+        if (data.success) window.location.reload();
+      }
+    });
+  });
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Handle delete action
+    document.querySelectorAll('.delete-review').forEach(button => {
+      button.addEventListener('click', async (event) => {
+        event.preventDefault();
+        console.log('Delete button clicked for review ID:', button.dataset.id);
+        if (confirm('Voulez-vous vraiment marquer cet avis comme supprimé ?')) {
+          const reviewId = button.dataset.id;
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+          if (!csrfToken) {
+            console.error('CSRF token not found');
+            alert('Erreur : Jeton CSRF non trouvé. Veuillez recharger la page.');
+            return;
+          }
+          try {
+            const response = await fetch(`/backoffice/delete-review/${reviewId}/`, {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': csrfToken.value,
+                'Content-Type': 'application/x-www-form-urlencoded'
+              }
+            });
+            const data = await response.json();
+            console.log('Response:', data);
+            alert(data.message);
+            if (data.success) {
+              window.location.reload();
+            } else {
+              console.error('Delete failed:', data.message);
+            }
+          } catch (error) {
+            console.error('Fetch error:', error);
+            alert('Erreur lors de la suppression de l\'avis : ' + error.message);
+          }
+        }
+      });
     });
   });
 </script>

@@ -1,0 +1,496 @@
+{% extends 'admin.html' %}
+{% load static i18n %}
+
+{% block page_content %}
+<!-- Page main content START -->
+<div class="page-content-wrapper p-xxl-4">
+  <!-- Title -->
+  <div class="row">
+    <div class="col-12 mb-4 mb-sm-5">
+      <h1 class="h3 mb-0">Paramètres</h1>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Profile setting -->
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header border-bottom">
+          <h5 class="card-header-title">Paramètres du profil</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!-- Full name -->
+            <div class="mb-3">
+              <label class="form-label">Nom</label>
+              {{ profile_form.name }}
+              {% if profile_form.name.errors %}
+              <div class="text-danger small">{{ profile_form.name.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Profile picture -->
+            <div class="mb-3">
+              <label class="form-label">Photo de profil</label>
+              <div class="d-flex align-items-center">
+                <label class="position-relative me-4" for="uploadfile-1" title="Remplacer cette photo">
+                                    <span class="avatar avatar-xl">
+                                        <img id="uploadfile-1-preview"
+                                             class="avatar-img rounded-circle border border-white border-3 shadow"
+                                             src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/logo-icon.svg' %}{% endif %}"
+                                             alt="">
+                                    </span>
+                </label>
+                <label class="btn btn-sm btn-primary-soft mb-0" for="uploadfile-1">Changer</label>
+                {{ profile_form.profile_picture }}
+              </div>
+              {% if profile_form.profile_picture.errors %}
+              <div class="text-danger small">{{ profile_form.profile_picture.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Email id -->
+            <div class="mb-3">
+              <label class="form-label">Adresse e-mail</label>
+              {{ profile_form.email }}
+              {% if profile_form.email.errors %}
+              <div class="text-danger small">{{ profile_form.email.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Mobile number -->
+            <div class="mb-3">
+              <label class="form-label">Numéro de téléphone</label>
+              {{ profile_form.phone_number }}
+              {% if profile_form.phone_number.errors %}
+              <div class="text-danger small">{{ profile_form.phone_number.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Location -->
+            <div class="mb-3">
+              <label class="form-label">Localisation</label>
+              {{ profile_form.location }}
+              {% if profile_form.location.errors %}
+              <div class="text-danger small">{{ profile_form.location.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Birthday -->
+            <div>
+              <label class="form-label">Date de naissance</label>
+              {{ profile_form.birth_date }}
+              {% if profile_form.birth_date.errors %}
+              <div class="text-danger small">{{ profile_form.birth_date.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Save button -->
+            <div class="d-flex justify-content-end mt-4">
+              <a href="#" class="btn text-secondary border-0 me-2">Annuler</a>
+              <button type="submit" class="btn btn-primary" name="profile_submit">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Setting -->
+    <div class="col-lg-6">
+      <!-- Email setting -->
+      <div class="card shadow mb-4">
+        <div class="card-header border-bottom">
+          <h5 class="card-title mb-0">Notifications par e-mail</h5>
+        </div>
+        <div class="card-body vstack gap-4">
+          <form method="post">
+            {% csrf_token %}
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Nouvelles et mises à jour</h6>
+                <small>Actualités sur les produits et mises à jour des fonctionnalités</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ notification_form.news_updates }}
+              </div>
+            </div>
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Conseils et tutoriels</h6>
+                <small>Conseils pour tirer le meilleur parti de votre abonnement</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ notification_form.tips_tutorials }}
+              </div>
+            </div>
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Recherche utilisateur</h6>
+                <small>Conseils pour tirer le meilleur parti de votre abonnement</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ notification_form.user_research }}
+              </div>
+            </div>
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Commentaires</h6>
+                <small>Commentaires sur vos publications et réponses aux commentaires</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ notification_form.comments }}
+              </div>
+            </div>
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Rappels</h6>
+                <small>Je souhaite recevoir des rappels d'assistance pour les réservations</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ notification_form.reminders }}
+              </div>
+            </div>
+            <!-- Save button -->
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-primary" name="notification_submit">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- General setting -->
+      <div class="card shadow">
+        <div class="card-header border-bottom">
+          <h5 class="card-title mb-0">Permissions générales</h5>
+        </div>
+        <div class="card-body vstack gap-4">
+          <form method="post">
+            {% csrf_token %}
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Notifications sur les mises à jour et activités</h6>
+                <small>Vous serez notifié lorsqu'une personne partage un rapport ou vous invite à un projet</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ permission_form.notify_updates }}
+              </div>
+            </div>
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Résumé hebdomadaire</h6>
+                <small>Mise à jour hebdomadaire sur les changements de thème et plus</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ permission_form.weekly_digest }}
+              </div>
+            </div>
+            <!-- Item -->
+            <div class="d-md-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">Collaborateurs</h6>
+                <small>Je souhaite recevoir des rappels d'assistance pour les réservations</small>
+              </div>
+              <div class="form-check form-switch form-check-md mb-0">
+                {{ permission_form.collaborators }}
+              </div>
+            </div>
+            <!-- Save button -->
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-primary" name="permission_submit">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Website setting -->
+    <div class="col-lg-6">
+      <!-- Dark mode setting -->
+      <div class="card shadow mb-4">
+        <div class="card-header border-bottom p-3">
+          <h5 class="card-header-title mb-0">Paramètres de mode sombre/clair</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <div class="hstack gap-2 flex-wrap">
+              <!-- Mode light -->
+              <div class="form-check form-check-inline align-items-center theme-icon-active">
+                {{ theme_form.theme_mode }}
+                <label class="form-check-label" for="inlineRadio1">
+                  <img src="{% static 'images/element/d-light.svg' %}" class="rounded shadow w-80px" alt="">
+                </label>
+                <div class="text-center mt-1 small">Clair</div>
+              </div>
+              <!-- Mode dark -->
+              <div class="form-check form-check-inline">
+                {{ theme_form.theme_mode }}
+                <label class="form-check-label" for="inlineRadio2">
+                  <img src="{% static 'images/element/d-dark.svg' %}" class="rounded shadow w-80px" alt="">
+                </label>
+                <div class="text-center mt-1 small">Sombre</div>
+              </div>
+              <!-- Mode system -->
+              <div class="form-check form-check-inline">
+                {{ theme_form.theme_mode }}
+                <label class="form-check-label" for="inlineRadio3">
+                  <img src="{% static 'images/element/d-default.svg' %}" class="rounded shadow w-80px" alt="">
+                </label>
+                <div class="text-center mt-1 small">Paramètres du système</div>
+              </div>
+            </div>
+            <p class="mb-0 mt-3 small"><b>Note :</b> Ceci est une interface utilisateur pour les paramètres de mode de thème. La fonctionnalité n'est pas implémentée.</p>
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-primary" name="theme_submit">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Website settings -->
+      <div class="card shadow">
+        <div class="card-header border-bottom">
+          <h5 class="card-header-title">Paramètres du site</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" class="row g-4 align-items-center">
+            {% csrf_token %}
+            <!-- Input item -->
+            <div class="col-xl-6">
+              <label class="form-label">Nom du site</label>
+              {{ site_form.site_name }}
+              <div class="form-text">Entrez le nom du site. Il sera affiché sur le site et dans les e-mails.</div>
+              {% if site_form.site_name.errors %}
+              <div class="text-danger small">{{ site_form.site_name.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Input item -->
+            <div class="col-xl-6">
+              <label class="form-label">Droits d'auteur du site</label>
+              {{ site_form.site_copyright }}
+              <div class="form-text">Utilisé pour les contacts et l'envoi d'e-mails</div>
+              {% if site_form.site_copyright.errors %}
+              <div class="text-danger small">{{ site_form.site_copyright.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Input item -->
+            <div class="col-12">
+              <label class="form-label">E-mail du site</label>
+              {{ site_form.site_email }}
+              <div class="form-text">Pour les textes de droits d'auteur</div>
+              {% if site_form.site_email.errors %}
+              <div class="text-danger small">{{ site_form.site_email.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Textarea item -->
+            <div class="col-12">
+              <label class="form-label">Description du site</label>
+              {{ site_form.site_description }}
+              <div class="form-text">Pour écrire une brève description de votre organisation ou du site.</div>
+              {% if site_form.site_description.errors %}
+              <div class="text-danger small">{{ site_form.site_description.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Input item -->
+            <div class="col-lg-6">
+              <label class="form-label">Téléphone de contact</label>
+              {{ site_form.contact_phone }}
+              <div class="form-text">Utilisé pour les contacts et le support</div>
+              {% if site_form.contact_phone.errors %}
+              <div class="text-danger small">{{ site_form.contact_phone.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Input item -->
+            <div class="col-lg-6">
+              <label class="form-label">E-mail de support</label>
+              {{ site_form.support_email }}
+              <div class="form-text">Pour l'e-mail de support</div>
+              {% if site_form.support_email.errors %}
+              <div class="text-danger small">{{ site_form.support_email.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Radio items -->
+            <div class="col-lg-6">
+              <label class="form-label">Autoriser l'inscription</label>
+              <div class="d-sm-flex">
+                {{ site_form.allow_registration }}
+              </div>
+              {% if site_form.allow_registration.errors %}
+              <div class="text-danger small">{{ site_form.allow_registration.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Textarea item -->
+            <div class="col-12">
+              <label class="form-label">Adresse de contact</label>
+              {{ site_form.contact_address }}
+              <div class="form-text">Entrez l'adresse de support</div>
+              {% if site_form.contact_address.errors %}
+              <div class="text-danger small">{{ site_form.contact_address.errors }}</div>
+              {% endif %}
+            </div>
+            <!-- Save button -->
+            <div class="d-sm-flex justify-content-end">
+              <button type="submit" class="btn btn-primary mb-0" name="site_submit">Mettre à jour</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account setting -->
+    <div class="col-lg-6">
+      <!-- Active log -->
+      <div class="bg-light rounded-3 p-4 mb-3">
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-md-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="h5">Journaux d'activité</h6>
+              <p class="mb-1 mb-md-0">Vous pouvez enregistrer tous vos journaux d'activité, y compris les activités inhabituelles détectées.</p>
+            </div>
+            <div class="form-check form-switch form-check-md mb-0">
+              {{ account_form.activity_logs }}
+            </div>
+          </div>
+          <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-primary" name="account_submit">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Change password -->
+      <div class="bg-light rounded-3 p-4 mb-3">
+        <div class="d-md-flex justify-content-between align-items-center flex-wrap">
+          <div>
+            <h6 class="h5">Changer le mot de passe</h6>
+            <p class="mb-1 mb-md-0">Définissez un mot de passe unique pour protéger votre compte.</p>
+          </div>
+          <div>
+            <a href="#" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#changePassword">Changer le mot de passe</a>
+            <p class="mb-0 small h6">Dernier changement {{ user.last_password_change|date:"d M Y" }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two step verification -->
+      <div class="bg-light rounded-3 p-4">
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-md-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="h5">Vérification en deux étapes</h6>
+              <p class="mb-1 mb-md-0">Sécurisez votre compte avec la vérification en deux étapes. Lorsqu'elle est activée, vous devrez entrer non seulement votre mot de passe, mais aussi un code spécial via une application.</p>
+            </div>
+            <div class="form-check form-switch form-check-md mb-0">
+              {{ account_form.two_step_verification }}
+            </div>
+          </div>
+          <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-primary" name="account_submit">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Active log table -->
+      <div class="card shadow mt-4">
+        <div class="card-header border-bottom">
+          <h5 class="card-header-title">Journaux actifs</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive border-0">
+            <table class="table align-middle p-4 mb-0 table-hover">
+              <thead class="table-dark">
+              <tr>
+                <th scope="col" class="border-0 rounded-start">Navigateur</th>
+                <th scope="col" class="border-0">IP</th>
+                <th scope="col" class="border-0">Date</th>
+                <th scope="col" class="border-0 rounded-end">Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for session in active_sessions %}
+              <tr>
+                <td>{{ session.browser }}</td>
+                <td>{{ session.ip_address }}</td>
+                <td>{{ session.last_activity|date:"d M Y" }}</td>
+                <td>
+                  <form method="post" action="{% url 'backoffice:sign_out_session' session.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger-soft me-1 mb-1 mb-md-0">Déconnexion</button>
+                  </form>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">Aucune session active trouvée.</td>
+              </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Change Password -->
+<div class="modal fade" id="changePassword" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordLabel">Changer le mot de passe</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{% url 'backoffice:change_password' %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Ancien mot de passe</label>
+            {{ password_form.old_password }}
+            {% if password_form.old_password.errors %}
+            <div class="text-danger small">{{ password_form.old_password.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nouveau mot de passe</label>
+            {{ password_form.new_password1 }}
+            {% if password_form.new_password1.errors %}
+            <div class="text-danger small">{{ password_form.new_password1.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirmer le nouveau mot de passe</label>
+            {{ password_form.new_password2 }}
+            {% if password_form.new_password2.errors %}
+            <div class="text-danger small">{{ password_form.new_password2.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-primary" name="password_submit">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  // Preview profile picture
+  document.getElementById('uploadfile-1').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('uploadfile-1-preview').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+{% endblock %}
+{% endblock page_content %}

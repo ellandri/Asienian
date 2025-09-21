@@ -1,5 +1,4 @@
 {% extends 'account.html' %}
-
 {% load static i18n %}
 
 {% block body_attribute %}
@@ -7,124 +6,184 @@ class="dashboard"
 {% endblock body_attribute %}
 
 {% block page_content %}
-
 <!-- Main content START -->
 <div class="col-lg-8 col-xl-9">
+  <!-- Offcanvas menu button -->
+  <div class="d-grid mb-0 d-lg-none w-100">
+    <button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
+            aria-controls="offcanvasSidebar">
+      <i class="fas fa-sliders-h"></i> Menu
+    </button>
+  </div>
 
-	<!-- Offcanvas menu button -->
-	<div class="d-grid mb-0 d-lg-none w-100">
-		<button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
-			aria-controls="offcanvasSidebar">
-			<i class="fas fa-sliders-h"></i> Menu
-		</button>
-	</div>
+  <!-- Travelers List START -->
+  <div class="card border">
+    <!-- Card header -->
+    <div class="card-header border-bottom">
+      <h4 class="card-header-title">Détails des voyageurs</h4>
+    </div>
 
-	<!-- Wishlist START -->
-	<div class="card border">
-		<!-- Card header -->
-		<div class="card-header border-bottom">
-			<h4 class="card-header-title">Travelers Detail</h4>
-		</div>
+    <!-- Card body START -->
+    <div class="card-body vstack gap-4">
+      {% if travelers %}
+      {% for traveler in travelers %}
+      <!-- Traveler item START -->
+      <div class="card" id="traveler-{{ traveler.id }}">
+        <!-- Card header -->
+        <div class="card-header d-flex justify-content-between align-items-center p-0">
+          <!-- Avatar -->
+          <div class="d-flex align-items-center">
+            <div class="avatar avatar-sm">
+              {% if traveler.profile_photo %}
+              <img class="avatar-img rounded-circle" src="{{ traveler.profile_photo.url }}" alt="avatar">
+              {% else %}
+              <img class="avatar-img rounded-circle" src="{% static 'images/avatar/default.jpg' %}" alt="avatar">
+              {% endif %}
+            </div>
+            <!-- Info -->
+            <div class="ms-2">
+              <h6 class="mb-0">{{ traveler.title }} {{ traveler.first_name }} {{ traveler.last_name }}</h6>
+            </div>
+          </div>
 
-		<!-- Card body START -->
-		<div class="card-body vstack gap-4">
-			<!-- Traveler item START -->
-			<div class="card">
-				<!-- Card header -->
-				<div class="card-header d-flex justify-content-between align-items-center p-0">
-					<!-- Avatar -->
-					<div class="d-flex align-items-center">
-						<!-- Avatar -->
-						<div class="avatar avatar-sm">
-							<img class="avatar-img rounded-circle" src="{% static 'images/avatar/09.jpg' %}	"
-								alt="avatar">
-						</div>
-						<!-- Info -->
-						<div class="ms-2">
-							<h6 class="mb-0">Lori Stevens</h6>
-						</div>
-					</div>
+          <!-- Button -->
+          <form action="{% url 'pages:delete_traveler' traveler.id %}" method="POST" class="delete-traveler-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-link p-0 mb-0" onclick="return confirm('Voulez-vous vraiment supprimer ce voyageur ?');">Supprimer</button>
+          </form>
+        </div>
 
-					<!-- Button -->
-					<a href="#" class="btn btn-sm btn-link p-0 mb-0">Remove</a>
-				</div>
+        <!-- Card body -->
+        <form class="card-body p-0 pt-3" action="{% url 'pages:account_travelers' %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="traveler_id" value="{{ traveler.id }}">
+          <input type="hidden" name="form_type" value="update_traveler">
+          <!-- Name -->
+          <div class="mb-3">
+            <label class="form-label">Nom complet</label>
+            <div class="input-group">
+              <input type="text" class="form-control" name="first_name" value="{{ traveler.first_name }}" placeholder="Prénom" required>
+              <input type="text" class="form-control" name="last_name" value="{{ traveler.last_name }}" placeholder="Nom" required>
+            </div>
+          </div>
 
-				<!-- card body -->
-				<form class="card-body p-0 pt-3">
-					<!-- Name -->
-					<div class="mb-3">
-						<label class="form-label">Full name</label>
-						<div class="input-group">
-							<input type="text" class="form-control" value="Lori" placeholder="First name">
-							<input type="text" class="form-control" value="Stevens" placeholder="Last name">
-						</div>
-					</div>
+          <!-- Birth day -->
+          <div>
+            <label class="form-label">Date de naissance</label>
+            <input type="text" class="form-control flatpickr" name="date_of_birth" value="{{ traveler.date_of_birth|date:'d M Y' }}"
+                   placeholder="Entrez la date de naissance" data-date-format="d M Y" required>
+          </div>
 
-					<!-- Birth day -->
-					<div>
-						<label class="form-label">Date of Birth</label>
-						<input type="text" class="form-control flatpickr" value="29 Aug 1996"
-							placeholder="Enter date of birth" data-date-format="d M Y">
-					</div>
-				</form>
-			</div>
-			<!-- Traveler item END -->
+          <!-- Submit button -->
+          <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary mb-0">Mettre à jour</button>
+          </div>
+        </form>
+      </div>
+      <!-- Traveler item END -->
+      {% if not forloop.last %}
+      <hr> <!-- Divider -->
+      {% endif %}
+      {% endfor %}
+      {% else %}
+      <p>Aucun voyageur trouvé. Ajoutez un nouveau voyageur ci-dessous.</p>
+      {% endif %}
 
-			<hr> <!-- Divider -->
+      <!-- Button to add new traveler -->
+      <div class="text-end">
+        <button class="btn btn-primary mb-0" type="button" data-bs-toggle="modal" data-bs-target="#inquiryForm">
+          <i class="bi bi-plus-lg"></i> Ajouter un nouveau voyageur
+        </button>
+      </div>
+    </div>
+    <!-- Card body END -->
+  </div>
+  <!-- Travelers List END -->
 
-			<!-- Traveler item START -->
-			<div class="card">
-				<!-- Card header -->
-				<div class="card-header d-flex justify-content-between align-items-center p-0">
-					<!-- Avatar -->
-					<div class="d-flex align-items-center">
-						<!-- Avatar -->
-						<div class="avatar avatar-sm">
-							<img class="avatar-img rounded-circle" src="{% static 'images/avatar/01.jpg' %}	"
-								alt="avatar">
-						</div>
-						<!-- Info -->
-						<div class="ms-2">
-							<h6 class="mb-0">Jacqueline Miller</h6>
-						</div>
-					</div>
-
-					<!-- Button -->
-					<a href="#" class="btn btn-sm btn-link p-0 mb-0">Remove</a>
-				</div>
-
-				<!-- card body -->
-				<form class="card-body p-0 pt-3">
-					<!-- Name -->
-					<div class="mb-3">
-						<label class="form-label">Full name</label>
-						<div class="input-group">
-							<input type="text" class="form-control" value="Jacqueline" placeholder="First name">
-							<input type="text" class="form-control" value="Miller" placeholder="Last name">
-						</div>
-					</div>
-
-					<!-- Birth day -->
-					<div class="">
-						<label class="form-label">Date of Birth</label>
-						<input type="text" class="form-control flatpickr" value="15 May 1994"
-							placeholder="Enter date of birth" data-date-format="d M Y">
-					</div>
-				</form>
-			</div>
-			<!-- Traveler item END -->
-
-			<!-- Button -->
-			<div class="text-end">
-				<button class="btn btn-primary mb-0" type="button" data-bs-toggle="modal" data-bs-target="#inquiryForm">
-					<i class="bi bi-plus-lg"></i> Add New Traveler
-				</button>
-			</div>
-		</div>
-		<!-- Card body END -->
-	</div>
-	<!-- Wishlist END -->
-
+  <!-- Modal for adding new traveler -->
+  <div class="modal fade" id="inquiryForm" tabindex="-1" aria-labelledby="inquiryFormLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="inquiryFormLabel">Ajouter un nouveau voyageur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'pages:account_travelers' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="add_traveler">
+            <!-- Title -->
+            <div class="mb-3">
+              <label class="form-label">Titre</label>
+              <select class="form-select" name="title" required>
+                <option value="">Sélectionnez un titre</option>
+                {% for value, label in title_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <!-- Name -->
+            <div class="mb-3">
+              <label class="form-label">Nom complet</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="first_name" placeholder="Prénom" required>
+                <input type="text" class="form-control" name="last_name" placeholder="Nom" required>
+              </div>
+            </div>
+            <!-- Date of Birth -->
+            <div class="mb-3">
+              <label class="form-label">Date de naissance</label>
+              <input type="text" class="form-control flatpickr" name="date_of_birth" placeholder="Entrez la date de naissance" data-date-format="d M Y" required>
+            </div>
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email" placeholder="Entrez l'email" required>
+            </div>
+            <!-- Phone -->
+            <div class="mb-3">
+              <label class="form-label">Numéro de téléphone</label>
+              <input type="text" class="form-control" name="phone_number" placeholder="Ex. +225xxxxxxxx">
+            </div>
+            <!-- Nationality -->
+            <div class="mb-3">
+              <label class="form-label">Nationalité</label>
+              <select class="form-select" name="nationality">
+                <option value="">Sélectionnez une nationalité</option>
+                {% for country in countries %}
+                <option value="{{ country }}">{{ country }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <!-- Gender -->
+            <div class="mb-3">
+              <label class="form-label">Genre</label>
+              <select class="form-select" name="gender" required>
+                <option value="">Sélectionnez un genre</option>
+                {% for value, label in gender_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <!-- Address -->
+            <div class="mb-3">
+              <label class="form-label">Adresse</label>
+              <input type="text" class="form-control" name="address" placeholder="Entrez l'adresse">
+            </div>
+            <!-- Profile Photo -->
+            <div class="mb-3">
+              <label class="form-label">Photo de profil</label>
+              <input type="file" class="form-control" name="profile_photo" accept="image/*">
+            </div>
+            <div class="text-end">
+              <button type="submit" class="btn btn-primary">Ajouter</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+<!-- Main content END -->
 
 {% endblock page_content %}

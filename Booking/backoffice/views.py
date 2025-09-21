@@ -38,8 +38,13 @@ from paystackapi.transaction import Transaction
 from .models import Trip, Traveler, Booking, Review
 
 
+from django.views.decorators.http import require_POST
+from django.shortcuts import render
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Sum, Count
 
-
+import json
 
 
 
@@ -61,6 +66,14 @@ class LoginAdminView(LoginView):
             form.add_error(None, "Vous devez être un superutilisateur pour accéder au backoffice.")
             return self.form_invalid(form)
 
+
+
+
+
+
+import json
+import locale
+
 class BackofficeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "backoffice/admin-dashboard.html"
 
@@ -69,10 +82,63 @@ class BackofficeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.all()
-        context['message'] = _("Bienvenue dans le backoffice personnalisé !")
-        return context
 
+        # Définir la locale française pour formater les dates
+        locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+
+        # Boîtes de compteurs
+        context['total_trips'] = Trip.objects.count()
+        context['total_income'] = Booking.objects.filter(payment_status='paid').aggregate(total=Sum('trip__price'))['total'] or 0
+        context['total_seats'] = Trip.objects.aggregate(total=Sum('available_seats'))['total'] or 0
+        context['booked_seats'] = Booking.objects.filter(payment_status='paid').count()
+
+        # Données du graphique
+        today = timezone.now().date()
+        last_7_days = [today - timedelta(days=x) for x in range(6, -1, -1)]
+        check_ins = []
+        check_outs = []
+        for day in last_7_days:
+            check_ins.append(Booking.objects.filter(payment_status='paid', created_at__date=day).count())
+            check_outs.append(Booking.objects.filter(payment_status='paid', trip__departure_date=day).count())
+        # Formater les étiquettes en français (ex. : "01 janv.")
+        context['guest_traffic_labels'] = json.dumps([day.strftime('%d %b').lower() for day in last_7_days])
+        context['guest_traffic_check_ins'] = json.dumps(check_ins)
+        context['guest_traffic_check_outs'] = json.dumps(check_outs)
+        context['check_ins'] = sum(check_ins)
+        context['check_outs'] = sum(check_outs)
+        context['available_seats'] = context['total_seats'] - context['booked_seats']
+        context['popular_trips'] = Trip.objects.filter(is_active=True).annotate(
+            booking_count=Count('bookings')
+        ).order_by('-rating', '-booking_count')[:4]
+        context['recent_bookings'] = Booking.objects.select_related('trip').order_by('-created_at')[:5]
+        context['upcoming_arrivals'] = Booking.objects.filter(
+            payment_status='paid',
+            trip__departure_date__gte=today
+        ).select_related('traveler', 'trip').order_by('trip__departure_date')[:6]
+        context['recent_reviews'] = Review.objects.filter(
+            is_published=True,
+            is_deleted=False,
+            trip__isnull=False
+        ).select_related('trip').order_by('-created_at')[:5]
+
+        return (context)
+
+@csrf_exempt
+@login_required
+def toggle_trip_status(request, trip_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    if request.method == 'POST':
+        try:
+            trip = Trip.objects.get(id=trip_id)
+            trip.is_active = not trip.is_active
+            trip.save()
+            return JsonResponse({'success': True, 'is_active': trip.is_active})
+        except Trip.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Trip not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
 
 def dynamic_pages_view(request, template_name):
     valid_templates = ['login-admin', 'dashboard', 'admin-booking-detail', 'admin-trip-list',]  # 'admin-booking-list' retiré
@@ -164,9 +230,132 @@ class TripViewSet(viewsets.ModelViewSet):
 
 
 
+@require_POST
+@login_required
+def unpublish_review(request, review_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Accès non autorisé'}, status=403)
 
+    review = get_object_or_404(Review, id=review_id)
+    if not review.is_published:
+        return JsonResponse({'success': False, 'message': 'Cet avis est déjà dépublié.'}, status=400)
+    review.is_published = False
+    review.save()
+    return JsonResponse({'success': True, 'message': 'Avis dépublié avec succès.'})
 
+@login_required
+def backoffice_reviews(request):
+    if not request.user.is_superuser:
+        return redirect('backoffice:backoffice_login')
 
+    # Filtrer par statut (all, published, deleted)
+    status = request.GET.get('status', 'all')
+    reviews = Review.objects.select_related('trip', 'user')
+    if status == 'published':
+        reviews = reviews.filter(is_published=True, is_deleted=False)
+    elif status == 'deleted':
+        reviews = reviews.filter(is_deleted=True)
+    else:  # status == 'all'
+        reviews = reviews.filter(is_deleted=False)  # Show only non-deleted reviews for "all"
+
+    # Filtrer par voyage (trip)
+    trip_id = request.GET.get('trip_id')
+    if trip_id:
+        reviews = reviews.filter(trip__id=trip_id)
+
+    # Statistiques
+    total_reviews = Review.objects.count()
+    last_year_reviews = Review.objects.filter(
+        created_at__year=timezone.now().year - 1
+    ).count()
+    growth_percentage = ((total_reviews - last_year_reviews) / last_year_reviews * 100) if last_year_reviews > 0 else 0
+
+    # Pagination
+    paginator = Paginator(reviews.order_by('-created_at'), 8)  # 8 avis par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Liste des voyages pour le sélecteur
+    trips = Trip.objects.all()
+
+    context = {
+        'reviews': page_obj,
+        'total_reviews': total_reviews,
+        'growth_percentage': round(growth_percentage, 1),
+        'trips': trips,
+        'selected_status': status,
+        'selected_trip_id': trip_id,
+    }
+    return render(request, 'admin-reviews.html', context)
+@require_POST
+@login_required
+def delete_review(request, review_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Accès non autorisé'}, status=403)
+
+    review = get_object_or_404(Review, id=review_id)
+    review.is_deleted = True
+    review.save()
+    return JsonResponse({'success': True, 'message': 'Avis marqué comme supprimé.'})
+
+@require_POST
+@login_required
+def publish_review(request, review_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Accès non autorisé'}, status=403)
+
+    review = get_object_or_404(Review, id=review_id)
+    if review.is_published:
+        return JsonResponse({'success': False, 'message': 'Cet avis est déjà publié.'}, status=400)
+    if review.is_deleted:
+        return JsonResponse({'success': False, 'message': 'Cet avis est supprimé et ne peut pas être publié.'}, status=400)
+    review.is_published = True
+    review.save()
+    return JsonResponse({'success': True, 'message': 'Avis publié avec succès.'})
+
+@login_required
+def direct_message(request, user_id):
+    if not request.user.is_superuser:
+        return redirect('backoffice:backoffice_login')
+
+    # Retrieve the user
+    user = get_object_or_404(User, id=user_id)
+
+    # Get all reviews by this user
+    reviews = Review.objects.filter(user=user, is_deleted=False).select_related('trip').order_by('-created_at')
+
+    if request.method == 'POST':
+        message_text = request.POST.get('message')
+        if message_text:
+            # Placeholder for sending a message (e.g., save to a Message model or send via email)
+            # For now, we'll just show a success message
+            messages.success(request, f"Message envoyé à {user.username} avec succès.")
+            return redirect('backoffice:reviews')
+        else:
+            messages.error(request, "Le message ne peut pas être vide.")
+
+    context = {
+        'user': user,
+        'reviews': reviews,
+    }
+    return render(request, 'backoffice/direct_message.html', context)
+@require_POST
+@login_required
+def reply_to_review(request, review_id):
+    try:
+        review = Review.objects.get(id=review_id)
+        reply_text = request.POST.get('reply_text')
+        if reply_text:
+            Reply.objects.create(
+                review=review,
+                user=request.user,
+                text=reply_text
+            )
+            return JsonResponse({'success': True, 'message': 'Réponse enregistrée avec succès.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'La réponse ne peut pas être vide.'}, status=400)
+    except Review.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Avis non trouvé.'}, status=404)
 # def add_trip_form_view(request):
 #     if request.method == 'POST':
 #         form = TripForm(request.POST)
@@ -264,11 +453,11 @@ from booking.users.models import User
 from .models import Trip
 from django.shortcuts import get_object_or_404
 
-def admin_agent_detail_view(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    # Si Trip n'est pas lié à User, on affiche tous les voyages (à adapter si relation ajoutée)
-    trips = Trip.objects.all()
-    return render(request, 'pages/admin-agent-detail.html', {'user': user, 'trips': trips})
+# def admin_agent_detail_view(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+#     # Si Trip n'est pas lié à User, on affiche tous les voyages (à adapter si relation ajoutée)
+#     trips = Trip.objects.all()
+#     return render(request, 'pages/admin-agent-detail.html', {'user': user, 'trips': trips})
 
 
 def trip_edit_view(request, trip_id):
@@ -377,22 +566,23 @@ def admin_earnings_view(request):
     today = timezone.now().date()
     month_start = today.replace(day=1)
 
+    # Utiliser payment_status au lieu de status
     daily_earnings = Booking.objects.filter(
-        status='paid',
+        payment_status='paid',
         created_at__date__lte=today
     ).aggregate(avg_earnings=Avg('trip__price'))['avg_earnings'] or 0
 
     monthly_revenue = Booking.objects.filter(
-        status='paid',
+        payment_status='paid',
         created_at__date__gte=month_start
     ).aggregate(total=Sum('trip__price'))['total'] or 0
 
     on_hold = Booking.objects.filter(
-        status='pending'
+        payment_status='pending'
     ).aggregate(total=Sum('trip__price'))['total'] or 0
 
     total_balance = Booking.objects.filter(
-        status='paid'
+        payment_status='paid'
     ).aggregate(total=Sum('trip__price'))['total'] or 0
 
     bookings_list = Booking.objects.select_related('trip', 'traveler').order_by('-created_at')
@@ -406,10 +596,12 @@ def admin_earnings_view(request):
         'on_hold': round(on_hold, 2),
         'total_balance': round(total_balance, 2),
         'bookings': page_obj,
+        # Ajouter card_number et card_expiry si nécessaire
+        'card_number': bookings_list.first().card_number[-4:] if bookings_list.exists() else '****',
+        'card_expiry': f"{bookings_list.first().card_expiry_month}/{bookings_list.first().card_expiry_year}" if bookings_list.exists() else 'N/A',
     }
 
     return render(request, 'backoffice/admin-earnings.html', context)
-
 # Mettre à jour download_invoice pour inclure paystack_payment_id
 def download_invoice(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
@@ -545,6 +737,30 @@ def edit_card(request, booking_id):
             'card_expiry': f"{booking.card_expiry_month}/{booking.card_expiry_year[-2:]}"
         })
     return JsonResponse({'success': False, 'message': 'Méthode non autorisée'}, status=405)
+
+
+
+
+def admin_agent_detail_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    traveler = getattr(user, "traveler", None)
+    trips = Trip.objects.filter(is_active=True)
+    bookings = Booking.objects.filter(user=user)
+
+    booking_count = bookings.count()
+    total_earning = sum(b.amount for b in bookings if b.payment_status == "paid")
+
+    context = {
+        "user": user,
+        "traveler": traveler,
+        "trips": trips,
+        "bookings": bookings,
+        "booking_count": booking_count,
+        "total_earning": total_earning,
+    }
+    return render(request, "pages/admin-agent-detail.html", context)
+
 
 @login_required
 def admin_reviews_view(request):

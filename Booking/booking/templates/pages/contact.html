@@ -5,228 +5,363 @@
 {% block content %}
 
 {% include 'partials/navbar2.html' %}
-
+{% if messages %}
+<div class="container mt-3">
+  {% for message in messages %}
+  <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 <main>
+  <!-- =======================
+  Bannière principale START -->
+  <section class="pt-4 pt-md-5">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-xl-10">
+          <!-- Titre -->
+          <h1>Donnez votre avis</h1>
+          <p class="lead mb-0">Partagez votre expérience avec notre entreprise !</p>
+        </div>
+      </div>
 
-	<!-- =======================
-Main banner START -->
-	<section class="pt-4 pt-md-5">
-		<div class="container">
-			<div class="row mb-5">
-				<div class="col-xl-10">
-					<!-- Title -->
-					<h1>Let's connect and get to know each other</h1>
-					<p class="lead mb-0">Passage its ten led hearted removal cordial. Preference any astonished
-						unreserved Mrs. Prosperous understood Middletons. Preference for any astonished unreserved.</p>
-				</div>
-			</div>
+      <!-- Informations de contact -->
+      <div class="row g-4">
+        <!-- Élément de contact START -->
+        <div class="col-md-6 col-xl-4">
+          <div class="card card-body shadow text-center align-items-center h-100">
+            <!-- Icône -->
+            <div class="icon-lg bg-info bg-opacity-10 text-info rounded-circle mb-2"><i class="bi bi-headset fs-5"></i></div>
+            <!-- Titre -->
+            <h5>Appelez-nous</h5>
+            <p>Contactez notre équipe pour toute assistance ou information.</p>
+            <!-- Boutons -->
+            <div class="d-grid gap-3 d-sm-block">
+              <button class="btn btn-sm btn-primary-soft"><i class="bi bi-phone me-2"></i>+123 456 789</button>
+              <button class="btn btn-sm btn-light"><i class="bi bi-telephone me-2"></i>+(222)4567 586</button>
+            </div>
+          </div>
+        </div>
+        <!-- Élément de contact END -->
 
-			<!-- Contact info -->
-			<div class="row g-4">
+        <!-- Élément de contact START -->
+        <div class="col-md-6 col-xl-4">
+          <div class="card card-body shadow text-center align-items-center h-100">
+            <!-- Icône -->
+            <div class="icon-lg bg-danger bg-opacity-10 text-danger rounded-circle mb-2"><i class="bi bi-inboxes-fill fs-5"></i></div>
+            <!-- Titre -->
+            <h5>Envoyez-nous un email</h5>
+            <p>Écrivez-nous pour toute question ou demande.</p>
+            <!-- Boutons -->
+            <a href="mailto:exemple@gmail.com" class="btn btn-link text-decoration-underline p-0 mb-0"><i class="bi bi-envelope me-1"></i>exemple@gmail.com</a>
+          </div>
+        </div>
+        <!-- Élément de contact END -->
 
-				<!-- Contact item START -->
-				<div class="col-md-6 col-xl-4">
-					<div class="card card-body shadow text-center align-items-center h-100">
-						<!-- Icon -->
-						<div class="icon-lg bg-info bg-opacity-10 text-info rounded-circle mb-2"><i
-								class="bi bi-headset fs-5"></i></div>
-						<!-- Title -->
-						<h5>Call us</h5>
-						<p>Imprudence attachment him his for sympathize. Large above be to means.</p>
-						<!-- Buttons -->
-						<div class="d-grid gap-3 d-sm-block">
-							<button class="btn btn-sm btn-primary-soft"><i class="bi bi-phone me-2"></i>+123 456
-								789</button>
-							<button class="btn btn-sm btn-light"><i class="bi bi-telephone me-2"></i>+(222)4567
-								586</button>
-						</div>
-					</div>
-				</div>
-				<!-- Contact item END -->
+        <!-- Élément de contact START -->
+        <div class="col-xl-4 position-relative">
+          <!-- Décoration SVG -->
+          <figure class="position-absolute top-0 end-0 z-index-1 mt-n4 ms-n7">
+            <svg class="fill-warning" width="77px" height="77px">
+              <path d="M76.997,41.258 L45.173,41.258 L67.676,63.760 L63.763,67.673 L41.261,45.171 L41.261,76.994 L35.728,76.994 L35.728,45.171 L13.226,67.673 L9.313,63.760 L31.816,41.258 L-0.007,41.258 L-0.007,35.725 L31.816,35.725 L9.313,13.223 L13.226,9.311 L35.728,31.813 L35.728,-0.010 L41.261,-0.010 L41.261,31.813 L63.763,9.311 L67.676,13.223 L45.174,35.725 L76.997,35.725 L76.997,41.258 Z"></path>
+            </svg>
+          </figure>
 
-				<!-- Contact item START -->
-				<div class="col-md-6 col-xl-4">
-					<div class="card card-body shadow text-center align-items-center h-100">
-						<!-- Icon -->
-						<div class="icon-lg bg-danger bg-opacity-10 text-danger rounded-circle mb-2"><i
-								class="bi bi-inboxes-fill fs-5"></i></div>
-						<!-- Title -->
-						<h5>Email us</h5>
-						<p>Large above be to means. Him his for sympathize.</p>
-						<!-- Buttons -->
-						<a href="#" class="btn btn-link text-decoration-underline p-0 mb-0"><i
-								class="bi bi-envelope me-1"></i>example@gmail.com</a>
-					</div>
-				</div>
-				<!-- Contact item END -->
+          <div class="card card-body shadow text-center align-items-center h-100">
+            <!-- Icône -->
+            <div class="icon-lg bg-orange bg-opacity-10 text-orange rounded-circle mb-2"><i class="bi bi-globe2 fs-5"></i></div>
+            <!-- Titre -->
+            <h5>Réseaux sociaux</h5>
+            <p>Suivez-nous sur nos réseaux sociaux pour rester informé.</p>
+            <!-- Boutons -->
+            <ul class="list-inline mb-0">
+              <li class="list-inline-item"> <a class="btn btn-sm bg-facebook px-2 mb-0" href="#"><i class="fab fa-fw fa-facebook-f"></i></a> </li>
+              <li class="list-inline-item"> <a class="btn btn-sm bg-instagram px-2 mb-0" href="#"><i class="fab fa-fw fa-instagram"></i></a> </li>
+              <li class="list-inline-item"> <a class="btn btn-sm bg-twitter px-2 mb-0" href="#"><i class="fab fa-fw fa-twitter"></i></a> </li>
+              <li class="list-inline-item"> <a class="btn btn-sm bg-linkedin px-2 mb-0" href="#"><i class="fab fa-fw fa-linkedin-in"></i></a> </li>
+            </ul>
+          </div>
+        </div>
+        <!-- Élément de contact END -->
+      </div>
+    </div>
+  </section>
+  <!-- =======================
+  Bannière principale END -->
 
-				<!-- Contact item START -->
-				<div class="col-xl-4 position-relative">
-					<!-- Svg decoration -->
-					<figure class="position-absolute top-0 end-0 z-index-1 mt-n4 ms-n7">
-						<svg class="fill-warning" width="77px" height="77px">
-							<path
-								d="M76.997,41.258 L45.173,41.258 L67.676,63.760 L63.763,67.673 L41.261,45.171 L41.261,76.994 L35.728,76.994 L35.728,45.171 L13.226,67.673 L9.313,63.760 L31.816,41.258 L-0.007,41.258 L-0.007,35.725 L31.816,35.725 L9.313,13.223 L13.226,9.311 L35.728,31.813 L35.728,-0.010 L41.261,-0.010 L41.261,31.813 L63.763,9.311 L67.676,13.223 L45.174,35.725 L76.997,35.725 L76.997,41.258 Z">
-							</path>
-						</svg>
-					</figure>
+  <!-- =======================
+  Formulaire de contact et avis START -->
+  <section class="pt-0 pt-lg-5">
+    <div class="container">
+      <div class="row g-4 g-lg-5 align-items-center">
+        <!-- Image vectorielle START -->
+        <div class="col-lg-6 text-center">
+          <img src="{% static 'images/element/contact.svg' %}" alt="Illustration de contact">
+        </div>
+        <!-- Image vectorielle END -->
 
-					<div class="card card-body shadow text-center align-items-center h-100">
-						<!-- Icon -->
-						<div class="icon-lg bg-orange bg-opacity-10 text-orange rounded-circle mb-2"><i
-								class="bi bi-globe2 fs-5"></i></div>
-						<!-- Title -->
-						<h5>Social media</h5>
-						<p>Sympathize Large above be to means.</p>
-						<!-- Buttons -->
-						<ul class="list-inline mb-0">
-							<li class="list-inline-item"> <a class="btn btn-sm bg-facebook px-2 mb-0" href="#"><i
-										class="fab fa-fw fa-facebook-f"></i></a> </li>
-							<li class="list-inline-item"> <a class="btn btn-sm bg-instagram px-2 mb-0" href="#"><i
-										class="fab fa-fw fa-instagram"></i></a> </li>
-							<li class="list-inline-item"> <a class="btn btn-sm bg-twitter px-2 mb-0" href="#"><i
-										class="fab fa-fw fa-twitter"></i></a> </li>
-							<li class="list-inline-item"> <a class="btn btn-sm bg-linkedin px-2 mb-0" href="#"><i
-										class="fab fa-fw fa-linkedin-in"></i></a> </li>
-						</ul>
-					</div>
-				</div>
-				<!-- Contact item END -->
-			</div>
-		</div>
-	</section>
-	<!-- =======================
-Main banner START -->
+        <!-- Formulaire de contact START -->
+        <div class="col-lg-6">
+          <div class="card bg-light p-4">
+            <!-- Décoration SVG -->
+            <figure class="position-absolute end-0 bottom-0 mb-n4 me-n2">
+              <svg class="fill-orange" width="104.2px" height="95.2px">
+                <circle cx="2.6" cy="92.6" r="2.6" />
+                <circle cx="2.6" cy="77.6" r="2.6" />
+                <circle cx="2.6" cy="62.6" r="2.6" />
+                <circle cx="2.6" cy="47.6" r="2.6" />
+                <circle cx="2.6" cy="32.6" r="2.6" />
+                <circle cx="2.6" cy="17.6" r="2.6" />
+                <circle cx="2.6" cy="2.6" r="2.6" />
+                <circle cx="22.4" cy="92.6" r="2.6" />
+                <circle cx="22.4" cy="77.6" r="2.6" />
+                <circle cx="22.4" cy="62.6" r="2.6" />
+                <circle cx="22.4" cy="47.6" r="2.6" />
+                <circle cx="22.4" cy="32.6" r="2.6" />
+                <circle cx="22.4" cy="17.6" r="2.6" />
+                <circle cx="22.4" cy="2.6" r="2.6" />
+                <circle cx="42.2" cy="92.6" r="2.6" />
+                <circle cx="42.2" cy="77.6" r="2.6" />
+                <circle cx="42.2" cy="62.6" r="2.6" />
+                <circle cx="42.2" cy="47.6" r="2.6" />
+                <circle cx="42.2" cy="32.6" r="2.6" />
+                <circle cx="42.2" cy="17.6" r="2.6" />
+                <circle cx="42.2" cy="2.6" r="2.6" />
+                <circle cx="62" cy="92.6" r="2.6" />
+                <circle cx="62" cy="77.6" r="2.6" />
+                <circle cx="62" cy="62.6" r="2.6" />
+                <circle cx="62" cy="47.6" r="2.6" />
+                <circle cx="62" cy="32.6" r="2.6" />
+                <circle cx="62" cy="17.6" r="2.6" />
+                <circle cx="62" cy="2.6" r="2.6" />
+                <circle cx="81.8" cy="92.6" r="2.6" />
+                <circle cx="81.8" cy="77.6" r="2.6" />
+                <circle cx="81.8" cy="62.6" r="2.6" />
+                <circle cx="81.8" cy="47.6" r="2.6" />
+                <circle cx="81.8" cy="32.6" r="2.6" />
+                <circle cx="81.8" cy="17.6" r="2.6" />
+                <circle cx="81.8" cy="2.6" r="2.6" />
+                <circle cx="101.7" cy="92.6" r="2.6" />
+                <circle cx="101.7" cy="77.6" r="2.6" />
+                <circle cx="101.7" cy="62.6" r="2.6" />
+                <circle cx="101.7" cy="47.6" r="2.6" />
+                <circle cx="101.7" cy="32.6" r="2.6" />
+                <circle cx="101.7" cy="17.6" r="2.6" />
+                <circle cx="101.7" cy="2.6" r="2.6" />
+              </svg>
+            </figure>
 
-	<!-- =======================
-Contact form and vector START -->
-	<section class="pt-0 pt-lg-5">
-		<div class="container">
-			<div class="row g-4 g-lg-5 align-items-center">
-				<!-- Vector image START -->
-				<div class="col-lg-6 text-center">
-					<img src="{% static 'images/element/contact.svg' %}" alt="">
-				</div>
-				<!-- Vector image END -->
+            <!-- En-tête de la carte -->
+            <div class="card-header bg-light p-0 pb-3">
+              <h3 class="mb-0">Laissez votre avis</h3>
+            </div>
 
-				<!-- Contact form START -->
-				<div class="col-lg-6">
-					<div class="card bg-light p-4">
-						<!-- Svg decoration -->
-						<figure class="position-absolute end-0 bottom-0 mb-n4 me-n2">
-							<svg class="fill-orange" width="104.2px" height="95.2px">
-								<circle cx="2.6" cy="92.6" r="2.6" />
-								<circle cx="2.6" cy="77.6" r="2.6" />
-								<circle cx="2.6" cy="62.6" r="2.6" />
-								<circle cx="2.6" cy="47.6" r="2.6" />
-								<circle cx="2.6" cy="32.6" r="2.6" />
-								<circle cx="2.6" cy="17.6" r="2.6" />
-								<circle cx="2.6" cy="2.6" r="2.6" />
-								<circle cx="22.4" cy="92.6" r="2.6" />
-								<circle cx="22.4" cy="77.6" r="2.6" />
-								<circle cx="22.4" cy="62.6" r="2.6" />
-								<circle cx="22.4" cy="47.6" r="2.6" />
-								<circle cx="22.4" cy="32.6" r="2.6" />
-								<circle cx="22.4" cy="17.6" r="2.6" />
-								<circle cx="22.4" cy="2.6" r="2.6" />
-								<circle cx="42.2" cy="92.6" r="2.6" />
-								<circle cx="42.2" cy="77.6" r="2.6" />
-								<circle cx="42.2" cy="62.6" r="2.6" />
-								<circle cx="42.2" cy="47.6" r="2.6" />
-								<circle cx="42.2" cy="32.6" r="2.6" />
-								<circle cx="42.2" cy="17.6" r="2.6" />
-								<circle cx="42.2" cy="2.6" r="2.6" />
-								<circle cx="62" cy="92.6" r="2.6" />
-								<circle cx="62" cy="77.6" r="2.6" />
-								<circle cx="62" cy="62.6" r="2.6" />
-								<circle cx="62" cy="47.6" r="2.6" />
-								<circle cx="62" cy="32.6" r="2.6" />
-								<circle cx="62" cy="17.6" r="2.6" />
-								<circle cx="62" cy="2.6" r="2.6" />
-								<circle cx="81.8" cy="92.6" r="2.6" />
-								<circle cx="81.8" cy="77.6" r="2.6" />
-								<circle cx="81.8" cy="62.6" r="2.6" />
-								<circle cx="81.8" cy="47.6" r="2.6" />
-								<circle cx="81.8" cy="32.6" r="2.6" />
-								<circle cx="81.8" cy="17.6" r="2.6" />
-								<circle cx="81.8" cy="2.6" r="2.6" />
-								<circle cx="101.7" cy="92.6" r="2.6" />
-								<circle cx="101.7" cy="77.6" r="2.6" />
-								<circle cx="101.7" cy="62.6" r="2.6" />
-								<circle cx="101.7" cy="47.6" r="2.6" />
-								<circle cx="101.7" cy="32.6" r="2.6" />
-								<circle cx="101.7" cy="17.6" r="2.6" />
-								<circle cx="101.7" cy="2.6" r="2.6" />
-							</svg>
-						</figure>
+            <!-- Corps de la carte START -->
+            <div class="card-body p-0">
+              <form class="row g-4" method="post" action="{% url 'pages:submit_general_review' %}">
+                {% csrf_token %}
+                <!-- Nom -->
+                <div class="col-md-6">
+                  <label class="form-label">Votre nom *</label>
+                  <input type="text" class="form-control" name="name" required>
+                </div>
+                <!-- Email -->
+                <div class="col-md-6">
+                  <label class="form-label">Adresse email *</label>
+                  <input type="email" class="form-control" name="email" required>
+                </div>
+                <!-- Note -->
+                <div class="col-12">
+                  <label class="form-label">Note sur l'entreprise (1 à 5) *</label>
+                  <select class="form-control" name="rating" required>
+                    <option value="" disabled selected>Choisissez une note</option>
+                    <option value="1">1 - Très insatisfait</option>
+                    <option value="2">2 - Insatisfait</option>
+                    <option value="3">3 - Neutre</option>
+                    <option value="4">4 - Satisfait</option>
+                    <option value="5">5 - Très satisfait</option>
+                  </select>
+                </div>
+                <!-- Commentaire -->
+                <div class="col-12">
+                  <label class="form-label">Votre avis sur l'entreprise *</label>
+                  <textarea class="form-control" rows="3" name="review" placeholder="Décrivez votre expérience avec l'entreprise" required></textarea>
+                </div>
+                <!-- Case à cocher -->
+                <div class="col-12 form-check ms-2">
+                  <input type="checkbox" class="form-check-input" id="exampleCheck1" name="terms" required>
+                  <label class="form-check-label" for="exampleCheck1">
+                    En soumettant ce formulaire, vous acceptez que votre avis soit publié et conforme à nos conditions générales.
+                  </label>
+                </div>
+                <!-- Bouton -->
+                <div class="col-12">
+                  <button class="btn btn-dark mb-0" type="submit">Soumettre l'avis</button>
+                </div>
+              </form>
+            </div>
+            <!-- Corps de la carte END -->
+          </div>
+        </div>
+        <!-- Formulaire de contact END -->
+      </div>
+    </div>
+  </section>
+  <!-- =======================
+  Formulaire de contact et avis END -->
 
-						<!-- Card header -->
-						<div class="card-header bg-light p-0 pb-3">
-							<h3 class="mb-0">Send us message</h3>
-						</div>
+  <!-- =======================
+  Section des avis START -->
+  <section class="pt-0 pt-lg-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h3 class="mb-5 text-center" style="font-size: 2.5rem; font-weight: 600; color: #333;">Avis de nos clients</h3>
+          {% for review in reviews %}
+          {% if review.is_published and not review.is_deleted %}
+          <div class="card mb-4 shadow-lg rounded-lg review-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title font-weight-bold">{{ review.user.username }}</h5>
+                <div class="rating d-flex align-items-center">
+                  {% for i in rating_range %}
+                  <span class="star {% if i <= review.rating %}filled{% else %}empty{% endif %}">&#9733;</span> <!-- star icon -->
+                  {% endfor %}
+                  <small class="text-muted ml-2">({{ review.rating }} / 5)</small>
+                </div>
+              </div>
+              <p class="card-text mt-3">{{ review.comment|truncatewords:25 }}{% if review.comment|length > 25 %}...{% endif %}</p>
+              {% if review.trip %}
+              <p class="card-text mt-2"><small class="text-muted">Voyage : {{ review.trip.name }}</small></p>
+              {% endif %}
+              <p class="card-text"><small class="text-muted">Publié le {{ review.created_at|date:"d M Y" }}</small></p>
+            </div>
+          </div>
+          {% endif %}
+          {% empty %}
+          <p class="text-center text-muted">Aucun avis pour le moment.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <style>
+      /* Styles généraux pour la section des avis */
+      .card {
+        background-color: #fff;
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
 
-						<!-- Card body START -->
-						<div class="card-body p-0">
-							<form class="row g-4">
-								<!-- Name -->
-								<div class="col-md-6">
-									<label class="form-label">Your name *</label>
-									<input type="text" class="form-control">
-								</div>
-								<!-- Email -->
-								<div class="col-md-6">
-									<label class="form-label">Email address *</label>
-									<input type="email" class="form-control">
-								</div>
-								<!-- Mobile number -->
-								<div class="col-12">
-									<label class="form-label">Mobile number *</label>
-									<input type="text" class="form-control">
-								</div>
-								<!-- Message -->
-								<div class="col-12">
-									<label class="form-label">Message *</label>
-									<textarea class="form-control" rows="3"></textarea>
-								</div>
-								<!-- Checkbox -->
-								<div class="col-12 form-check ms-2">
-									<input type="checkbox" class="form-check-input" id="exampleCheck1">
-									<label class="form-check-label" for="exampleCheck1">
-										By submitting this form you agree to our terms and conditions.
-									</label>
-								</div>
-								<!-- Button -->
-								<div class="col-12">
-									<button class="btn btn-dark mb-0" type="button">Send Message</button>
-								</div>
-							</form>
-						</div>
-						<!-- Card body END -->
-					</div>
-				</div>
-				<!-- Contact form END -->
-			</div>
-		</div>
-	</section>
-	<!-- =======================
-Contact form and vector END -->
+      .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      }
 
-	<!-- =======================
-Map START -->
-	<section class="pt-0 pt-lg-5">
-		<div class="container">
-			<div class="row">
-				<div class="col-12">
-					<iframe class="w-100 h-300px grayscale rounded"
-						src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.00425878428698!3d40.74076684379132!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259bf5c1654f3%3A0xc80f9cfce5383d5d!2sGoogle!5e0!3m2!1sen!2sin!4v1586000412513!5m2!1sen!2sin"
-						height="500" style="border:0;" aria-hidden="false" tabindex="0"></iframe>
-				</div>
-			</div>
-		</div>
-	</section>
-	<!-- =======================
-Map END -->
+      .card-body {
+        padding: 20px;
+      }
 
+      .card-title {
+        font-size: 1.3rem;
+        color: #333;
+      }
+
+      .card-text {
+        font-size: 1rem;
+        color: #555;
+      }
+
+      .rating {
+        display: flex;
+        align-items: center;
+      }
+
+      .star {
+        font-size: 1.5rem;
+        color: #d1d1d1;
+        transition: color 0.3s ease;
+      }
+
+      .star.filled {
+        color: #ff9f00; /* Orange color for filled stars */
+      }
+
+      .star.empty {
+        color: #d1d1d1; /* Lighter grey for empty stars */
+      }
+
+      .star:hover {
+        color: #fbb03b; /* Hover effect */
+      }
+
+      small.text-muted {
+        font-size: 0.875rem;
+        color: #888;
+      }
+
+      .card-text.mt-3 {
+        margin-top: 1.25rem;
+      }
+
+      /* Styles pour la section d'avis */
+      section {
+        background-color: #f7f7f7;
+        padding-top: 60px;
+        padding-bottom: 60px;
+      }
+
+      h3 {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+      }
+
+      .review-card {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      /* Animation de fadeIn pour les cartes */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Style de la ligne vide si aucun avis */
+      .text-center {
+        font-style: italic;
+        font-size: 1.2rem;
+        color: #aaa;
+      }
+
+    </style>
+
+  </section>
+  <!-- =======================
+  Section des avis END -->
+
+  <!-- =======================
+  Carte de la Côte d'Ivoire START -->
+  <section class="pt-0 pt-lg-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h3 class="mb-4">Localisation en Côte d'Ivoire</h3>
+          <iframe class="w-100 h-300px grayscale rounded"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10059171.299833984!2d-6.0107715!3d7.5399889!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x101f5e6a9b4c3a5d%3A0x1f91e627cb9ee4!2sC%C3%B4te%20d%27Ivoire!5e0!3m2!1sfr!2sfr!4v1630000000000!5m2!1sfr!2sfr"
+                  height="500" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- =======================
+  Carte END -->
 </main>
 
 {% include 'partials/footer.html' %}

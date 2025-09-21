@@ -15,7 +15,7 @@ from django.views import View
 from allauth.account.views import LoginView
 from allauth.account.forms import SignupForm, LoginForm
 from django.urls import reverse
-from backoffice.models import Trip,Traveler, Booking
+from backoffice.models import Trip,Traveler, Booking,Review
 from backoffice.forms import TripForm
 from django.shortcuts import get_object_or_404
 from datetime import datetime
@@ -44,7 +44,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from datetime import datetime
 
-
+from django.http import HttpResponse  # Ajout de l'importation manquante
+import json
 
 
 
@@ -71,17 +72,21 @@ class CustomLoginView(LoginView):
 def root_page_view(request):
     form = LoginForm(request.POST or None)
     best_trips = Trip.objects.filter(is_best_trip=True)
+    reviews = Review.objects.filter(is_published=True, is_deleted=False)  # Fetch approved reviews
     return render(request, 'pages/index-tour.html', {
         'user_authenticated': request.user.is_authenticated,
         'form': form,
         'best_trips': best_trips,
-        'login_required': request.GET.get('login_required') == 'true',  # Ajouter l'indicateur
+        'login_required': request.GET.get('login_required') == 'true',
+        'reviews': reviews,  # Add reviews to context,
+        'rating_range': range(1, 6),  # 1 à 5 étoiles
+
     })
 
 
 def dynamic_pages_view(request, template_name):
     allowed_pages = [
-        'account-profile', 'account-travelers', 'account-payment-details',
+        'account-profile', 'account-travelers', 'account-payment-details','backup_data', 'dashboard', 'delete_account',
         'account-wishlist', 'account-settings', 'account-delete', 'hotel-list','index-tour',
         'sign-up', 'sign-in', 'about','contact','faq','terms-of-service','privacy-policy', 'blog-list', 'blog-single','team','help-center','help-detail',
         'blog','blog-detail','flight-list', 'tour-grid','tour-detail','blog-man-mountains','blog-attieke','blog-comoe','blog-danses', 'blog-san-pedro', 'blog-korhogo'
@@ -674,7 +679,7 @@ def booking_process(request, trip_id):
             return JsonResponse({
                 'success': True,
                 'message': 'Réservation confirmée avec succès.',
-                'redirect_url': reverse('pages:account_profile'),
+                'redirect_url': reverse('pages:tour_booking'),
                 'booking_id': booking.id
             })
         except Exception as e:
@@ -723,66 +728,194 @@ def tour_booking_view(request, trip_id):
         'traveler': traveler,
         'existing_booking': None
     }))
+# @login_required
+# def booking_success(request):
+#     # Logique pour la page de succès de réservation
+#     return render(request, 'pages/booking_success.html')
+
+
+
+from django.utils.translation import gettext as _
+
 @login_required
-def booking_success(request):
-    # Logique pour la page de succès de réservation
-    return render(request, 'pages/booking_success.html')
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        try:
+            # Désactiver le compte
+            user.is_active = False
+            user.save()
+            # Déconnecter l'utilisateur
+            logout(request)
+            # Ajouter un message de succès
+            messages.success(request, _("Votre compte a été désactivé avec succès."))
+            # Rediriger vers la page d'accueil
+            return redirect('pages:dashboard')
+        except Exception as e:
+            messages.error(request, _("Une erreur s'est produite lors de la désactivation de votre compte."))
+            return redirect('pages:delete_account')
+    return render(request, 'pages/delete_account.html')
 
+@login_required
+def backup_data_view(request):
+    user = request.user
+    bookings = Booking.objects.filter(user=user)
+    data = [
+        {
+            'booking_id': booking.id,
+            'traveler': f"{booking.traveler.title} {booking.traveler.first_name} {booking.traveler.last_name}",
+            'departure_city': booking.trip.departure_city,
+            'arrival_city': booking.trip.arrival_city,
+            'departure_time': booking.trip.departure_time.strftime("%d %B %Y %H:%M"),
+            'amount': float(booking.amount),
+            'created_at': booking.created_at.strftime("%d %B %Y %H:%M"),
+            'payment_method': booking.get_payment_method_display() or "N/A"
+        }
+        for booking in bookings
+    ]
+    response = HttpResponse(
+        content_type='application/json',
+        headers={'Content-Disposition': f'attachment; filename="backup_{user.username}.json"'}
+    )
+    json.dump(data, response, ensure_ascii=False, indent=2)
+    return response
+@login_required
+def dashboard_view(request):
+    bookings = Booking.objects.filter(user=request.user).order_by('-created_at')[:5]
+    context = {
+        'bookings': [
+            {
+                'id': booking.id,
+                'traveler': f"{booking.traveler.title} {booking.traveler.first_name} {booking.traveler.last_name}",
+                'departure_city': booking.trip.departure_city,
+                'arrival_city': booking.trip.arrival_city,
+                'departure_time': booking.trip.departure_time.strftime("%d %B %Y %H:%M"),
+                'amount': booking.amount,
+                'created_at': booking.created_at.strftime("%d %B %Y %H:%M")
+            }
+            for booking in bookings
+        ]
+    }
+    return render(request, 'dashboard.html', context)
 
+# Liste de pays (simplifiée, peut être remplacée par django-countries)
+COUNTRIES = [
+    'Côte d\'Ivoire', 'France', 'États-Unis', 'Canada', 'Royaume-Uni', 'Allemagne',
+    'Nigeria', 'Ghana', 'Maroc', 'Sénégal', 'Mali', 'Burkina Faso', 'Togo'
+]
 
 @login_required
 def update_profile_view(request):
-    try:
-        traveler = Traveler.objects.get(user=request.user)
-    except Traveler.DoesNotExist:
-        traveler = None
+    traveler = Traveler.objects.filter(user=request.user).first()
+
+    # Calcul du pourcentage de complétion du profil
+    profile_completion = 0
+    if traveler:
+        fields = [
+            traveler.title,
+            traveler.first_name != 'Inconnu',
+            traveler.last_name != 'Inconnu',
+            traveler.email,
+            traveler.date_of_birth,
+            traveler.gender,
+            traveler.phone_number,
+            traveler.nationality
+        ]
+        filled_fields = sum(1 for field in fields if field)
+        profile_completion = int((filled_fields / len(fields)) * 100)
 
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
 
         if form_type == 'profile':
+            # Mise à jour des informations personnelles
             title = request.POST.get('title')
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
             email = request.POST.get('email')
+            date_of_birth = request.POST.get('date_of_birth')
             phone_number = request.POST.get('phone_number')
             nationality = request.POST.get('nationality')
-            date_of_birth = request.POST.get('date_of_birth')
             gender = request.POST.get('gender')
             address = request.POST.get('address')
             profile_photo = request.FILES.get('profile_photo')
 
-            # Validate required fields
-            if not all([title, first_name, last_name, email, date_of_birth, gender]):
-                messages.error(request, "Les champs obligatoires (*) doivent être remplis.")
+            # Validation des champs requis
+            required_fields = {
+                'title': title,
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+                'date_of_birth': date_of_birth,
+                'gender': gender
+            }
+            for field_name, value in required_fields.items():
+                if not value or value.strip() == '':
+                    logger.warning(f"Champ requis manquant : {field_name}")
+                    messages.error(request, f"Le champ {field_name} est requis.")
+                    return redirect('pages:account_profile')
+
+            # Validation du titre
+            valid_titles = [choice[0] for choice in Traveler._meta.get_field('title').choices]
+            if title not in valid_titles:
+                logger.warning(f"Titre invalide : {title}")
+                messages.error(request, "Titre invalide (choisir parmi Monsieur, Madame, Mademoiselle).")
                 return redirect('pages:account_profile')
 
-            # Validate email
-            try:
-                validate_email(email)
-            except ValidationError:
+            # Validation de l'email
+            if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+                logger.warning(f"Format d'email invalide : {email}")
                 messages.error(request, "Adresse email invalide.")
                 return redirect('pages:account_profile')
 
-            # Validate date of birth
+            # Validation de la date de naissance
             try:
-                date_of_birth = timezone.datetime.strptime(date_of_birth, '%d %b %Y').date()
-                if date_of_birth > timezone.now().date():
-                    messages.error(request, "La date de naissance ne peut pas être dans le futur.")
+                dob = datetime.strptime(date_of_birth, '%d %b %Y').date()  # Format flatpickr: "d M Y"
+                today = datetime.now().date()
+                if dob >= today:
+                    logger.warning(f"Date de naissance invalide : {date_of_birth}")
+                    messages.error(request, "La date de naissance doit être dans le passé.")
                     return redirect('pages:account_profile')
             except ValueError:
-                messages.error(request, "Format de date de naissance invalide (utilisez JJ MMM AAAA).")
+                logger.warning(f"Format de date invalide pour date_of_birth : {date_of_birth}")
+                messages.error(request, "Format de date invalide (ex. 25 Jan 2000).")
                 return redirect('pages:account_profile')
 
-            # Validate phone number
+            # Validation du numéro de téléphone (si fourni)
             if phone_number and not re.match(r'^\+225\d{8,10}$', phone_number):
-                messages.error(request, "Numéro de téléphone invalide (format +225xxxxxxxx).")
+                logger.warning(f"Format de numéro de téléphone invalide : {phone_number}")
+                messages.error(request, "Numéro invalide (format +225xxxxxxxx, 8 à 10 chiffres).")
                 return redirect('pages:account_profile')
 
-            # Validate profile photo size
-            if profile_photo and profile_photo.size > 5 * 1024 * 1024:
-                messages.error(request, "La photo de profil ne doit pas dépasser 5 Mo.")
+            # Validation du genre
+            valid_genders = [choice[0] for choice in Traveler.GENDER_CHOICES]
+            if gender not in valid_genders:
+                logger.warning(f"Genre invalide : {gender}")
+                messages.error(request, "Genre invalide (choisir parmi Masculin, Féminin).")
                 return redirect('pages:account_profile')
+
+            # Validation de la nationalité
+            if nationality and nationality not in COUNTRIES:
+                logger.warning(f"Nationalité invalide : {nationality}")
+                messages.error(request, "Nationalité non reconnue.")
+                return redirect('pages:account_profile')
+
+            # Validation de la photo de profil (si fournie)
+            if profile_photo:
+                if not isinstance(profile_photo, UploadedFile):
+                    logger.warning("Téléchargement de photo de profil invalide.")
+                    messages.error(request, "Fichier de photo de profil invalide.")
+                    return redirect('pages:account_profile')
+                if profile_photo.size > 5 * 1024 * 1024:  # 5MB max
+                    logger.warning(f"Photo de profil trop volumineuse : {profile_photo.size} octets")
+                    messages.error(request, "La photo de profil ne doit pas dépasser 5 Mo.")
+                    return redirect('pages:account_profile')
+                try:
+                    FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])(profile_photo)
+                except Exception as e:
+                    logger.warning(f"Extension de fichier invalide pour la photo de profil : {str(e)}")
+                    messages.error(request, "Extension de fichier invalide (jpg, jpeg, png, gif uniquement).")
+                    return redirect('pages:account_profile')
 
             try:
                 traveler, created = Traveler.objects.update_or_create(
@@ -792,85 +925,77 @@ def update_profile_view(request):
                         'first_name': first_name,
                         'last_name': last_name,
                         'email': email,
-                        'date_of_birth': date_of_birth,
+                        'date_of_birth': dob,
                         'phone_number': phone_number or None,
                         'nationality': nationality or None,
                         'gender': gender,
                         'address': address or None,
-                        'profile_photo': profile_photo or traveler.profile_photo if traveler else None
+                        'profile_photo': profile_photo or None
                     }
                 )
-                logger.debug(f"Traveler {'created' if created else 'updated'}: ID={traveler.id}")
-                messages.success(request, "Profil mis à jour avec succès.")
+                logger.debug(f"Voyageur {'créé' if created else 'mis à jour'} : ID={traveler.id}")
+                messages.success(request, 'Profil mis à jour avec succès.')
+                return redirect('pages:account_profile')
             except Exception as e:
-                logger.error(f"Error updating traveler: {str(e)}", exc_info=True)
+                logger.error(f"Erreur lors de la mise à jour du profil : {str(e)}", exc_info=True)
                 messages.error(request, f"Erreur lors de la mise à jour du profil : {str(e)}")
-            return redirect('pages:account_profile')
+                return redirect('pages:account_profile')
 
         elif form_type == 'email':
-            email = request.POST.get('email')
-            try:
-                validate_email(email)
-                request.user.email = email
-                request.user.save()
-                messages.success(request, "Email mis à jour avec succès.")
-            except ValidationError:
+            # Mise à jour de l'email de l'utilisateur
+            new_email = request.POST.get('email')
+            if not new_email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', new_email):
+                logger.warning(f"Format d'email invalide : {new_email}")
                 messages.error(request, "Adresse email invalide.")
-            return redirect('pages:account_profile')
+                return redirect('pages:account_profile')
+
+            try:
+                request.user.email = new_email
+                request.user.save()
+                if traveler:
+                    traveler.email = new_email
+                    traveler.save()
+                logger.debug(f"Email mis à jour pour l'utilisateur {request.user.username}: {new_email}")
+                messages.success(request, 'Email mis à jour avec succès.')
+                return redirect('pages:account_profile')
+            except Exception as e:
+                logger.error(f"Erreur lors de la mise à jour de l'email : {str(e)}", exc_info=True)
+                messages.error(request, f"Erreur lors de la mise à jour de l'email : {str(e)}")
+                return redirect('pages:account_profile')
 
         elif form_type == 'password':
-            old_password = request.POST.get('old_password')
-            new_password1 = request.POST.get('new_password1')
-            new_password2 = request.POST.get('new_password2')
-            if new_password1 != new_password2:
-                messages.error(request, "Les nouveaux mots de passe ne correspondent pas.")
+            # Mise à jour du mot de passe
+            form = PasswordChangeForm(user=request.user, data=request.POST)
+            if form.is_valid():
+                form.save()
+                update_session_auth_hash(request, form.user)  # Maintenir la session active
+                logger.debug(f"Mot de passe mis à jour pour l'utilisateur {request.user.username}")
+                messages.success(request, 'Mot de passe mis à jour avec succès.')
                 return redirect('pages:account_profile')
-            if request.user.check_password(old_password):
-                request.user.set_password(new_password1)
-                request.user.save()
-                messages.success(request, "Mot de passe mis à jour avec succès. Veuillez vous reconnecter.")
-                return redirect('pages:account_login')
             else:
-                messages.error(request, "Mot de passe actuel incorrect.")
+                for error in form.errors.values():
+                    logger.warning(f"Erreur de validation du mot de passe : {error}")
+                    messages.error(request, error)
                 return redirect('pages:account_profile')
 
-    # Calculer le pourcentage de complétion du profil
-    profile_completion = 0
-    if traveler:
-        fields = [
-            traveler.title,
-            traveler.first_name and traveler.first_name != 'Inconnu',
-            traveler.last_name and traveler.last_name != 'Inconnu',
-            traveler.email,
-            traveler.date_of_birth,
-            traveler.gender,
-            traveler.phone_number,
-            traveler.nationality,
-            traveler.address,
-            traveler.profile_photo
-        ]
-        profile_completion = (sum(1 for field in fields if field) / len(fields)) * 100
+        else:
+            logger.warning(f"Type de formulaire invalide : {form_type}")
+            messages.error(request, 'Type de formulaire invalide.')
+            return redirect('pages:account_profile')
 
-    bookings = Booking.objects.filter(user=request.user)
-
-    # Données pour les choix du formulaire
-    title_choices = Traveler._meta.get_field('title').choices
-    gender_choices = Traveler._meta.get_field('gender').choices
-    countries = [
-        'Côte d\'Ivoire', 'France', 'États-Unis', 'Nigeria', 'Ghana', 'Mali', 'Sénégal',
-        # Ajoutez d'autres pays selon vos besoins
-    ]
-
-    return render(request, 'pages/account_profile.html', {
-        'traveler': traveler,
-        'bookings': bookings,
-        'profile_completion': round(profile_completion),
-        'title_choices': title_choices,
-        'gender_choices': gender_choices,
-        'countries': countries,
-        'user': request.user,
-        'message': 'Aucun profil voyageur trouvé. Veuillez compléter vos informations.' if not traveler else None
-    })
+    else:
+        # Requête GET : rendre la page de profil
+        bookings = Booking.objects.filter(user=request.user).select_related('trip', 'traveler')
+        context = {
+            'traveler': traveler,
+            'title_choices': Traveler._meta.get_field('title').choices,
+            'gender_choices': Traveler.GENDER_CHOICES,
+            'countries': COUNTRIES,
+            'profile_completion': profile_completion,
+            'bookings': bookings,
+        }
+        logger.debug(f"Rendu de la page de profil pour l'utilisateur {request.user.username}, traveler={traveler}")
+        return render(request, 'pages/account-profile.html', context)
 
 def trip_detail(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
@@ -994,19 +1119,19 @@ def add_trip_form_view(request):
 #     logger.error("Méthode non autorisée")
 #     return redirect('pages:dashboard')  # Rediriger si la méthode n'est pas POST
 
-def booking_confirm_view(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-    context = {
-        'booking': booking,
-        'booking_id': booking.id,
-        'trip': booking.trip,
-        'booked_by': f"{booking.traveler.title} {booking.traveler.first_name} {booking.traveler.last_name}",
-        'payment_method': booking.get_payment_method_display() or booking.payment_method or "N/A",
-        'total_price': booking.trip.price,  # Prix du voyage depuis Trip
-        'booking_date': booking.created_at.strftime('%Y-%m-%d'),  # Date de création de la réservation
-        'tour_date': booking.trip.departure_time,  # Heure de départ comme date du voyage
-    }
-    return render(request, 'pages/booking-confirm.html', context)
+# def booking_confirm_view(request, booking_id):
+#     booking = get_object_or_404(Booking, id=booking_id)
+#     context = {
+#         'booking': booking,
+#         'booking_id': booking.id,
+#         'trip': booking.trip,
+#         'booked_by': f"{booking.traveler.title} {booking.traveler.first_name} {booking.traveler.last_name}",
+#         'payment_method': booking.get_payment_method_display() or booking.payment_method or "N/A",
+#         'total_price': booking.trip.price,  # Prix du voyage depuis Trip
+#         'booking_date': booking.created_at.strftime('%Y-%m-%d'),  # Date de création de la réservation
+#         'tour_date': booking.trip.departure_time,  # Heure de départ comme date du voyage
+#     }
+#     return render(request, 'pages/booking-confirm.html', context)
 
 
 
@@ -1015,10 +1140,10 @@ def my_bookings_view(request):
     # Récupérer les réservations de l'utilisateur connecté
     bookings = Booking.objects.filter(traveler__user=request.user).select_related('trip', 'traveler')
 
-    # Trier les réservations par statut
-    upcoming_bookings = bookings.filter(status='pending')
-    canceled_bookings = bookings.filter(status='canceled')
-    completed_bookings = bookings.filter(status='paid')
+    # Trier les réservations par payment_status
+    upcoming_bookings = bookings.filter(payment_status='pending')
+    canceled_bookings = bookings.filter(payment_status='canceled')
+    completed_bookings = bookings.filter(payment_status='paid')
 
     context = {
         'user': request.user,
@@ -1027,6 +1152,29 @@ def my_bookings_view(request):
         'completed_bookings': completed_bookings,
     }
     return render(request, 'pages/account-bookings.html', context)
+
+def booking_confirm_view(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    if booking.user != request.user:
+        return render(request, 'pages/booking_confirm.html', {
+            'error': _("Vous n'êtes pas autorisé à voir cette réservation.")
+        })
+    trip = booking.trip
+    booked_by = f"{booking.traveler.title} {booking.traveler.first_name} {booking.traveler.last_name}"
+    tour_date = booking.trip.departure_time.strftime("%d %B %Y %H:%M")
+    payment_method = booking.get_payment_method_display() or "N/A"
+    total_price = booking.amount
+    booking_date = booking.created_at.strftime("%d %B %Y %H:%M")
+    context = {
+        'booking_id': booking.id,
+        'trip': trip,
+        'booked_by': booked_by,
+        'tour_date': tour_date,
+        'payment_method': payment_method,
+        'total_price': total_price,
+        'booking_date': booking_date,
+    }
+    return render(request, 'pages/booking-confirm.html', context)
 
 def booking_success(request):
     return render(request, 'pages/booking_success.html', {'message': 'Votre réservation a été effectuée avec succès !'})
@@ -1168,124 +1316,206 @@ def update_email_view(request):
 
     return redirect('pages:account_profile')
 
-@login_required
+
+
+# Liste de pays (simplifiée, peut être remplacée par django-countries)
+COUNTRIES = [
+    'Côte d\'Ivoire', 'France', 'États-Unis', 'Canada', 'Royaume-Uni', 'Allemagne',
+    'Nigeria', 'Ghana', 'Maroc', 'Sénégal', 'Mali', 'Burkina Faso', 'Togo'
+]
+
 @login_required
 def update_profile_view(request):
-    # Récupérer ou créer le profil Traveler de l'utilisateur connecté
-    traveler, created = Traveler.objects.get_or_create(
-        user=request.user,
-        defaults={
-            'email': request.user.email or '',
-            'first_name': request.user.name if hasattr(request.user, 'name') and request.user.name else 'Inconnu',
-            'last_name': 'Inconnu',  # Pas de last_name dans User, donc valeur par défaut
-        }
-    )
+    traveler = Traveler.objects.filter(user=request.user).first()
 
-    if created:
-        messages.info(request, "Un nouveau profil voyageur a été créé. Veuillez le compléter.")
-
-    # Liste statique des pays
-    countries = ['CI','USA', 'France', 'India', 'UK', 'Canada', 'Germany', 'Australia']
+    # Calcul du pourcentage de complétion du profil
+    profile_completion = 0
+    if traveler:
+        fields = [
+            traveler.title,
+            traveler.first_name != 'Inconnu',
+            traveler.last_name != 'Inconnu',
+            traveler.email,
+            traveler.date_of_birth,
+            traveler.gender,
+            traveler.phone_number,
+            traveler.nationality
+        ]
+        filled_fields = sum(1 for field in fields if field)
+        profile_completion = int((filled_fields / len(fields)) * 100)
 
     if request.method == 'POST':
-        try:
-            title = request.POST.get('title', '')
-            first_name = request.POST.get('first_name', '')
-            last_name = request.POST.get('last_name', '')
-            email = request.POST.get('email', '')
-            phone_number = request.POST.get('phone_number', '')
-            nationality = request.POST.get('nationality', '')
-            date_of_birth = request.POST.get('date_of_birth', '')
-            gender = request.POST.get('gender', '')
-            address = request.POST.get('address', '')
+        form_type = request.POST.get('form_type')
+
+        if form_type == 'profile':
+            # Mise à jour des informations personnelles
+            title = request.POST.get('title')
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            email = request.POST.get('email')
+            date_of_birth = request.POST.get('date_of_birth')
+            phone_number = request.POST.get('phone_number')
+            nationality = request.POST.get('nationality')
+            gender = request.POST.get('gender')
+            address = request.POST.get('address')
             profile_photo = request.FILES.get('profile_photo')
 
-            # Validations des champs obligatoires
-            if not all([first_name, last_name]):
-                messages.error(request, "Les champs Prénom et Nom sont obligatoires.")
+            # Validation des champs requis
+            required_fields = {
+                'title': title,
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+                'date_of_birth': date_of_birth,
+                'gender': gender
+            }
+            for field_name, value in required_fields.items():
+                if not value or value.strip() == '':
+                    logger.warning(f"Champ requis manquant : {field_name}")
+                    messages.error(request, f"Le champ {field_name} est requis.")
+                    return redirect('pages:account_profile')
+
+            # Validation du titre
+            valid_titles = [choice[0] for choice in Traveler._meta.get_field('title').choices]
+            if title not in valid_titles:
+                logger.warning(f"Titre invalide : {title}")
+                messages.error(request, "Titre invalide (choisir parmi Monsieur, Madame, Mademoiselle).")
                 return redirect('pages:account_profile')
 
-            # Validation de l'email (si fourni)
-            if email:
-                try:
-                    validate_email(email)
-                except ValidationError:
-                    messages.error(request, "Adresse email invalide.")
-                    return redirect('pages:account_profile')
+            # Validation de l'email
+            if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+                logger.warning(f"Format d'email invalide : {email}")
+                messages.error(request, "Adresse email invalide.")
+                return redirect('pages:account_profile')
 
-            # Validation de la date de naissance (si fournie)
-            parsed_date = None
-            if date_of_birth:
-                try:
-                    parsed_date = datetime.strptime(date_of_birth, '%d %b %Y').date()
-                except ValueError:
-                    messages.error(request, "Format de date de naissance invalide (JJ MMM AAAA requis, ex. 29 Aug 1996).")
+            # Validation de la date de naissance
+            try:
+                dob = datetime.strptime(date_of_birth, '%d %b %Y').date()  # Format flatpickr: "d M Y"
+                today = datetime.now().date()
+                if dob >= today:
+                    logger.warning(f"Date de naissance invalide : {date_of_birth}")
+                    messages.error(request, "La date de naissance doit être dans le passé.")
                     return redirect('pages:account_profile')
-
-            # Validation de la taille de la photo de profil (si fournie)
-            if profile_photo and profile_photo.size > 5 * 1024 * 1024:
-                messages.error(request, "La photo de profil ne doit pas dépasser 5 Mo.")
+            except ValueError:
+                logger.warning(f"Format de date invalide pour date_of_birth : {date_of_birth}")
+                messages.error(request, "Format de date invalide (ex. 25 Jan 2000).")
                 return redirect('pages:account_profile')
 
             # Validation du numéro de téléphone (si fourni)
-            phone_regex = r'^\+?1?\d{9,15}$'
-            if phone_number and not re.match(phone_regex, phone_number):
-                messages.error(request, "Numéro de téléphone invalide (ex. +1234567890).")
+            if phone_number and not re.match(r'^\+225\d{8,10}$', phone_number):
+                logger.warning(f"Format de numéro de téléphone invalide : {phone_number}")
+                messages.error(request, "Numéro invalide (format +225xxxxxxxx, 8 à 10 chiffres).")
                 return redirect('pages:account_profile')
 
-            # Mise à jour du profil
-            traveler.title = title if title else None
-            traveler.first_name = first_name
-            traveler.last_name = last_name
-            traveler.email = email if email else None
-            traveler.phone_number = phone_number if phone_number else None
-            traveler.nationality = nationality if nationality else None
-            traveler.date_of_birth = parsed_date
-            traveler.gender = gender if gender else None
-            traveler.address = address if address else None
+            # Validation du genre
+            valid_genders = [choice[0] for choice in Traveler.GENDER_CHOICES]
+            if gender not in valid_genders:
+                logger.warning(f"Genre invalide : {gender}")
+                messages.error(request, "Genre invalide (choisir parmi Masculin, Féminin).")
+                return redirect('pages:account_profile')
+
+            # Validation de la nationalité
+            if nationality and nationality not in COUNTRIES:
+                logger.warning(f"Nationalité invalide : {nationality}")
+                messages.error(request, "Nationalité non reconnue.")
+                return redirect('pages:account_profile')
+
+            # Validation de la photo de profil (si fournie)
             if profile_photo:
-                traveler.profile_photo = profile_photo
-            traveler.save()
+                if not isinstance(profile_photo, UploadedFile):
+                    logger.warning("Téléchargement de photo de profil invalide.")
+                    messages.error(request, "Fichier de photo de profil invalide.")
+                    return redirect('pages:account_profile')
+                if profile_photo.size > 5 * 1024 * 1024:  # 5MB max
+                    logger.warning(f"Photo de profil trop volumineuse : {profile_photo.size} octets")
+                    messages.error(request, "La photo de profil ne doit pas dépasser 5 Mo.")
+                    return redirect('pages:account_profile')
+                try:
+                    FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])(profile_photo)
+                except Exception as e:
+                    logger.warning(f"Extension de fichier invalide pour la photo de profil : {str(e)}")
+                    messages.error(request, "Extension de fichier invalide (jpg, jpeg, png, gif uniquement).")
+                    return redirect('pages:account_profile')
 
-            # Synchroniser l'email avec User (si fourni)
-            if email:
-                request.user.email = email
+            try:
+                traveler, created = Traveler.objects.update_or_create(
+                    user=request.user,
+                    defaults={
+                        'title': title,
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'email': email,
+                        'date_of_birth': dob,
+                        'phone_number': phone_number or None,
+                        'nationality': nationality or None,
+                        'gender': gender,
+                        'address': address or None,
+                        'profile_photo': profile_photo or None
+                    }
+                )
+                logger.debug(f"Voyageur {'créé' if created else 'mis à jour'} : ID={traveler.id}")
+                messages.success(request, 'Profil mis à jour avec succès.')
+                return redirect('pages:account_profile')
+            except Exception as e:
+                logger.error(f"Erreur lors de la mise à jour du profil : {str(e)}", exc_info=True)
+                messages.error(request, f"Erreur lors de la mise à jour du profil : {str(e)}")
+                return redirect('pages:account_profile')
+
+        elif form_type == 'email':
+            # Mise à jour de l'email de l'utilisateur
+            new_email = request.POST.get('email')
+            if not new_email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', new_email):
+                logger.warning(f"Format d'email invalide : {new_email}")
+                messages.error(request, "Adresse email invalide.")
+                return redirect('pages:account_profile')
+
+            try:
+                request.user.email = new_email
                 request.user.save()
+                if traveler:
+                    traveler.email = new_email
+                    traveler.save()
+                logger.debug(f"Email mis à jour pour l'utilisateur {request.user.username}: {new_email}")
+                messages.success(request, 'Email mis à jour avec succès.')
+                return redirect('pages:account_profile')
+            except Exception as e:
+                logger.error(f"Erreur lors de la mise à jour de l'email : {str(e)}", exc_info=True)
+                messages.error(request, f"Erreur lors de la mise à jour de l'email : {str(e)}")
+                return redirect('pages:account_profile')
 
-            messages.success(request, "Profil mis à jour avec succès.")
+        elif form_type == 'password':
+            # Mise à jour du mot de passe
+            form = PasswordChangeForm(user=request.user, data=request.POST)
+            if form.is_valid():
+                form.save()
+                update_session_auth_hash(request, form.user)  # Maintenir la session active
+                logger.debug(f"Mot de passe mis à jour pour l'utilisateur {request.user.username}")
+                messages.success(request, 'Mot de passe mis à jour avec succès.')
+                return redirect('pages:account_profile')
+            else:
+                for error in form.errors.values():
+                    logger.warning(f"Erreur de validation du mot de passe : {error}")
+                    messages.error(request, error)
+                return redirect('pages:account_profile')
+
+        else:
+            logger.warning(f"Type de formulaire invalide : {form_type}")
+            messages.error(request, 'Type de formulaire invalide.')
             return redirect('pages:account_profile')
 
-        except Exception as e:
-            logger.error(f"Erreur lors de la mise à jour du profil pour l'utilisateur {request.user.id}: {str(e)}")
-            messages.error(request, "Une erreur s’est produite lors de la mise à jour du profil.")
-            return redirect('pages:account_profile')
-
-    # Calculer le pourcentage de complétion du profil
-    def calculate_profile_completion(traveler):
-        fields = [
-            traveler.title,
-            traveler.first_name,
-            traveler.last_name,
-            traveler.email,
-            traveler.phone_number,
-            traveler.nationality,
-            traveler.date_of_birth,
-            traveler.gender,
-            traveler.address,
-            traveler.profile_photo
-        ]
-        filled_fields = sum(1 for field in fields if field and field != 'Inconnu')
-        return int((filled_fields / len(fields)) * 100)
-
-    context = {
-        'user': request.user,
-        'traveler': traveler,
-        'profile_completion': calculate_profile_completion(traveler),
-        'countries': countries,
-        'title_choices': Traveler.TITLE_CHOICES,
-        'gender_choices': Traveler.GENDER_CHOICES,
-    }
-    return render(request, 'pages/account-profile.html', context)
+    else:
+        # Requête GET : rendre la page de profil
+        bookings = Booking.objects.filter(user=request.user).select_related('trip', 'traveler')
+        context = {
+            'traveler': traveler,
+            'title_choices': Traveler._meta.get_field('title').choices,
+            'gender_choices': Traveler.GENDER_CHOICES,
+            'countries': COUNTRIES,
+            'profile_completion': profile_completion,
+            'bookings': bookings,
+        }
+        logger.debug(f"Rendu de la page de profil pour l'utilisateur {request.user.username}, traveler={traveler}")
+        return render(request, 'pages/account-profile.html', context)
 
 def calculate_profile_completion(traveler):
     fields = [
@@ -1302,8 +1532,7 @@ def calculate_profile_completion(traveler):
     ]
     filled_fields = sum(1 for field in fields if field)
     return int((filled_fields / len(fields)) * 100)
-@login_required
-@csrf_protect
+
 # def update_email_view(request):
 #     if request.method == 'POST':
 #         email = request.POST.get('email')
@@ -1332,166 +1561,218 @@ def calculate_profile_completion(traveler):
 #
 #     return redirect('pages:account_profile')
 
+
+
+
 @login_required
 @csrf_protect
-def update_profile_view(request):
-    # Récupérer ou créer le profil Traveler de l'utilisateur connecté
-    traveler, created = Traveler.objects.get_or_create(
-        user=request.user,
-        defaults={
-            'email': request.user.email or '',
-            'first_name': request.user.name if hasattr(request.user, 'name') and request.user.name else 'Inconnu',
-            'last_name': 'Inconnu',
-        }
-    )
-
-    if created:
-        messages.info(request, "Un nouveau profil voyageur a été créé. Veuillez le compléter.")
-
-    # Liste statique des pays
-    countries = ['USA', 'France', 'India', 'UK', 'Canada', 'Germany', 'Australia']
+def account_travelers_view(request):
+    travelers = Traveler.objects.filter(user=request.user)
 
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
 
-        if form_type == 'profile':
+        if form_type == 'add_traveler':
+            # Ajout d'un nouveau voyageur
+            title = request.POST.get('title')
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            email = request.POST.get('email')
+            date_of_birth = request.POST.get('date_of_birth')
+            phone_number = request.POST.get('phone_number')
+            nationality = request.POST.get('nationality')
+            gender = request.POST.get('gender')
+            address = request.POST.get('address')
+            profile_photo = request.FILES.get('profile_photo')
+
+            # Validation des champs requis
+            required_fields = {
+                'title': title,
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+                'date_of_birth': date_of_birth,
+                'gender': gender
+            }
+            for field_name, value in required_fields.items():
+                if not value or value.strip() == '':
+                    logger.warning(f"Champ requis manquant : {field_name}")
+                    messages.error(request, f"Le champ {field_name} est requis.")
+                    return redirect('pages:account_travelers')
+
+            # Validation du titre
+            valid_titles = [choice[0] for choice in Traveler._meta.get_field('title').choices]
+            if title not in valid_titles:
+                logger.warning(f"Titre invalide : {title}")
+                messages.error(request, "Titre invalide (choisir parmi Monsieur, Madame, Mademoiselle).")
+                return redirect('pages:account_travelers')
+
+            # Validation de l'email
+            if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+                logger.warning(f"Format d'email invalide : {email}")
+                messages.error(request, "Adresse email invalide.")
+                return redirect('pages:account_travelers')
+
+            # Validation de la date de naissance
             try:
-                title = request.POST.get('title', '')
-                first_name = request.POST.get('first_name', '')
-                last_name = request.POST.get('last_name', '')
-                email = request.POST.get('email', '')
-                phone_number = request.POST.get('phone_number', '')
-                nationality = request.POST.get('nationality', '')
-                date_of_birth = request.POST.get('date_of_birth', '')
-                gender = request.POST.get('gender', '')
-                address = request.POST.get('address', '')
-                profile_photo = request.FILES.get('profile_photo')
+                dob = datetime.strptime(date_of_birth, '%d %b %Y').date()
+                today = datetime.now().date()
+                if dob >= today:
+                    logger.warning(f"Date de naissance invalide : {date_of_birth}")
+                    messages.error(request, "La date de naissance doit être dans le passé.")
+                    return redirect('pages:account_travelers')
+            except ValueError:
+                logger.warning(f"Format de date invalide pour date_of_birth : {date_of_birth}")
+                messages.error(request, "Format de date invalide (ex. 25 Jan 2000).")
+                return redirect('pages:account_travelers')
 
-                # Validations des champs obligatoires
-                if not all([first_name, last_name]):
-                    messages.error(request, "Les champs Prénom et Nom sont obligatoires.")
-                    return redirect('pages:account_profile')
+            # Validation du numéro de téléphone (si fourni)
+            if phone_number and not re.match(r'^\+225\d{8,10}$', phone_number):
+                logger.warning(f"Format de numéro de téléphone invalide : {phone_number}")
+                messages.error(request, "Numéro invalide (format +225xxxxxxxx, 8 à 10 chiffres).")
+                return redirect('pages:account_travelers')
 
-                # Validation de l'email (si fourni)
-                if email:
-                    try:
-                        validate_email(email)
-                    except ValidationError:
-                        messages.error(request, "Adresse email invalide.")
-                        return redirect('pages:account_profile')
+            # Validation du genre
+            valid_genders = [choice[0] for choice in Traveler.GENDER_CHOICES]
+            if gender not in valid_genders:
+                logger.warning(f"Genre invalide : {gender}")
+                messages.error(request, "Genre invalide (choisir parmi Masculin, Féminin).")
+                return redirect('pages:account_travelers')
 
-                # Validation de la date de naissance (si fournie)
-                parsed_date = None
-                if date_of_birth:
-                    try:
-                        parsed_date = datetime.strptime(date_of_birth, '%d %b %Y').date()
-                    except ValueError:
-                        messages.error(request, "Format de date de naissance invalide (JJ MMM AAAA requis, ex. 29 Aug 1996).")
-                        return redirect('pages:account_profile')
+            # Validation de la nationalité
+            if nationality and nationality not in COUNTRIES:
+                logger.warning(f"Nationalité invalide : {nationality}")
+                messages.error(request, "Nationalité non reconnue.")
+                return redirect('pages:account_travelers')
 
-                # Validation de la taille de la photo de profil (si fournie)
-                if profile_photo and profile_photo.size > 5 * 1024 * 1024:
+            # Validation de la photo de profil (si fournie)
+            if profile_photo:
+                if not isinstance(profile_photo, UploadedFile):
+                    logger.warning("Téléchargement de photo de profil invalide.")
+                    messages.error(request, "Fichier de photo de profil invalide.")
+                    return redirect('pages:account_travelers')
+                if profile_photo.size > 5 * 1024 * 1024:  # 5MB max
+                    logger.warning(f"Photo de profil trop volumineuse : {profile_photo.size} octets")
                     messages.error(request, "La photo de profil ne doit pas dépasser 5 Mo.")
-                    return redirect('pages:account_profile')
+                    return redirect('pages:account_travelers')
+                try:
+                    FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])(profile_photo)
+                except Exception as e:
+                    logger.warning(f"Extension de fichier invalide pour la photo de profil : {str(e)}")
+                    messages.error(request, "Extension de fichier invalide (jpg, jpeg, png, gif uniquement).")
+                    return redirect('pages:account_travelers')
 
-                # Validation du numéro de téléphone (si fourni)
-                phone_regex = r'^\+?1?\d{9,15}$'
-                if phone_number and not re.match(phone_regex, phone_number):
-                    messages.error(request, "Numéro de téléphone invalide (ex. +1234567890).")
-                    return redirect('pages:account_profile')
+            try:
+                traveler = Traveler.objects.create(
+                    user=request.user,
+                    title=title,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    date_of_birth=dob,
+                    phone_number=phone_number or None,
+                    nationality=nationality or None,
+                    gender=gender,
+                    address=address or None,
+                    profile_photo=profile_photo or None
+                )
+                logger.debug(f"Voyageur créé : ID={traveler.id}")
+                messages.success(request, 'Voyageur ajouté avec succès.')
+                return redirect('pages:account_travelers')
+            except Exception as e:
+                logger.error(f"Erreur lors de l'ajout du voyageur : {str(e)}", exc_info=True)
+                messages.error(request, f"Erreur lors de l'ajout du voyageur : {str(e)}")
+                return redirect('pages:account_travelers')
 
-                # Mise à jour du profil
-                traveler.title = title if title else None
+        elif form_type == 'update_traveler':
+            # Mise à jour d'un voyageur existant
+            traveler_id = request.POST.get('traveler_id')
+            try:
+                traveler = Traveler.objects.get(id=traveler_id, user=request.user)
+            except Traveler.DoesNotExist:
+                logger.error(f"Voyageur avec ID {traveler_id} non trouvé pour l'utilisateur {request.user.username}")
+                messages.error(request, "Voyageur non trouvé.")
+                return redirect('pages:account_travelers')
+
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            date_of_birth = request.POST.get('date_of_birth')
+
+            # Validation des champs requis
+            required_fields = {
+                'first_name': first_name,
+                'last_name': last_name,
+                'date_of_birth': date_of_birth
+            }
+            for field_name, value in required_fields.items():
+                if not value or value.strip() == '':
+                    logger.warning(f"Champ requis manquant : {field_name}")
+                    messages.error(request, f"Le champ {field_name} est requis.")
+                    return redirect('pages:account_travelers')
+
+            # Validation de la date de naissance
+            try:
+                dob = datetime.strptime(date_of_birth, '%d %b %Y').date()
+                today = datetime.now().date()
+                if dob >= today:
+                    logger.warning(f"Date de naissance invalide : {date_of_birth}")
+                    messages.error(request, "La date de naissance doit être dans le passé.")
+                    return redirect('pages:account_travelers')
+            except ValueError:
+                logger.warning(f"Format de date invalide pour date_of_birth : {date_of_birth}")
+                messages.error(request, "Format de date invalide (ex. 25 Jan 2000).")
+                return redirect('pages:account_travelers')
+
+            try:
                 traveler.first_name = first_name
                 traveler.last_name = last_name
-                traveler.email = email if email else None
-                traveler.phone_number = phone_number if phone_number else None
-                traveler.nationality = nationality if nationality else None
-                traveler.date_of_birth = parsed_date
-                traveler.gender = gender if gender else None
-                traveler.address = address if address else None
-                if profile_photo:
-                    traveler.profile_photo = profile_photo
+                traveler.date_of_birth = dob
                 traveler.save()
-
-                # Synchroniser l'email avec User (si fourni)
-                if email:
-                    request.user.email = email
-                    request.user.save()
-
-                messages.success(request, "Profil mis à jour avec succès.")
-                return redirect('pages:account_profile')
-
+                logger.debug(f"Voyageur mis à jour : ID={traveler.id}")
+                messages.success(request, 'Voyageur mis à jour avec succès.')
+                return redirect('pages:account_travelers')
             except Exception as e:
-                logger.error(f"Erreur lors de la mise à jour du profil pour l'utilisateur {request.user.id}: {str(e)}")
-                messages.error(request, "Une erreur s’est produite lors de la mise à jour du profil.")
-                return redirect('pages:account_profile')
+                logger.error(f"Erreur lors de la mise à jour du voyageur : {str(e)}", exc_info=True)
+                messages.error(request, f"Erreur lors de la mise à jour du voyageur : {str(e)}")
+                return redirect('pages:account_travelers')
 
-        elif form_type == 'password':
-            form = PasswordChangeForm(user=request.user, data=request.POST)
-            if form.is_valid():
-                form.save()
-                update_session_auth_hash(request, form.user)
-                messages.success(request, "Mot de passe mis à jour avec succès.")
-                return redirect('pages:account_profile')
-            else:
-                messages.error(request, "Erreur lors de la mise à jour du mot de passe. Vérifiez les champs saisis.")
-
-        elif form_type == 'email':
-            try:
-                email = request.POST.get('email', '')
-                if not email:
-                    messages.error(request, "L'email est requis.")
-                    return redirect('pages:account_profile')
-
-                # Validation de l'email
-                try:
-                    validate_email(email)
-                except ValidationError:
-                    messages.error(request, "Adresse email invalide.")
-                    return redirect('pages:account_profile')
-
-                # Mise à jour de l'email dans User et Traveler
-                request.user.email = email
-                request.user.save()
-                traveler.email = email
-                traveler.save()
-
-                messages.success(request, "Email mis à jour avec succès.")
-                return redirect('pages:account_profile')
-
-            except Exception as e:
-                logger.error(f"Erreur lors de la mise à jour de l'email pour l'utilisateur {request.user.id}: {str(e)}")
-                messages.error(request, "Une erreur s’est produite lors de la mise à jour de l'email.")
-                return redirect('pages:account_profile')
-
-    # Calculer le pourcentage de complétion du profil
-    def calculate_profile_completion(traveler):
-        fields = [
-            traveler.title,
-            traveler.first_name,
-            traveler.last_name,
-            traveler.email,
-            traveler.phone_number,
-            traveler.nationality,
-            traveler.date_of_birth,
-            traveler.gender,
-            traveler.address,
-            traveler.profile_photo
-        ]
-        filled_fields = sum(1 for field in fields if field and field != 'Inconnu')
-        return int((filled_fields / len(fields)) * 100)
-
+    # Requête GET : afficher la liste des voyageurs
     context = {
-        'user': request.user,
-        'traveler': traveler,
-        'profile_completion': calculate_profile_completion(traveler),
-        'countries': countries,
-        'title_choices': Traveler.TITLE_CHOICES,
+        'travelers': travelers,
+        'title_choices': Traveler._meta.get_field('title').choices,
         'gender_choices': Traveler.GENDER_CHOICES,
-        'password_form': PasswordChangeForm(user=request.user),
+        'countries': COUNTRIES,
     }
-    return render(request, 'pages/account-profile.html', context)
+    return render(request, 'pages/account-travelers.html', context)
+
+@login_required
+@csrf_protect
+def delete_traveler_view(request, traveler_id):
+    if request.method == 'POST':
+        try:
+            traveler = Traveler.objects.get(id=traveler_id, user=request.user)
+            traveler.delete()
+            logger.debug(f"Voyageur supprimé : ID={traveler_id}")
+            messages.success(request, 'Voyageur supprimé avec succès.')
+        except Traveler.DoesNotExist:
+            logger.error(f"Voyageur avec ID {traveler_id} non trouvé pour l'utilisateur {request.user.username}")
+            messages.error(request, 'Voyageur non trouvé.')
+        except Exception as e:
+            logger.error(f"Erreur lors de la suppression du voyageur : {str(e)}", exc_info=True)
+            messages.error(request, f"Erreur lors de la suppression du voyageur : {str(e)}")
+        return redirect('pages:account_travelers')
+    else:
+        logger.warning(f"Méthode HTTP non autorisée pour la suppression : {request.method}")
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('pages:account_travelers')
+
+
+from django.core.files.uploadedfile import UploadedFile
+from django.core.validators import FileExtensionValidator
+
+
+
+
 @login_required
 def logout_view(request):
     if request.method == 'GET':
@@ -1519,3 +1800,97 @@ def faqs_view(request):
         'user_authenticated': request.user.is_authenticated,
     }
     return render(request, 'pages/faq.html', context)
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
+def contact(request, trip_id):
+    trip = Trip.objects.get(id=trip_id)
+    reviews = Review.objects.filter(trip=trip)
+    return render(request, 'contact.html', {'trip': trip, 'reviews': reviews})
+
+def submit_contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        message = request.POST.get('message')
+        terms = request.POST.get('terms')
+
+        if not terms:
+            messages.error(request, "Vous devez accepter les conditions générales.")
+            return redirect('contact', trip_id=request.POST.get('trip_id'))
+
+        # Logique pour traiter le formulaire de contact (par exemple, enregistrer dans une base de données ou envoyer un email)
+        messages.success(request, "Votre message a été envoyé avec succès !")
+        return redirect('contact', trip_id=request.POST.get('trip_id'))
+
+    return redirect('home')  # Rediriger vers la page d'accueil si la méthode n'est pas POST
+
+@login_required
+def submit_review(request, trip_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+
+        try:
+            rating = float(rating)
+            if not (1 <= rating <= 5):
+                messages.error(request, "La note doit être comprise entre 1 et 5.")
+                return redirect('contact', trip_id=trip.id)
+
+            Review.objects.create(
+                user=request.user,
+                trip=trip,
+                rating=rating,
+                comment=comment
+            )
+            messages.success(request, "Votre avis a été soumis avec succès !")
+            return redirect('contact', trip_id=trip.id)
+        except ValueError:
+            messages.error(request, "Veuillez entrer une note valide.")
+            return redirect('contact', trip_id=trip.id)
+
+    return redirect('contact', trip_id=trip.id)
+@login_required
+def contact_general(request):
+    reviews = Review.objects.filter(is_published=True, is_deleted=False)
+    context = {
+        'reviews': reviews,
+        'rating_range': range(1, 6),  # 1 à 5 étoiles
+    }
+    return render(request, 'pages/contact.html', context)
+
+
+
+@login_required
+def submit_general_review(request):
+    if request.method == 'POST':
+        comment = request.POST.get('review')
+        rating = request.POST.get('rating')
+        terms_accepted = request.POST.get('terms')
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        if comment and rating and terms_accepted and name and email:
+            try:
+                rating = float(rating)
+                if not (1 <= rating <= 5):
+                    messages.error(request, "La note doit être comprise entre 1 et 5.")
+                    return redirect('pages:contact_general')
+                Review.objects.create(
+                    user=request.user,
+                    comment=comment,
+                    rating=rating,
+                    is_published=True,
+                    is_deleted=False
+                )
+                messages.success(request, "Avis soumis avec succès !")
+                return redirect('pages:contact_general')
+            except ValueError:
+                messages.error(request, "Note invalide. Veuillez entrer un nombre.")
+        else:
+            messages.error(request, "Veuillez remplir tous les champs et accepter les conditions.")
+    reviews = Review.objects.filter(is_published=True, is_deleted=False)
+    return render(request, 'pages/contact.html', {'reviews': reviews})

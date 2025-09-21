@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
-from booking.pages.views import ModalLoginView, tour_booking_view, booking_process
+from booking.pages.views import ModalLoginView, tour_booking_view, booking_process,backup_data_view,dashboard_view,delete_account
 from backoffice.views import admin_booking_list_view
 
 urlpatterns = [
@@ -27,6 +27,9 @@ urlpatterns = [
     # Booking URLs
     path("tour-booking/<int:trip_id>/", tour_booking_view, name="tour_booking"),
     path("booking-process/<int:trip_id>/", booking_process, name="bookinga_process"),
+    path('account/delete/', delete_account, name='delete_account'),
+    path('dashboard/', dashboard_view, name='dashboard'),
+    path('backup/data/', backup_data_view, name='backup_data'),
 ]
 
 if settings.DEBUG:
