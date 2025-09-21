@@ -460,19 +460,28 @@ from django.shortcuts import get_object_or_404
 #     return render(request, 'pages/admin-agent-detail.html', {'user': user, 'trips': trips})
 
 
+
+
 def trip_edit_view(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
 
     if request.method == 'POST':
+        print("Données POST :", request.POST)  # Débogage
         form = TripForm(request.POST, instance=trip)
         if form.is_valid():
+            print("Données nettoyées :", form.cleaned_data)  # Débogage
             form.save()
+            messages.success(request, 'Voyage modifié avec succès !')
             return redirect('backoffice:admin-trip-detail', trip_id=trip.id)
+        else:
+            print("Erreurs du formulaire :", form.errors)  # Débogage
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{form.fields[field].label}: {error}")
     else:
         form = TripForm(instance=trip)
 
-    return render(request, 'pages/tour-edit.html', {'form': form, 'trip': trip})
-
+    return render(request, 'backoffice/admin_add_trip_form.html', {'form': form, 'trip': trip})
 def traveler_create(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
     success = False
